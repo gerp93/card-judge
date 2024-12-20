@@ -42,7 +42,7 @@ func (h *Hub) run() {
 		case client := <-h.unregister:
 			h.unregisterClient(client)
 			if len(h.clients) == 0 {
-				database.DeleteLobby(h.lobbyId)
+				_ = database.DeleteLobby(h.lobbyId)
 				delete(lobbyHubs, h.lobbyId)
 				return
 			}
@@ -54,16 +54,18 @@ func (h *Hub) run() {
 
 func (h *Hub) registerClient(client *Client) {
 	h.clients[client] = true
-	h.broadcastMessage([]byte(client.user.Name + " has joined..."))
+	h.broadcastMessage([]byte("<blue>Player Joined</>: <green>" + client.user.Name + "</>"))
+	h.broadcastMessage([]byte("refresh"))
 }
 
 func (h *Hub) unregisterClient(client *Client) {
 	if _, ok := h.clients[client]; ok {
 		delete(h.clients, client)
 		close(client.send)
-		database.RemoveUserFromLobby(h.lobbyId, client.user.Id)
+		_ = database.RemoveUserFromLobby(h.lobbyId, client.user.Id)
 	}
-	h.broadcastMessage([]byte(client.user.Name + " has left..."))
+	h.broadcastMessage([]byte("<red>Player Left</>: <green>" + client.user.Name + "</>"))
+	h.broadcastMessage([]byte("refresh"))
 }
 
 func (h *Hub) broadcastMessage(message []byte) {
@@ -78,7 +80,22 @@ func (h *Hub) broadcastMessage(message []byte) {
 }
 
 func LobbyBroadcast(lobbyId uuid.UUID, message string) {
-	if _, ok := lobbyHubs[lobbyId]; ok {
-		lobbyHubs[lobbyId].broadcastMessage([]byte(message))
+	if hub, ok := lobbyHubs[lobbyId]; ok {
+		hub.broadcastMessage([]byte(message))
+	}
+}
+
+func PlayerBroadcast(playerId uuid.UUID, message string) {
+	player, err := database.GetPlayer(playerId)
+	if err != nil {
+		return
+	}
+
+	if hub, ok := lobbyHubs[player.LobbyId]; ok {
+		for client := range hub.clients {
+			if client.user.Id == player.UserId {
+				client.send <- []byte(message)
+			}
+		}
 	}
 }

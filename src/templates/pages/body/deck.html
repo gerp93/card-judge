@@ -1,164 +1,201 @@
 {{define "body"}}
-<h3>Deck: {{.Deck.Name}}</h3>
-<button onclick="document.getElementById('deck-update-dialog').showModal()">
-  Edit Deck
-</button>
-<dialog id="deck-update-dialog">
-  <div style="display: grid; grid-auto-flow: column">
-    <div>
-      <h3>Edit Deck</h3>
-    </div>
-    <div>
-      <div
-        class="close-button"
-        onclick="document.getElementById('deck-update-dialog').close()"
-      >
-        &#10060;
-      </div>
-    </div>
-  </div>
-  <form hx-put="/api/deck/{{.Deck.Id}}/name" hx-target="find .htmx-result">
-    <h3>Set Deck Name</h3>
-    <p>Current Name: {{.Deck.Name}}</p>
-    <label for="setDeckName">New Name:</label>
-    <input
-      type="text"
-      id="setDeckName"
-      name="name"
-      maxlength="255"
-      placeholder="Enter Name"
-      required="true"
-      autocomplete="off"
-    />
-    <br />
-    <br />
-    <div class="htmx-result"></div>
-    <input type="submit" value="Set Deck Name" />
-  </form>
-  <form hx-put="/api/deck/{{.Deck.Id}}/password" hx-target="find .htmx-result">
-    <h3>Set Deck Password</h3>
-    <label for="newDeckPassword">New Password:</label>
-    <input
-      type="password"
-      id="newDeckPassword"
-      name="password"
-      maxlength="255"
-      placeholder="Enter Password"
-      autocomplete="new-password"
-    />
-    <br />
-    <label for="newDeckPasswordConfirm">Confirm New Password:</label>
-    <input
-      type="password"
-      id="newDeckPasswordConfirm"
-      name="passwordConfirm"
-      maxlength="255"
-      placeholder="Enter Password"
-      autocomplete="off"
-    />
-    <br />
-    <br />
-    <div class="htmx-result"></div>
-    <input type="submit" value="Set Deck Password" />
-  </form>
-</dialog>
-<button
-  hx-delete="/api/deck/{{.Deck.Id}}"
-  hx-confirm="Are you sure you want to delete this deck?"
->
-  Delete Deck
-</button>
-<br />
-<br />
-<button onclick="document.getElementById('card-create-dialog').showModal()">
-  Create Card
-</button>
-<dialog id="card-create-dialog">
-  <div style="display: grid; grid-auto-flow: column">
-    <div>
-      <h3>Create Card</h3>
-    </div>
-    <div>
-      <div
-        class="close-button"
-        onclick="document.getElementById('card-create-dialog').close()"
-      >
-        &#10060;
-      </div>
-    </div>
-  </div>
-  <form hx-post="/api/card/create" hx-target="find .htmx-result">
-    <input
-      type="text"
-      id="newCardDeckId"
-      name="deckId"
-      value="{{.Deck.Id}}"
-      hidden
-    />
-    <label for="newCardCardTypeName">Card Type:</label>
-    <select
-      id="newCardCardTypeName"
-      name="cardTypeName"
-      autocomplete="off"
-      required
-    >
-      <option value="Judge" selected>Judge</option>
-      <option value="Player">Player</option>
-    </select>
-    <br />
-    <label for="newCardText" style="vertical-align: top">Text:</label>
-    <textarea
-      id="newCardText"
-      name="text"
-      maxlength="255"
-      placeholder="Enter New Card Text"
-      required="true"
-      cols="40"
-      rows="10"
-      autocomplete="off"
-    ></textarea>
-    <br />
-    <br />
-    <div class="htmx-result"></div>
-    <input type="submit" value="Create" />
-  </form>
-</dialog>
-<br />
-{{$cardCount := len .Cards}} {{if gt $cardCount 0}}
-<h3>Cards in Deck</h3>
-<table>
-  <thead>
-    <tr>
-      <th>Created</th>
-      <th>Changed</th>
-      <th>Card Type</th>
-      <th>
-        <form>
-          <input
-            type="text"
-            id="cardDeckId"
-            name="deckId"
-            value="{{.Deck.Id}}"
-            hidden
-          />
-          <label for="cardTextSearch">Text</label>
-          <input
-            type="search"
-            id="cardTextSearch"
-            name="text"
-            maxlength="510"
-            placeholder="Search..."
-            autocomplete="off"
-            hx-post="/api/card/search"
-            hx-trigger="load, input changed delay:500ms, search"
-            hx-target="#card-table-rows"
-          />
+    <script src="/static/js/deck.js"></script>
+    <h3>Deck: {{.Deck.Name}}</h3>
+    <button onclick="document.getElementById('deck-update-dialog').showModal()">
+        Edit Deck
+    </button>
+    <dialog id="deck-update-dialog">
+        <div style="display: grid; grid-auto-flow: column">
+            <div>
+                <h3>Edit Deck</h3>
+            </div>
+            <div>
+                <span class="bi bi-x-lg close-button"
+                      onclick="document.getElementById('deck-update-dialog').close()"
+                ></span>
+            </div>
+        </div>
+        <form hx-put="/api/deck/{{.Deck.Id}}/name" hx-target="find .htmx-result">
+            <h3>Set Deck Name</h3>
+            <p>Current Name: {{.Deck.Name}}</p>
+            <label for="setDeckName">New Name:</label>
+            <input
+                    type="text"
+                    id="setDeckName"
+                    name="name"
+                    maxlength="255"
+                    placeholder="Enter Name"
+                    required="required"
+                    autocomplete="off"
+            />
+            <br/>
+            <br/>
+            <div class="htmx-result"></div>
+            <input type="submit" value="Set Deck Name"/>
         </form>
-      </th>
-      <th></th>
-      <th></th>
-    </tr>
-  </thead>
-  <tbody id="card-table-rows"></tbody>
-</table>
-{{end}} {{end}}
+        <form hx-put="/api/deck/{{.Deck.Id}}/password" hx-target="find .htmx-result">
+            <h3>Set Deck Password</h3>
+            <label for="setDeckPassword">New Password:</label>
+            <input
+                    type="password"
+                    id="setDeckPassword"
+                    name="password"
+                    maxlength="255"
+                    placeholder="Enter Password"
+                    autocomplete="new-password"
+                    required="required"
+            />
+            <br/>
+            <label for="setDeckPasswordConfirm">Confirm New Password:</label>
+            <input
+                    type="password"
+                    id="setDeckPasswordConfirm"
+                    name="passwordConfirm"
+                    maxlength="255"
+                    placeholder="Enter Password"
+                    autocomplete="off"
+                    required="required"
+            />
+            <br/>
+            <br/>
+            <div class="htmx-result"></div>
+            <input type="submit" value="Set Deck Password"/>
+        </form>
+        <form
+                hx-put="/api/deck/{{.Deck.Id}}/is-public-read-only"
+                hx-target="find .htmx-result"
+        >
+            <h3>Set Is Public Read-Only</h3>
+            <label for="setDeckIsPublicReadOnly">Is Public Read-Only:</label>
+            <select
+                    id="setDeckIsPublicReadOnly"
+                    name="isPublicReadOnly"
+                    autocomplete="off"
+            >
+                {{if .Deck.IsPublicReadOnly}}
+                    <option value="0">No</option>
+                    <option value="1" selected>Yes</option>
+                {{else}}
+                    <option value="0" selected>No</option>
+                    <option value="1">Yes</option>
+                {{end}}
+            </select>
+            <br/>
+            <br/>
+            <div class="htmx-result"></div>
+            <input type="submit" value="Set Is Public Read-Only"/>
+        </form>
+    </dialog>
+    <button
+            hx-delete="/api/deck/{{.Deck.Id}}"
+            hx-confirm="Are you sure you want to delete this deck?"
+    >
+        Delete Deck
+    </button>
+    <br/>
+    <br/>
+    <button
+            hx-get="/api/deck/{{.Deck.Id}}/card-export"
+            hx-target="#deck-card-export-content"
+            hx-confirm="Are you sure you want to export cards to a CSV file?"
+    >
+        Export Cards
+        <span id="deck-card-export-content" style="display: none"></span>
+    </button>
+    <br/>
+    <br/>
+    <button onclick="document.getElementById('card-create-dialog').showModal()">
+        Create Card
+    </button>
+    <dialog id="card-create-dialog">
+        <div style="display: grid; grid-auto-flow: column">
+            <div>
+                <h3>Create Card</h3>
+            </div>
+            <div>
+                <span class="bi bi-x-lg close-button"
+                      onclick="document.getElementById('card-create-dialog').close()"
+                ></span>
+            </div>
+        </div>
+        <form hx-post="/api/card/create" hx-target="find .htmx-result">
+            <input
+                    type="text"
+                    id="newCardDeckId"
+                    name="deckId"
+                    value="{{.Deck.Id}}"
+                    hidden
+            />
+            <label for="newCardCategory">Category:</label>
+            <select id="newCardCategory" name="category" autocomplete="off" required>
+                <option value="PROMPT" selected>Prompt</option>
+                <option value="RESPONSE">Response</option>
+            </select>
+            <br/>
+            <label for="newCardText" style="vertical-align: top">Text:</label>
+            <textarea
+                    id="newCardText"
+                    name="text"
+                    maxlength="255"
+                    placeholder="Enter New Card Text"
+                    required="required"
+                    cols="40"
+                    rows="10"
+                    autocomplete="off"
+            ></textarea>
+            <br/>
+            <br/>
+            <div class="htmx-result"></div>
+            <input type="submit" value="Create"/>
+        </form>
+    </dialog>
+    <br/>
+    <h3>Cards in Deck</h3>
+    <form
+            hx-post="/api/card/search"
+            hx-trigger="load, input change delay:500ms"
+            hx-target="#card-table-rows"
+    >
+        <input type="text" name="deckId" value="{{.Deck.Id}}" hidden/>
+        <label for="categorySearch">Category:</label>
+        <select id="categorySearch" name="category" autocomplete="off" required>
+            <option value="%" selected>Any</option>
+            <option value="PROMPT">Prompt</option>
+            <option value="RESPONSE">Response</option>
+        </select>
+        <label for="textSearch">Text:</label>
+        <input
+                type="search"
+                id="textSearch"
+                name="text"
+                maxlength="510"
+                placeholder="Search..."
+                autocomplete="off"
+        />
+        <label for="pageSearch">Page:</label>
+        <input
+                type="number"
+                id="pageSearch"
+                name="page"
+                min="1"
+                max="100"
+                value="1"
+                required="required"
+        />
+    </form>
+    <br/>
+    <table>
+        <thead>
+        <tr>
+            <th>Created</th>
+            <th>Changed</th>
+            <th>Category</th>
+            <th>Text</th>
+            <th>Image</th>
+            <th>Edit</th>
+            <th>Delete</th>
+        </tr>
+        </thead>
+        <tbody id="card-table-rows"></tbody>
+    </table>
+{{end}}

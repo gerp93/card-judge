@@ -1,127 +1,187 @@
 {{define "body"}}
-<button onclick="document.getElementById('lobby-create-dialog').showModal()">
-  Create Lobby
-</button>
-<dialog id="lobby-create-dialog">
-  <div style="display: grid; grid-auto-flow: column">
-    <div>
-      <h3>Create Lobby</h3>
-    </div>
-    <div>
-      <div
-        class="close-button"
-        onclick="document.getElementById('lobby-create-dialog').close()"
-      >
-        &#10060;
-      </div>
-    </div>
-  </div>
-  <form hx-post="/api/lobby/create" hx-target="find .htmx-result">
-    <label for="createLobbyName">Name:</label>
-    <input
-      type="text"
-      id="createLobbyName"
-      name="name"
-      maxlength="255"
-      placeholder="Enter Lobby Name"
-      required="true"
-      autocomplete="off"
-    />
-    <br />
-    <br />
-    <details>
-      <summary>Password (optional)</summary>
-      <label for="createLobbyPassword">Password:</label>
-      <input
-        type="password"
-        id="createLobbyPassword"
-        name="password"
-        maxlength="255"
-        placeholder="Enter Lobby Password"
-        autocomplete="off"
-      />
-      <br />
-      <label for="createLobbyPasswordConfirm">Confirm Password:</label>
-      <input
-        type="password"
-        id="createLobbyPasswordConfirm"
-        name="passwordConfirm"
-        maxlength="255"
-        placeholder="Confirm Lobby Password"
-        autocomplete="off"
-      />
-      <br />
-    </details>
-    <br />
-    <label for="createLobbyHandSize">Hand Size:</label>
-    <input
-      type="number"
-      id="createLobbyHandSize"
-      name="handSize"
-      min="1"
-      max="16"
-      value="8"
-      required="true"
-      autocomplete="off"
-    />
-    <br />
-    {{$deckCount := len .Decks}} {{if gt $deckCount 0}}
-    <h3>Choose Decks</h3>
-    <table>
-      <tbody>
-        {{range .Decks}}
-        <tr>
-          <td>
+    <button onclick="document.getElementById('lobby-create-dialog').showModal()">
+        Create Lobby
+    </button>
+    <dialog id="lobby-create-dialog">
+        <div style="display: grid; grid-auto-flow: column">
+            <div>
+                <h3>Create Lobby</h3>
+            </div>
+            <div>
+                <span class="bi bi-x-lg close-button"
+                      onclick="document.getElementById('lobby-create-dialog').close()"
+                ></span>
+            </div>
+        </div>
+        <form hx-post="/api/lobby/create" hx-target="find .htmx-result">
+            <label for="createLobbyName">Name:</label>
             <input
-              id="deckSelect{{.Id}}"
-              type="checkbox"
-              name="deckId{{.Id}}"
-              value="{{.Id}}"
-              autocomplete="off"
+                    type="text"
+                    id="createLobbyName"
+                    name="name"
+                    maxlength="255"
+                    placeholder="Enter Lobby Name"
+                    required="required"
+                    autocomplete="off"
             />
-            <label for="deckSelect{{.Id}}" class="clickable">{{.Name}}</label>
-          </td>
+            <br/>
+            <label for="createLobbyMessage">Message:</label>
+            <input
+                    type="text"
+                    id="createLobbyMessage"
+                    name="message"
+                    maxlength="255"
+                    placeholder="Enter Lobby Message"
+                    autocomplete="off"
+            />
+            <br/>
+            <br/>
+            <details>
+                <summary>Password (optional)</summary>
+                <label for="createLobbyPassword">Password:</label>
+                <input
+                        type="password"
+                        id="createLobbyPassword"
+                        name="password"
+                        maxlength="255"
+                        placeholder="Enter Lobby Password"
+                        autocomplete="off"
+                />
+                <br/>
+                <label for="createLobbyPasswordConfirm">Confirm Password:</label>
+                <input
+                        type="password"
+                        id="createLobbyPasswordConfirm"
+                        name="passwordConfirm"
+                        maxlength="255"
+                        placeholder="Confirm Lobby Password"
+                        autocomplete="off"
+                />
+                <br/>
+            </details>
+            <br/>
+            <details>
+                <summary>Settings</summary>
+                <label for="createLobbyHandSize">Hand Size:</label>
+                <select
+                        id="createLobbyHandSize"
+                        name="handSize"
+                        autocomplete="off"
+                        required="required"
+                >
+                    <option value="6">6</option>
+                    <option value="8" selected>8</option>
+                    <option value="10">10</option>
+                    <option value="12">12</option>
+                    <option value="14">14</option>
+                    <option value="16">16</option>
+                </select>
+                <br/>
+                <label for="createLobbyCreditLimit">Credit Limit:</label>
+                <select
+                        id="createLobbyCreditLimit"
+                        name="creditLimit"
+                        autocomplete="off"
+                        required="required"
+                >
+                    <option value="0">0</option>
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
+                <br/>
+                <label for="createLobbyWinStreakThreshold">Win Streak Threshold:</label>
+                <select
+                        id="createLobbyWinStreakThreshold"
+                        name="winStreakThreshold"
+                        autocomplete="off"
+                        required="required"
+                >
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+                <br/>
+                <label for="createLobbyLoseStreakThreshold">Lose Streak Threshold:</label>
+                <select
+                        id="createLobbyLoseStreakThreshold"
+                        name="loseStreakThreshold"
+                        autocomplete="off"
+                        required="required"
+                >
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3" selected>3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                </select>
+            </details>
+            {{$deckCount := len .Decks}}
+            {{if gt $deckCount 0}}
+                <h3>Choose Decks</h3>
+                <table style="max-height: 200px">
+                    <tbody>
+                    {{range .Decks}}
+                        <tr>
+                            <td>
+                                <input
+                                        id="deckSelect{{.Id}}"
+                                        type="checkbox"
+                                        name="deckId{{.Id}}"
+                                        value="{{.Id}}"
+                                        autocomplete="off"
+                                />
+                                <label for="deckSelect{{.Id}}" class="clickable">{{.Name}}</label>
+                            </td>
+                        </tr>
+                    {{end}}
+                    </tbody>
+                </table>
+            {{end}}
+            <br/>
+            <details>
+                <summary>Missing decks?</summary>
+                <p>Go <a href="/decks">here</a> to access/create some.</p>
+            </details>
+            <br/>
+            <br/>
+            <div class="htmx-result"></div>
+            <input type="submit" value="Create Lobby"/>
+        </form>
+    </dialog>
+    <br/>
+    <h3>Choose a Lobby to Join</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>Created</th>
+            <th>
+                <label for="lobbySearch">Name</label>
+                <input
+                        type="search"
+                        id="lobbySearch"
+                        name="search"
+                        maxlength="255"
+                        placeholder="Search..."
+                        autocomplete="off"
+                        hx-post="/api/lobby/search"
+                        hx-trigger="load, input changed delay:500ms, search"
+                        hx-target="#lobby-table-rows"
+                />
+            </th>
+            <th>Security</th>
+            <th>Users</th>
         </tr>
-        {{end}}
-      </tbody>
+        </thead>
+        <tbody id="lobby-table-rows"></tbody>
     </table>
-    {{end}}
-    <br />
-    <details>
-      <summary>Missing decks?</summary>
-      <p>Go <a href="/decks">here</a> to access/create some.</p>
-    </details>
-    <br />
-    <br />
-    <div class="htmx-result"></div>
-    <input type="submit" value="Create Lobby" />
-  </form>
-</dialog>
-<br />
-<h3>Choose a Lobby to Join</h3>
-<table>
-  <thead>
-    <tr>
-      <th>Created</th>
-      <th>Changed</th>
-      <th>
-        <label for="lobbySearch">Name</label>
-        <input
-          type="search"
-          id="lobbySearch"
-          name="search"
-          maxlength="255"
-          placeholder="Search..."
-          autocomplete="off"
-          hx-post="/api/lobby/search"
-          hx-trigger="load, input changed delay:500ms, search"
-          hx-target="#lobby-table-rows"
-        />
-      </th>
-      <th>Security</th>
-      <th>Users</th>
-    </tr>
-  </thead>
-  <tbody id="lobby-table-rows"></tbody>
-</table>
 {{end}}

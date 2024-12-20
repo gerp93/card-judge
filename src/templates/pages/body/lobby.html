@@ -1,76 +1,418 @@
 {{define "body"}}
-<script src="/static/js/lobby.js"></script>
-<link rel="stylesheet" href="/static/css/lobby.css" />
-<div id="lobby-grid-container">
-  <div
-    id="lobby-grid-interface"
-    hx-get="/api/player/{{.PlayerId}}/game-interface"
-    hx-trigger="load, every 5s"
-  ></div>
-  <div id="lobby-chat">
-    <div id="lobby-chat-messages"></div>
-    <form id="lobby-chat-form">
-      <input
-        id="lobby-chat-input"
-        type="text"
-        maxlength="255"
-        placeholder="Send a message..."
-      />
-      <input id="lobby-chat-submit" type="submit" value="Send" />
-    </form>
-  </div>
-</div>
-<dialog id="lobby-update-dialog">
-  <div style="display: grid; grid-auto-flow: column">
-    <div>
-      <h3>Edit Lobby</h3>
+    <script src="/static/js/lobby.js"></script>
+    <link rel="stylesheet" href="/static/css/lobby.css"/>
+    <div id="lobby-grid-container">
+        <div
+                id="lobby-grid-interface"
+                hx-get="/api/lobby/{{.Lobby.Id}}/game-interface"
+                hx-trigger="load"
+        ></div>
+        <div id="lobby-chat">
+            <div id="lobby-chat-messages"></div>
+            <form id="lobby-chat-form">
+                <input
+                        id="lobby-chat-input"
+                        type="text"
+                        maxlength="255"
+                        placeholder="Send a message..."
+                />
+                <input id="lobby-chat-submit" type="submit" value="Send Message"/>
+                <button
+                        hx-post="/api/lobby/{{.Lobby.Id}}/flip"
+                        hx-confirm="Are you sure you want to flip the table and leave?"
+                >
+                    Flip the Table!
+                </button>
+            </form>
+        </div>
     </div>
-    <div>
-      <div
-        class="close-button"
-        onclick="document.getElementById('lobby-update-dialog').close()"
-      >
-        &#10060;
-      </div>
-    </div>
-  </div>
-  <form hx-put="/api/lobby/{{.Lobby.Id}}/name" hx-target="find .htmx-result">
-    <h3>Set Lobby Name</h3>
-    <label for="setLobbyName">New Name:</label>
-    <input
-      type="text"
-      id="setLobbyName"
-      name="name"
-      maxlength="255"
-      placeholder="Enter Name"
-      required="true"
-      autocomplete="off"
-    />
-    <br />
-    <br />
-    <div class="htmx-result"></div>
-    <input type="submit" value="Set Lobby Name" />
-  </form>
-  <form
-    hx-put="/api/lobby/{{.Lobby.Id}}/hand-size"
-    hx-target="find .htmx-result"
-  >
-    <h3>Set Lobby Hand Size</h3>
-    <label for="setLobbyHandSize">New Hand Size:</label>
-    <input
-      type="number"
-      id="setLobbyHandSize"
-      name="handSize"
-      min="1"
-      max="16"
-      value="8"
-      required="true"
-      autocomplete="off"
-    />
-    <br />
-    <br />
-    <div class="htmx-result"></div>
-    <input type="submit" value="Set Lobby Hand Size" />
-  </form>
-</dialog>
+    {{if .Lobby.Message.Valid}}
+        <dialog id="lobby-message-dialog">
+            <div style="display: grid; grid-auto-flow: column">
+                <div>
+                    <h3>{{.Lobby.Name}}</h3>
+                    <p>{{.Lobby.Message.String}}</p>
+                </div>
+                <div>
+                    <span class="bi bi-x-lg close-button"
+                          onclick="document.getElementById('lobby-message-dialog').close()"
+                    ></span>
+                </div>
+            </div>
+        </dialog>
+    {{end}}
+    <dialog id="lobby-update-dialog">
+        <div style="display: grid; grid-auto-flow: column">
+            <div>
+                <h3>Edit Lobby</h3>
+            </div>
+            <div>
+                <span class="bi bi-x-lg close-button"
+                      onclick="document.getElementById('lobby-update-dialog').close()"
+                ></span>
+            </div>
+        </div>
+        <form hx-put="/api/lobby/{{.Lobby.Id}}/name" hx-target="find .htmx-result">
+            <label for="setLobbyName">Name:</label>
+            <input
+                    type="text"
+                    id="setLobbyName"
+                    name="name"
+                    maxlength="255"
+                    placeholder="Enter Name"
+                    required="required"
+                    autocomplete="off"
+            />
+            <div class="htmx-result"></div>
+            <input type="submit" value="Set Lobby Name"/>
+        </form>
+        <form hx-put="/api/lobby/{{.Lobby.Id}}/message" hx-target="find .htmx-result">
+            <label for="setLobbyMessage">Message:</label>
+            <input
+                    type="text"
+                    id="setLobbyMessage"
+                    name="message"
+                    maxlength="255"
+                    placeholder="Enter Message"
+                    autocomplete="off"
+            />
+            <div class="htmx-result"></div>
+            <input type="submit" value="Set Lobby Message"/>
+        </form>
+        <form
+                hx-put="/api/lobby/{{.Lobby.Id}}/hand-size"
+                hx-target="find .htmx-result"
+        >
+            <label for="setLobbyHandSize">Hand Size:</label>
+            <select
+                    id="setLobbyHandSize"
+                    name="handSize"
+                    autocomplete="off"
+                    required="required"
+            >
+                <option value="6">6</option>
+                <option value="8" selected>8</option>
+                <option value="10">10</option>
+                <option value="12">12</option>
+                <option value="14">14</option>
+                <option value="16">16</option>
+            </select>
+            <div class="htmx-result"></div>
+            <input type="submit" value="Set Lobby Hand Size"/>
+        </form>
+        <form
+                hx-put="/api/lobby/{{.Lobby.Id}}/credit-limit"
+                hx-target="find .htmx-result"
+        >
+            <label for="setLobbyCreditLimit">Credit Limit:</label>
+            <select
+                    id="setLobbyCreditLimit"
+                    name="creditLimit"
+                    autocomplete="off"
+                    required="required"
+            >
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+            </select>
+            <div class="htmx-result"></div>
+            <input type="submit" value="Set Lobby Credit Limit"/>
+        </form>
+        <form
+                hx-put="/api/lobby/{{.Lobby.Id}}/win-streak-threshold"
+                hx-target="find .htmx-result"
+        >
+            <label for="setLobbyWinStreakThreshold">Win Streak Threshold:</label>
+            <select
+                    id="setLobbyWinStreakThreshold"
+                    name="winStreakThreshold"
+                    autocomplete="off"
+                    required="required"
+            >
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+            <div class="htmx-result"></div>
+            <input type="submit" value="Set Lobby Win Streak Threshold"/>
+        </form>
+        <form
+                hx-put="/api/lobby/{{.Lobby.Id}}/lose-streak-threshold"
+                hx-target="find .htmx-result"
+        >
+            <label for="setLobbyLoseStreakThreshold">Lose Streak Threshold:</label>
+            <select
+                    id="setLobbyLoseStreakThreshold"
+                    name="loseStreakThreshold"
+                    autocomplete="off"
+                    required="required"
+            >
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3" selected>3</option>
+                <option value="4">4</option>
+                <option value="5">5</option>
+            </select>
+            <div class="htmx-result"></div>
+            <input type="submit" value="Set Lobby Lose Streak Threshold"/>
+        </form>
+    </dialog>
+    <dialog id="purchase-credits-dialog">
+        <div style="display: grid; grid-auto-flow: column">
+            <div>
+                <h3>Purchase Credits</h3>
+            </div>
+            <div>
+                <span class="bi bi-x-lg close-button"
+                      onclick="document.getElementById('purchase-credits-dialog').close()"
+                ></span>
+            </div>
+        </div>
+        <p style="text-align: center">
+            Additional <b>Game Credits</b> can be purchased to help give you an advantage over your opponents.
+            <br/>
+            <br/>
+            <button hx-post="/api/lobby/{{.Lobby.Id}}/purchase-credits"
+                    hx-target="closest p"
+            >
+                Purchase Credits
+            </button>
+        </p>
+    </dialog>
+    <dialog id="gamble-credits-dialog">
+        <div style="display: grid; grid-auto-flow: column">
+            <div>
+                <h3>Gamble Credits</h3>
+                <h5><i>Choose how many credits to gamble.</i></h5>
+            </div>
+            <div>
+                <span class="bi bi-x-lg close-button"
+                      onclick="document.getElementById('gamble-credits-dialog').close()"
+                ></span>
+            </div>
+        </div>
+        <form
+                hx-post="/api/lobby/{{.Lobby.Id}}/gamble-credits"
+                hx-confirm="Are you sure you want to gamble these credits?"
+                hx-target="find .htmx-result"
+        >
+            <label for="gambleAmount">Credits:</label>
+            <input
+                    id="gambleAmount"
+                    name="credits"
+                    type="number"
+                    min="1"
+                    max="10"
+                    required="required"
+                    value="1"
+            />
+            <br/>
+            <br/>
+            <div class="htmx-result"></div>
+            <input type="submit" value="Gamble" />
+        </form>
+        <br/>
+        <details>
+            <summary>Chance of Winning</summary>
+            <br/>
+            <table id="gamble-credits-chance-table">
+                <head>
+                    <tr>
+                        <th colspan="2">Credits</th>
+                        <th colspan="2">% Chance</th>
+                    </tr>
+                    <tr>
+                        <th>Cost</th>
+                        <th>Win</th>
+                        <th>Per Credit</th>
+                        <th>Overall</th>
+                    </tr>
+                </head>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>2</td>
+                        <td>40.0</td>
+                        <td>40.0</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>4</td>
+                        <td>42.5</td>
+                        <td>21.2</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>6</td>
+                        <td>45.0</td>
+                        <td>15.0</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>8</td>
+                        <td>47.5</td>
+                        <td>11.9</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>10</td>
+                        <td>50.0</td>
+                        <td>10.0</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>12</td>
+                        <td>52.5</td>
+                        <td>8.8</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>14</td>
+                        <td>55.0</td>
+                        <td>7.9</td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>16</td>
+                        <td>57.5</td>
+                        <td>7.2</td>
+                    </tr>
+                    <tr>
+                        <td>9</td>
+                        <td>18</td>
+                        <td>60.0</td>
+                        <td>6.7</td>
+                    </tr>
+                    <tr>
+                        <td>10</td>
+                        <td>20</td>
+                        <td>62.5</td>
+                        <td>6.2</td>
+                    </tr>
+                </tbody>
+            </table>
+        </details>
+        <br/>
+    </dialog>
+    <dialog id="bet-on-win-dialog">
+        <div style="display: grid; grid-auto-flow: column">
+            <div>
+                <h3>Bet On Win</h3>
+                <h5><i>Choose how many credits to bet that you will win this round.</i></h5>
+            </div>
+            <div>
+                <span class="bi bi-x-lg close-button"
+                      onclick="document.getElementById('bet-on-win-dialog').close()"
+                ></span>
+            </div>
+        </div>
+        <form
+                hx-post="/api/lobby/{{.Lobby.Id}}/bet-on-win"
+                hx-confirm="Are you sure you want to place this bet?"
+                hx-target="find .htmx-result"
+        >
+            <label for="betOnWinAmount">Credits:</label>
+            <input
+                    id="betOnWinAmount"
+                    name="credits"
+                    type="number"
+                    min="1"
+                    max="10"
+                    required="required"
+                    value="1"
+            />
+            <br/>
+            <br/>
+            <div class="htmx-result"></div>
+            <input type="submit" value="Place Bet" />
+        </form>
+    </dialog>
+    <dialog id="find-card-dialog">
+        <div style="display: grid; grid-auto-flow: column">
+            <div>
+                <h3>Find Card</h3>
+                <h5><i>Find a card in the draw pile to play</i></h5>
+            </div>
+            <div>
+                <span class="bi bi-x-lg close-button"
+                      onclick="document.getElementById('find-card-dialog').close()"
+                ></span>
+            </div>
+        </div>
+        <form
+                hx-post="/api/card/find"
+                hx-trigger="input change delay:500ms"
+                hx-target="#find-card-table-rows"
+        >
+            <input type="text" name="lobbyId" value="{{.Lobby.Id}}" hidden/>
+            <label for="textSearch">Text:</label>
+            <input
+                    type="search"
+                    id="textSearch"
+                    name="text"
+                    maxlength="510"
+                    placeholder="Search..."
+                    autocomplete="off"
+            />
+        </form>
+        <br/>
+        <table>
+            <thead>
+            <tr>
+                <th>Text</th>
+                <th>Image</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody id="find-card-table-rows"></tbody>
+        </table>
+    </dialog>
+    <dialog id="wild-card-dialog">
+        <div style="display: grid; grid-auto-flow: column">
+            <div>
+                <h3>Create Wild Card</h3>
+                <h5><i>A temporary card played for this round only</i></h5>
+            </div>
+            <div>
+                <span class="bi bi-x-lg close-button"
+                      onclick="document.getElementById('wild-card-dialog').close()"
+                ></span>
+            </div>
+        </div>
+        <form
+                hx-post="/api/lobby/{{.Lobby.Id}}/card/wild/play"
+                hx-target="find .htmx-result"
+                hx-confirm="Are you sure you want to play this Wild Card?"
+        >
+            <label for="wildCardText" style="vertical-align: top">Text:</label>
+            <textarea
+                    id="wildCardText"
+                    name="text"
+                    maxlength="255"
+                    placeholder="Enter Wild Card Text"
+                    required="required"
+                    cols="40"
+                    rows="10"
+                    autocomplete="off"
+            ></textarea>
+            <br/>
+            <br/>
+            <div class="htmx-result"></div>
+            <input
+                    type="submit"
+                    value="Play Wild Card"
+                    onclick="document.getElementById('wild-card-dialog').close();"
+            />
+        </form>
+    </dialog>
 {{end}}

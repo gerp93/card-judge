@@ -1,9 +1,9 @@
-{{define "deck-table-rows"}} {{range .}}
-<tr>
-  <td>{{.CreatedOnDate.Format "2006-01-02"}}</td>
-  <td>{{.ChangedOnDate.Format "2006-01-02"}}</td>
-  <td>{{if .PasswordHash.Valid}} Protected &#128274; {{else}} Open {{end}}</td>
-  <td style="white-space: pre-wrap"><a href="/deck/{{.Id}}">{{.Name}}</a></td>
-  <td>{{.CardCount}}</td>
-</tr>
-{{end}} {{end}}
+{{define "deck-table-rows"}}
+    {{range .}}
+        <tr>
+            <td class="wrap-new-lines"><a href="/deck/{{.Id}}">{{.Name}}</a></td>
+            <td>{{.CardCount}}</td>
+            <td>{{if .IsPublicReadOnly}} Public {{else}} <span class="bi bi-lock">Private</span> {{end}}</td>
+        </tr>
+    {{end}}
+{{end}}

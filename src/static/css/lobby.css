@@ -1,89 +1,164 @@
 #lobby-grid-container {
-  height: calc(100vh - 80px);
-  display: grid;
-  grid-template-columns: auto;
-  grid-template-rows: auto 200px;
-  grid-template-areas:
-    "interface"
-    "chat";
-  gap: 4px;
+    height: calc(100vh - 80px);
+    display: grid;
+    grid-template-columns: auto;
+    grid-template-rows: auto 200px;
+    grid-template-areas:
+        "interface"
+        "chat";
+    gap: 4px;
+}
+
+@media screen and (max-width: 1080px) {
+    #lobby-grid-container {
+        height: auto;
+        width: calc(100vw - 40px);
+        grid-template-columns: calc(100vw - 40px);
+    }
 }
 
 #lobby-grid-interface {
-  grid-area: interface;
+    grid-area: interface;
 
-  height: calc(100vh - 280px);
-  display: grid;
-  grid-template-columns: 400px auto 200px;
-  grid-template-rows: 80px auto;
-  grid-template-areas:
-    "info info info"
-    "player board stats";
-  gap: 4px;
+    height: calc(100vh - 280px);
+    min-height: 400px;
+    display: grid;
+    grid-template-columns: 400px auto 200px;
+    grid-template-rows: 80px auto;
+    grid-template-areas:
+        "info info info"
+        "player board stats";
+    gap: 4px;
+}
+
+@media screen and (max-width: 1080px) {
+    #lobby-grid-interface {
+        height: auto;
+        width: calc(100vw - 40px);
+        grid-template-columns: calc(100vw - 40px);
+        grid-template-rows: auto;
+        grid-template-areas:
+            "info"
+            "player"
+            "board"
+            "stats";
+    }
+}
+
+table {
+    display: table;
 }
 
 #lobby-grid-interface > div {
-  padding: 10px;
-  border: 2px solid black;
+    padding: 10px;
+    border: 2px solid black;
 }
 
 #lobby-game-info {
-  grid-area: info;
+    grid-area: info;
 }
 
 #game-info-table {
-  width: 100%;
-  text-align: center;
+    width: 100%;
+    text-align: center;
 }
 
 #game-info-table tr:hover {
-  background-color: transparent;
+    background-color: transparent;
 }
 
 #lobby-player-data {
-  grid-area: player;
-  overflow-y: scroll;
+    grid-area: player;
+    overflow-y: scroll;
+}
+
+.lobby-player-data-message {
+    padding: 10px;
+}
+
+#player-values-table {
+    width: 100%;
+    text-align: center;
+}
+
+#player-values-table tr:hover {
+    background-color: transparent;
+}
+
+#special-table {
+    width: 100%;
+    text-align: center;
+}
+
+#special-table tr:hover {
+    background-color: transparent;
+}
+
+#special-table button {
+    width: 100%;
+}
+
+#gamble-credits-chance-table th {
+    text-align: center;
+    border: 1px solid;
+}
+
+#gamble-credits-chance-table td {
+    text-align: right;
+    border: 1px solid;
 }
 
 #lobby-game-board {
-  grid-area: board;
-  min-height: 300px;
-  min-width: 400px;
+    grid-area: board;
+    overflow-y: scroll;
 }
 
-#judge-card {
-  text-align: center;
-  padding: 30px;
-  border: 2px solid black;
-  border-radius: 10px;
+#prompt-card {
+    text-align: center;
+    padding: 30px;
+    border: 2px solid black;
+    border-radius: 10px;
+}
+
+#board-responses-table {
+    width: 100%;
+}
+
+#player-responses-table {
+    width: 100%;
 }
 
 #lobby-game-stats {
-  grid-area: stats;
+    grid-area: stats;
+    overflow-y: scroll;
 }
 
 #lobby-chat {
-  grid-area: chat;
-  padding: 10px;
-  border: 2px solid black;
+    grid-area: chat;
+    padding: 10px;
+    border: 2px solid black;
 }
 
 #lobby-chat-messages {
-  height: calc(100% - 50px);
-  overflow-y: scroll;
-  overflow-x: hidden !important;
-  padding-left: calc(5px + 1em);
-  text-indent: -1em;
+    height: calc(100% - 75px);
+    max-width: 1850px;
+    overflow-y: scroll;
+    overflow-x: hidden !important;
+    padding-left: calc(5px + 1em);
+    text-indent: -1em;
+    overflow-wrap: break-word;
+}
+
+@media (max-width: 1920px) {
+    #lobby-chat-messages {
+        max-width: 90vw;
+    }
 }
 
 #lobby-chat-form {
-  height: 40px;
+    height: 40px;
 }
 
 #lobby-chat-input {
-  width: calc(100% - 100px);
-}
-
-#lobby-chat-submit {
-  width: 50px;
+    width: calc(100% - 20px);
 }

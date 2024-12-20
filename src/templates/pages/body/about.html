@@ -1,0 +1,71 @@
+{{define "body"}}
+    <link rel="stylesheet" href="/static/css/about.css"/>
+    <h1>About</h1>
+    <p>
+        Card Judge is an
+        <a href="https://github.com/GrantFBarnes/card-judge">open source</a>
+        online multiplayer party game.
+    </p>
+    <details>
+        <summary class="summary-level-1">Definitions</summary>
+        <p>A <b>card</b> is text categorized as either a <i>Prompt</i> or <i>Response</i>.</p>
+        <p>A <b>deck</b> is a grouping of cards.</p>
+        <p>A <b>lobby</b> is an active game taking place.</p>
+        <p>A <b>draw pile</b> is the available cards within a lobby.</p>
+        <p>A <b>user</b> is an account created on this site.</p>
+        <p>A <b>player</b> is a user in a lobby.</p>
+        <p>A <b>judge</b> is a role given to a single player within a lobby.</p>
+    </details>
+    <details>
+        <summary class="summary-level-1">Rules</summary>
+        <details>
+            <summary class="summary-level-2">Start Playing</summary>
+            <p>
+                To start playing, create/join a lobby of at least three players (including
+                yourself). The player who created the lobby will start as the judge.
+            </p>
+        </details>
+        <details>
+            <summary class="summary-level-2">Playing a Round</summary>
+            <p>
+                The prompt card will be displayed in the middle of the game board for all
+                players to read.
+            </p>
+            <p>
+                All players (except the judge) answer the question or fill in the blanks
+                of the prompt card by selecting the amount of required response cards from
+                their hand. Players can withdraw their play as long not all other
+                players have played.
+            </p>
+            <p>
+                The judge has the option to skip the current prompt card as long as no
+                player has played a response card yet.
+            </p>
+            <p>
+                Once all players have played the required amount of cards, the answers
+                will be visible to all in alphabetical order (to ensure randomness). The
+                judge will be able to select the card of their choosing that they believe
+                to be the best played response card for the given prompt card.
+            </p>
+            <p>
+                The judge choosing a winner concludes that round. The player who won
+                becomes the new judge and is awarded a point on the scoreboard.
+            </p>
+            <p>
+                Gameplay can continue until there are no more cards to draw from the draw
+                pile or when players agree to finish. The player with the most points is
+                the winner.
+            </p>
+        </details>
+        <details>
+            <summary class="summary-level-2">Credits/Specials</summary>
+            <p>
+                A lobby will have a set credit limit for each player.
+                Credits can be used to purchase Specials at varying costs.
+                Specials vary from gambling credits to potentially earn more,
+                to playing Special Cards, which are an alternative way to play a turn.
+                Each Special has a help icon next to it to display what it is.
+            </p>
+        </details>
+    </details>
+{{end}}

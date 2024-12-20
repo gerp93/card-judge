@@ -21,7 +21,7 @@ type BasePageData struct {
 	LoggedIn  bool
 }
 
-func PageMiddleware(next http.Handler) http.Handler {
+func MiddlewareForPages(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		basePageData := BasePageData{
 			PageTitle: "Card Judge",
@@ -32,7 +32,9 @@ func PageMiddleware(next http.Handler) http.Handler {
 		userId, err := auth.GetCookieUserId(r)
 		if err == nil {
 			user, err := database.GetUser(userId)
-			if err == nil {
+			if user.Id == uuid.Nil {
+				auth.RemoveCookieUserId(w)
+			} else if err == nil {
 				basePageData.User = user
 				basePageData.LoggedIn = true
 			}
@@ -41,6 +43,7 @@ func PageMiddleware(next http.Handler) http.Handler {
 		// required to be logged in
 		if r.URL.Path == "/manage" ||
 			r.URL.Path == "/admin" ||
+			r.URL.Path == "/stats" ||
 			r.URL.Path == "/lobbies" ||
 			r.URL.Path == "/decks" ||
 			strings.HasPrefix(r.URL.Path, "/lobby/") ||
@@ -78,7 +81,7 @@ func GetBasePageData(r *http.Request) BasePageData {
 	return r.Context().Value(basePageDataRequestContextKey).(BasePageData)
 }
 
-func ApiMiddleware(next http.Handler) http.Handler {
+func MiddlewareForAPIs(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		userId, _ := auth.GetCookieUserId(r)
 		r = r.WithContext(context.WithValue(r.Context(), userIdRequestContextKey, userId))

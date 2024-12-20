@@ -7,31 +7,22 @@ import (
 	"github.com/google/uuid"
 )
 
-func getUserLobbyAccess(userId uuid.UUID) (lobbyIds []uuid.UUID, err error) {
-	sqlString := `
-		SELECT DISTINCT
-			L.ID
-		FROM LOBBY AS L
-			LEFT JOIN USER_ACCESS_LOBBY AS UAL ON UAL.LOBBY_ID = L.ID
-		WHERE L.PASSWORD_HASH IS NULL
-			OR UAL.USER_ID = ?
-	`
-	rows, err := Query(sqlString, userId)
+func UserHasLobbyAccess(userId uuid.UUID, lobbyId uuid.UUID) (bool, error) {
+	sqlString := "SELECT FN_USER_HAS_LOBBY_ACCESS (?, ?)"
+	rows, err := query(sqlString, userId, lobbyId)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
-	lobbyIds = make([]uuid.UUID, 0)
+	hasAccess := false
 	for rows.Next() {
-		var lobbyId uuid.UUID
-		if err := rows.Scan(&lobbyId); err != nil {
+		if err := rows.Scan(&hasAccess); err != nil {
 			log.Println(err)
-			return lobbyIds, errors.New("failed to scan row in query results")
+			return false, errors.New("failed to scan row in query results")
 		}
-		lobbyIds = append(lobbyIds, lobbyId)
 	}
 
-	return lobbyIds, nil
+	return hasAccess, nil
 }
 
 func AddUserLobbyAccess(userId uuid.UUID, lobbyId uuid.UUID) error {
@@ -39,34 +30,25 @@ func AddUserLobbyAccess(userId uuid.UUID, lobbyId uuid.UUID) error {
 		INSERT INTO USER_ACCESS_LOBBY (USER_ID, LOBBY_ID)
 		VALUES (?, ?)
 	`
-	return Execute(sqlString, userId, lobbyId)
+	return execute(sqlString, userId, lobbyId)
 }
 
-func getUserDeckAccess(userId uuid.UUID) (deckIds []uuid.UUID, err error) {
-	sqlString := `
-		SELECT DISTINCT
-			D.ID
-		FROM DECK AS D
-			LEFT JOIN USER_ACCESS_DECK AS UAD ON UAD.DECK_ID = D.ID
-		WHERE D.PASSWORD_HASH IS NULL
-			OR UAD.USER_ID = ?
-	`
-	rows, err := Query(sqlString, userId)
+func UserHasDeckAccess(userId uuid.UUID, deckId uuid.UUID) (bool, error) {
+	sqlString := "SELECT FN_USER_HAS_DECK_ACCESS (?, ?)"
+	rows, err := query(sqlString, userId, deckId)
 	if err != nil {
-		return nil, err
+		return false, err
 	}
 
-	deckIds = make([]uuid.UUID, 0)
+	hasAccess := false
 	for rows.Next() {
-		var deckId uuid.UUID
-		if err := rows.Scan(&deckId); err != nil {
+		if err := rows.Scan(&hasAccess); err != nil {
 			log.Println(err)
-			return deckIds, errors.New("failed to scan row in query results")
+			return false, errors.New("failed to scan row in query results")
 		}
-		deckIds = append(deckIds, deckId)
 	}
 
-	return deckIds, nil
+	return hasAccess, nil
 }
 
 func AddUserDeckAccess(userId uuid.UUID, deckId uuid.UUID) error {
@@ -74,5 +56,5 @@ func AddUserDeckAccess(userId uuid.UUID, deckId uuid.UUID) error {
 		INSERT INTO USER_ACCESS_DECK (USER_ID, DECK_ID)
 		VALUES (?, ?)
 	`
-	return Execute(sqlString, userId, deckId)
+	return execute(sqlString, userId, deckId)
 }

@@ -1,88 +1,90 @@
 {{define "body"}}
-<button onclick="document.getElementById('deck-create-dialog').showModal()">
-  Create Deck
-</button>
-<dialog id="deck-create-dialog">
-  <div style="display: grid; grid-auto-flow: column">
-    <div>
-      <h3>Create Deck</h3>
-    </div>
-    <div>
-      <div
-        class="close-button"
-        onclick="document.getElementById('deck-create-dialog').close()"
-      >
-        &#10060;
-      </div>
-    </div>
-  </div>
-  <form hx-post="/api/deck/create" hx-target="find .htmx-result">
-    <label for="createDeckName">Name:</label>
-    <input
-      type="text"
-      id="createDeckName"
-      name="name"
-      maxlength="255"
-      placeholder="Enter Deck Name"
-      required="true"
-      autocomplete="off"
-    />
-    <br />
-    <br />
-    <details>
-      <summary>Password (optional)</summary>
-      <label for="createDeckPassword">Password:</label>
-      <input
-        type="password"
-        id="createDeckPassword"
-        name="password"
-        maxlength="255"
-        placeholder="Enter Deck Password"
-        autocomplete="off"
-      />
-      <br />
-      <label for="createDeckPasswordConfirm">Confirm Password:</label>
-      <input
-        type="password"
-        id="createDeckPasswordConfirm"
-        name="passwordConfirm"
-        maxlength="255"
-        placeholder="Confirm Deck Password"
-        autocomplete="off"
-      />
-      <br />
-    </details>
-    <br />
-    <br />
-    <div class="htmx-result"></div>
-    <input type="submit" value="Create Deck" />
-  </form>
-</dialog>
-<br />
-<h3>Choose a Deck to Modify</h3>
-<table>
-  <thead>
-    <tr>
-      <th>Created</th>
-      <th>Changed</th>
-      <th>Security</th>
-      <th>
-        <label for="deckSearch">Name</label>
-        <input
-          type="search"
-          id="deckSearch"
-          name="search"
-          maxlength="255"
-          placeholder="Search..."
-          autocomplete="off"
-          hx-post="/api/deck/search"
-          hx-trigger="load, input changed delay:500ms, search"
-          hx-target="#deck-table-rows"
-        />
-      </th>
-      <th>Cards</th>
-    </tr>
-  </thead>
-  <tbody id="deck-table-rows"></tbody>
-</table>
+    <button onclick="document.getElementById('deck-create-dialog').showModal()">
+        Create Deck
+    </button>
+    <dialog id="deck-create-dialog">
+        <div style="display: grid; grid-auto-flow: column">
+            <div>
+                <h3>Create Deck</h3>
+            </div>
+            <div>
+                <span class="bi bi-x-lg close-button"
+                      onclick="document.getElementById('deck-create-dialog').close()"
+                ></span>
+            </div>
+        </div>
+        <form hx-post="/api/deck/create" hx-target="find .htmx-result">
+            <label for="createDeckName">Name:</label>
+            <input
+                    type="text"
+                    id="createDeckName"
+                    name="name"
+                    maxlength="255"
+                    placeholder="Enter Deck Name"
+                    required="required"
+                    autocomplete="off"
+            />
+            <br/>
+            <label for="createDeckPassword">Password:</label>
+            <input
+                    type="password"
+                    id="createDeckPassword"
+                    name="password"
+                    maxlength="255"
+                    placeholder="Enter Deck Password"
+                    autocomplete="off"
+                    required="required"
+            />
+            <br/>
+            <label for="createDeckPasswordConfirm">Confirm Password:</label>
+            <input
+                    type="password"
+                    id="createDeckPasswordConfirm"
+                    name="passwordConfirm"
+                    maxlength="255"
+                    placeholder="Confirm Deck Password"
+                    autocomplete="off"
+                    required="required"
+            />
+            <br/>
+            <label for="createDeckIsPublicReadOnly">Is Public Read-Only:</label>
+            <select
+                    id="createDeckIsPublicReadOnly"
+                    name="isPublicReadOnly"
+                    autocomplete="off"
+            >
+                <option value="0" selected>No</option>
+                <option value="1">Yes</option>
+            </select>
+            <br/>
+            <br/>
+            <div class="htmx-result"></div>
+            <input type="submit" value="Create Deck"/>
+        </form>
+    </dialog>
+    <br/>
+    <h3>Choose a Deck to Modify</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>
+                <label for="deckSearch">Name</label>
+                <input
+                        type="search"
+                        id="deckSearch"
+                        name="search"
+                        maxlength="255"
+                        placeholder="Search..."
+                        autocomplete="off"
+                        hx-post="/api/deck/search"
+                        hx-trigger="load, input changed delay:500ms, search"
+                        hx-target="#deck-table-rows"
+                />
+            </th>
+            <th>Cards</th>
+            <th>View Access</th>
+        </tr>
+        </thead>
+        <tbody id="deck-table-rows"></tbody>
+    </table>
 {{end}}

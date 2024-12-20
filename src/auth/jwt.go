@@ -5,18 +5,18 @@ import (
 	"log"
 	"os"
 
-	jwt "github.com/golang-jwt/jwt/v5"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 const claimKey string = "value"
 
-var jwtSecret []byte = []byte(os.Getenv("CARD_JUDGE_JWT_SECRET"))
+var jwtSecret = []byte(os.Getenv("CARD_JUDGE_JWT_SECRET"))
 
-func getValueTokenString(value string) (tokenString string, err error) {
+func getValueTokenString(value string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		claimKey: value,
 	})
-	tokenString, err = token.SignedString(jwtSecret)
+	tokenString, err := token.SignedString(jwtSecret)
 	if err != nil {
 		log.Println(err)
 		return "", errors.New("failed to sign token")
@@ -24,7 +24,7 @@ func getValueTokenString(value string) (tokenString string, err error) {
 	return tokenString, nil
 }
 
-func getTokenStringValue(tokenString string) (value string, err error) {
+func getTokenStringValue(tokenString string) (string, error) {
 	token, err := getTokenStringToken(tokenString)
 	if err != nil {
 		log.Println(err)
@@ -38,7 +38,7 @@ func getTokenStringValue(tokenString string) (value string, err error) {
 	}
 }
 
-func getTokenStringToken(tokenString string) (token *jwt.Token, err error) {
+func getTokenStringToken(tokenString string) (*jwt.Token, error) {
 	return jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil
 	})

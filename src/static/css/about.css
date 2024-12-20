@@ -1,0 +1,17 @@
+details {
+    padding: 10px;
+    margin-left: 2em;
+}
+
+summary {
+    margin-left: -2em;
+}
+
+.summary-level-1 {
+    font-size: larger;
+    font-weight: bold;
+}
+
+.summary-level-2 {
+    font-size: large;
+}

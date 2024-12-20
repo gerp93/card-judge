@@ -1,72 +1,63 @@
 {{define "base"}}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{.PageTitle}}</title>
-    <script
-      src="https://unpkg.com/htmx.org@2.0.1"
-      integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TyjxEPXiiUgN2WmTyV5OEZWCD6gQhgkdpB/"
-      crossorigin="anonymous"
-    ></script>
-    <script src="/static/js/global.js"></script>
-    <link rel="icon" type="image/x-icon" href="/static/images/favicon.png" />
-    <link rel="stylesheet" href="/static/css/colors.css" />
-    <link rel="stylesheet" href="/static/css/global.css" />
-  </head>
-  {{if .User.ColorTheme.Valid}}
-  <body class="{{.User.ColorTheme.String}}">
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <title>{{.PageTitle}}</title>
+        <script
+                src="https://unpkg.com/htmx.org@2.0.1"
+                integrity="sha384-QWGpdj554B4ETpJJC9z+ZHJcA/i59TyjxEPXiiUgN2WmTyV5OEZWCD6gQhgkdpB/"
+                crossorigin="anonymous"
+        ></script>
+        <script src="/static/js/global.js"></script>
+        <link rel="icon" type="image/x-icon" href="/static/images/favicon.png"/>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+        <link rel="stylesheet" href="/static/css/colors.css"/>
+        <link rel="stylesheet" href="/static/css/global.css"/>
+    </head>
+    {{if .User.ColorTheme.Valid}}
+    <body class="{{.User.ColorTheme.String}}">
     {{else}}
     <body class="dark-theme">
-      {{end}}
-      <div id="topbar">
+    {{end}}
+    <div id="top-bar">
         <div style="text-align: left">
           <span
-            class="clickable"
-            onclick="location.href='/'"
-            title="Go to Home Page"
+                  class="clickable"
+                  onclick="location.href='/'"
+                  title="Go to Home Page"
           >
             Card Judge
           </span>
         </div>
         <div style="text-align: right">
-          <span
-            id="topbar-menu-toggle"
-            class="clickable"
-            onclick="toggleTopbarMenu()"
-            title="Menu Toggle"
-          >
-            &#9776;
-          </span>
+            <span id="top-bar-menu-toggle"
+                  class="bi bi-list clickable"
+                  onclick="toggleTopBarMenu()"
+                  title="Menu Toggle"
+            ></span>
         </div>
-      </div>
-      <div id="topbar-menu">
+    </div>
+    <div id="top-bar-menu">
         {{if .LoggedIn}}
-        <div class="topbar-menu-item">Playing As: {{.User.Name}}</div>
-        <div class="topbar-menu-link" onclick="location.href='/manage'">
-          &#128295; Manage Account
-        </div>
-        <div
-          class="topbar-menu-link"
-          hx-post="/api/user/logout"
-          hx-confirm="Are you sure you want to logout?"
-        >
-          Logout
-        </div>
+            <div class="top-bar-menu-item">Playing As: {{.User.Name}}</div>
+            <div class="top-bar-menu-link" onclick="location.href='/manage'">Manage Account</div>
+            <div class="top-bar-menu-link"
+                 hx-post="/api/user/logout"
+                 hx-confirm="Are you sure you want to logout?"
+            >
+                Logout
+            </div>
         {{else}}
-        <div class="topbar-menu-link" onclick="location.href='/login'">
-          Login
-        </div>
+            <div class="top-bar-menu-link" onclick="location.href='/login'">
+                Login
+            </div>
         {{end}}
-      </div>
-      <div id="content">
+    </div>
+    <div id="content">
         <div id="body">{{template "body" .}}</div>
-      </div>
-      {{if .User.ColorTheme.Valid}}
+    </div>
     </body>
-    {{else}}
-  </body>
-  {{end}}
-</html>
+    </html>
 {{end}}

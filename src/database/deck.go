@@ -1,7 +1,6 @@
 package database
 
 import (
-	"database/sql"
 	"errors"
 	"log"
 	"time"
@@ -15,8 +14,9 @@ type Deck struct {
 	CreatedOnDate time.Time
 	ChangedOnDate time.Time
 
-	Name         string
-	PasswordHash sql.NullString
+	Name             string
+	PasswordHash     string
+	IsPublicReadOnly bool
 }
 
 type DeckDetails struct {
@@ -32,21 +32,17 @@ func SearchDecks(search string) ([]DeckDetails, error) {
 	sqlString := `
 		SELECT
 			D.ID,
-			D.CREATED_ON_DATE,
-			D.CHANGED_ON_DATE,
 			D.NAME,
-			D.PASSWORD_HASH,
-			COUNT(C.ID) AS CARD_COUNT
+			COUNT(C.ID) AS CARD_COUNT,
+			D.IS_PUBLIC_READONLY
 		FROM DECK AS D
 			LEFT JOIN CARD AS C ON C.DECK_ID = D.ID
-		WHERE D.NAME LIKE ?
+		WHERE D.IS_LOBBY_WILD_DECK = FALSE
+			AND D.NAME LIKE ?
 		GROUP BY D.ID
-		ORDER BY
-			TO_DAYS(D.CHANGED_ON_DATE) DESC,
-			D.NAME ASC,
-			COUNT(C.ID) DESC
+		ORDER BY D.NAME
 	`
-	rows, err := Query(sqlString, search)
+	rows, err := query(sqlString, search)
 	if err != nil {
 		return nil, err
 	}
@@ -56,11 +52,9 @@ func SearchDecks(search string) ([]DeckDetails, error) {
 		var deckDetails DeckDetails
 		if err := rows.Scan(
 			&deckDetails.Id,
-			&deckDetails.CreatedOnDate,
-			&deckDetails.ChangedOnDate,
 			&deckDetails.Name,
-			&deckDetails.PasswordHash,
-			&deckDetails.CardCount); err != nil {
+			&deckDetails.CardCount,
+			&deckDetails.IsPublicReadOnly); err != nil {
 			log.Println(err)
 			return result, errors.New("failed to scan row in query results")
 		}
@@ -69,19 +63,9 @@ func SearchDecks(search string) ([]DeckDetails, error) {
 	return result, nil
 }
 
-func GetUserDecks(userId uuid.UUID) ([]Deck, error) {
-	sqlString := `
-		SELECT DISTINCT
-			D.ID,
-			D.NAME
-		FROM DECK AS D
-			INNER JOIN CARD AS C ON C.DECK_ID = D.ID
-			LEFT JOIN USER_ACCESS_DECK AS UAD ON UAD.DECK_ID = D.ID
-		WHERE D.PASSWORD_HASH IS NULL
-			OR UAD.USER_ID = ?
-		ORDER BY NAME ASC
-	`
-	rows, err := Query(sqlString, userId)
+func GetReadableDecks(userId uuid.UUID) ([]Deck, error) {
+	sqlString := "CALL SP_GET_READABLE_DECKS (?)"
+	rows, err := query(sqlString, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -109,11 +93,12 @@ func GetDeck(id uuid.UUID) (Deck, error) {
 			CREATED_ON_DATE,
 			CHANGED_ON_DATE,
 			NAME,
-			PASSWORD_HASH
+			PASSWORD_HASH,
+			IS_PUBLIC_READONLY
 		FROM DECK
 		WHERE ID = ?
 	`
-	rows, err := Query(sqlString, id)
+	rows, err := query(sqlString, id)
 	if err != nil {
 		return deck, err
 	}
@@ -124,7 +109,8 @@ func GetDeck(id uuid.UUID) (Deck, error) {
 			&deck.CreatedOnDate,
 			&deck.ChangedOnDate,
 			&deck.Name,
-			&deck.PasswordHash); err != nil {
+			&deck.PasswordHash,
+			&deck.IsPublicReadOnly); err != nil {
 			log.Println(err)
 			return deck, errors.New("failed to scan row in query results")
 		}
@@ -133,8 +119,8 @@ func GetDeck(id uuid.UUID) (Deck, error) {
 	return deck, nil
 }
 
-func GetDeckPasswordHash(id uuid.UUID) (sql.NullString, error) {
-	var passwordHash sql.NullString
+func GetDeckPasswordHash(id uuid.UUID) (string, error) {
+	var passwordHash string
 
 	sqlString := `
 		SELECT
@@ -142,7 +128,7 @@ func GetDeckPasswordHash(id uuid.UUID) (sql.NullString, error) {
 		FROM DECK
 		WHERE ID = ?
 	`
-	rows, err := Query(sqlString, id)
+	rows, err := query(sqlString, id)
 	if err != nil {
 		return passwordHash, err
 	}
@@ -157,7 +143,7 @@ func GetDeckPasswordHash(id uuid.UUID) (sql.NullString, error) {
 	return passwordHash, nil
 }
 
-func CreateDeck(name string, password string) (uuid.UUID, error) {
+func CreateDeck(name string, password string, isPublicReadOnly bool) (uuid.UUID, error) {
 	id, err := uuid.NewUUID()
 	if err != nil {
 		log.Println(err)
@@ -171,14 +157,10 @@ func CreateDeck(name string, password string) (uuid.UUID, error) {
 	}
 
 	sqlString := `
-		INSERT INTO DECK (ID, NAME, PASSWORD_HASH)
-		VALUES (?, ?, ?)
+		INSERT INTO DECK (ID, NAME, PASSWORD_HASH, IS_PUBLIC_READONLY)
+		VALUES (?, ?, ?, ?)
 	`
-	if password == "" {
-		return id, Execute(sqlString, id, name, nil)
-	} else {
-		return id, Execute(sqlString, id, name, passwordHash)
-	}
+	return id, execute(sqlString, id, name, passwordHash, isPublicReadOnly)
 }
 
 func GetDeckId(name string) (uuid.UUID, error) {
@@ -190,7 +172,7 @@ func GetDeckId(name string) (uuid.UUID, error) {
 		FROM DECK
 		WHERE NAME = ?
 	`
-	rows, err := Query(sqlString, name)
+	rows, err := query(sqlString, name)
 	if err != nil {
 		return id, err
 	}
@@ -212,7 +194,17 @@ func SetDeckName(id uuid.UUID, name string) error {
 			NAME = ?
 		WHERE ID = ?
 	`
-	return Execute(sqlString, name, id)
+	return execute(sqlString, name, id)
+}
+
+func SetIsPublicReadOnly(id uuid.UUID, isPublicReadOnly bool) error {
+	sqlString := `
+		UPDATE DECK
+		SET
+			IS_PUBLIC_READONLY = ?
+		WHERE ID = ?
+	`
+	return execute(sqlString, isPublicReadOnly, id)
 }
 
 func SetDeckPassword(id uuid.UUID, password string) error {
@@ -228,11 +220,7 @@ func SetDeckPassword(id uuid.UUID, password string) error {
 			PASSWORD_HASH = ?
 		WHERE ID = ?
 	`
-	if password == "" {
-		return Execute(sqlString, nil, id)
-	} else {
-		return Execute(sqlString, passwordHash, id)
-	}
+	return execute(sqlString, passwordHash, id)
 }
 
 func DeleteDeck(id uuid.UUID) error {
@@ -240,5 +228,5 @@ func DeleteDeck(id uuid.UUID) error {
 		DELETE FROM DECK
 		WHERE ID = ?
 	`
-	return Execute(sqlString, id)
+	return execute(sqlString, id)
 }

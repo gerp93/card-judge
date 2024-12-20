@@ -1,150 +1,587 @@
 {{define "game-interface"}}
-<div id="lobby-game-info">
-  <table id="game-info-table">
-    <thead>
-      <tr>
-        <th>Lobby</th>
-        <th>Judge</th>
-        <th>Hand Size</th>
-        <th>Draw Pile</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          {{.LobbyName}}
-          <span
-            class="clickable"
-            onclick="document.getElementById('lobby-update-dialog').showModal()"
-          >
-            &#128393;
-          </span>
-        </td>
-        <td>{{if eq .JudgeName ""}} (None) {{else}} {{.JudgeName}} {{end}}</td>
-        <td>{{.LobbyHandSize}}</td>
-        <td>{{.LobbyDrawPileCount}}</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-<div id="lobby-player-data">
-  <table>
-    <thead>
-      <tr>
-        <th>
-          {{$cardCount := len .PlayerHand}} {{if lt $cardCount .LobbyHandSize}}
-          <button
-            hx-post="/api/player/{{.PlayerId}}/draw"
-            hx-target="#lobby-grid-interface"
-          >
-            Draw
-          </button>
-          {{end}}
-        </th>
-        <th>
-          {{$cardCount := len .PlayerHand}} {{if gt $cardCount 0}}
-          <button
-            hx-post="/api/player/{{.PlayerId}}/discard"
-            hx-target="#lobby-grid-interface"
-            hx-confirm="Are you sure you want to discard your hand?"
-          >
-            Discard
-          </button>
-          {{end}}
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      {{range .PlayerHand}}
-      <tr style="border-top: 2px solid black">
-        <td style="padding: 20px">
-          {{if or $.PlayerIsJudge $.PlayerPlayed}}
-          <span>{{.Text}}</span>
-          {{else}}
-          <span
-            class="clickable"
-            hx-post="/api/player/{{$.PlayerId}}/card/{{.Id}}/play"
-            hx-target="#lobby-grid-interface"
-            hx-confirm="Are you sure you want to play this card?"
-          >
-            {{.Text}}
-          </span>
-          {{end}}
-        </td>
-        <td style="text-align: center">
-          <span
-            title="Discard"
-            class="clickable"
-            hx-delete="/api/player/{{$.PlayerId}}/card/{{.Id}}"
-            hx-target="#lobby-grid-interface"
-            hx-confirm="Are you sure you want to discard this card?"
-          >
-            &#9940;
-          </span>
-        </td>
-      </tr>
-      {{end}}
-    </tbody>
-  </table>
-</div>
-<div id="lobby-game-board">
-  <h3 id="judge-card">
-    {{.JudgeCardText}}
-    <span
-      class="clickable"
-      style="float: right"
-      title="Skip Current Card"
-      hx-post="/api/lobby/{{.LobbyId}}/skip-judge-card"
-      hx-confirm="Are you sure you want to skip this judge card?"
-    >
-      &#11118;
-    </span>
-  </h3>
-  <br />
-  {{$cardCount := len .BoardCards}} {{if eq $cardCount .LobbyPlayerCount}}
-  <div id="board-cards">
-    <table id="board-cards-table">
-      <tbody>
-        {{range .BoardCards}}
-        <tr>
-          <td style="padding: 20px">
-            {{if $.PlayerIsJudge}}
-            <span
-              class="clickable"
-              hx-post="/api/lobby/{{$.LobbyId}}/card/{{.Id}}/winner"
-              hx-confirm="Are you sure you want to pick this card as the winner?"
-            >
-              {{.Text}}
-            </span>
-            {{else}}
-            <span>{{.Text}}</span>
+    <div id="lobby-game-info">
+        <table id="game-info-table">
+            <thead>
+            <tr>
+                <th style="width: 34%">Lobby</th>
+                <th style="width: 33%">Judge</th>
+                <th style="width: 33%">Draw Pile</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>
+                    {{.LobbyName}}
+                    <span class="bi bi-pencil clickable"
+                          onclick="document.getElementById('lobby-update-dialog').showModal()"
+                    ></span>
+                </td>
+                <td>
+                    {{if .JudgeName.Valid}}
+                        {{.JudgeName.String}}
+                    {{else}}
+                        (None)
+                    {{end}}
+                </td>
+                <td>
+                    Prompt {{.DrawPilePromptCount}} | Response {{.DrawPileResponseCount}}
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="lobby-player-data">
+        {{if not .JudgeCardText.Valid}}
+            <div class="lobby-player-data-message">[NO PROMPT CARD]</div>
+        {{else}}
+            <table id="player-hand-table">
+                {{$handSize := len .PlayerHand}}
+                <thead>
+                <tr>
+                    <th colspan="3">Cards in Hand</th>
+                </tr>
+                <tr>
+                    <th></th>
+                    <th>
+                        {{if lt $handSize .LobbyHandSize}}
+                            <button
+                                    hx-post="/api/lobby/{{.LobbyId}}/draw-hand"
+                                    hx-target="#lobby-grid-interface"
+                            >
+                                Draw
+                            </button>
+                        {{end}}
+                    </th>
+                    <th>
+                        {{if gt $handSize 0}}
+                            <button
+                                    hx-post="/api/lobby/{{.LobbyId}}/discard-hand"
+                                    hx-target="#lobby-grid-interface"
+                                    hx-confirm="Are you sure you want to discard your hand?"
+                            >
+                                Discard
+                            </button>
+                        {{end}}
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range .PlayerHand}}
+                    <tr style="border-top: 2px solid black">
+                        <td style="text-align: center">
+                            {{if .IsLocked}}
+                                <span title="Unlock"
+                                      class="bi bi-lock clickable"
+                                      hx-post="/api/lobby/{{$.LobbyId}}/card/{{.Id}}/unlock"
+                                      hx-target="#lobby-grid-interface"
+                                ></span>
+                            {{else}}
+                                <span title="Lock"
+                                      class="bi bi-unlock clickable"
+                                      hx-post="/api/lobby/{{$.LobbyId}}/card/{{.Id}}/lock"
+                                      hx-target="#lobby-grid-interface"
+                                ></span>
+                            {{end}}
+                        </td>
+                        <td
+                                style="padding: 20px"
+                                {{if and (not $.PlayerIsJudge) (not $.PlayerIsReady)}}
+                                    class="clickable"
+                                    hx-post="/api/lobby/{{$.LobbyId}}/card/{{.Id}}/play"
+                                    hx-confirm="Are you sure you want to play this card?"
+                                {{end}}
+                        >
+                            <span class="wrap-new-lines">{{.Text}}</span>
+                            <span class="bi bi-info-circle" style="float: right" title="{{.DeckName}}"></span>
+                            {{if .Image.Valid}}
+                                <br/>
+                                <br/>
+                                <img src="data:image;base64,{{.Image.String}}" alt="Card Image"/>
+                            {{end}}
+                        </td>
+                        <td style="text-align: center">
+                            {{if not .IsLocked}}
+                                <span title="Discard"
+                                      class="bi bi-trash clickable"
+                                      hx-post="/api/lobby/{{$.LobbyId}}/card/{{.Id}}/discard"
+                                      hx-target="#lobby-grid-interface"
+                                      hx-confirm="Are you sure you want to discard this card?"
+                                ></span>
+                            {{end}}
+                        </td>
+                    </tr>
+                {{end}}
+                </tbody>
+            </table>
+            <hr/>
+            <table id="player-values-table">
+                <thead>
+                <tr>
+                    <th>Value</th>
+                    <th>Amount</th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>Credits</td>
+                    <td>{{.PlayerCreditsRemaining}}</td>
+                    <td>
+                        <span class="bi bi-info-circle" title="Credits are used to purchase specials."></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Winning Streak</td>
+                    <td>{{.PlayerWinningStreak}}</td>
+                    <td>
+                        <span class="bi bi-info-circle"
+                        title="If your winning streak hits {{.LobbyWinStreakThreshold}}, you have a credit removed and your streak will be reset."
+                        ></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Losing Streak</td>
+                    <td>{{.PlayerLosingStreak}}</td>
+                    <td>
+                        <span class="bi bi-info-circle"
+                              title="If your losing streak hits {{.LobbyLoseStreakThreshold}}, you will be awarded an additional credit and your streak will be reset."
+                        ></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <hr/>
+            {{if not .PlayerIsJudge}}
+            <table id="special-table">
+                <thead>
+                <tr>
+                    <th>Special</th>
+                    <th>Cost</th>
+                    <th>
+                        <span title="Purchase Credits"
+                              class="bi bi-cart4 clickable"
+                              onclick="document.getElementById('purchase-credits-dialog').showModal()"
+                        ></span>
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>
+                        <button
+                            onclick="document.getElementById('gamble-credits-dialog').showModal()"
+                            {{if lt .PlayerCreditsRemaining 1}}
+                                style="opacity: 0.3; cursor: not-allowed;"
+                                disabled
+                            {{end}}
+                        >
+                            Gamble Credits
+                        </button>
+                    </td>
+                    <td>1-10</td>
+                    <td>
+                        <span class="bi bi-info-circle" title="Gamble credits with a chance to win more."></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        {{if gt .PlayerBetOnWin 0}}
+                            <i>Bet Placed: {{.PlayerBetOnWin}}</i>
+                        {{else}}
+                            <button
+                                onclick="document.getElementById('bet-on-win-dialog').showModal()"
+                                {{if or .BoardHasAnyRevealed (lt .PlayerCreditsRemaining 1)}}
+                                    style="opacity: 0.3; cursor: not-allowed;"
+                                    disabled
+                                {{end}}
+                            >
+                                Bet On Win
+                            </button>
+                        {{end}}
+                    </td>
+                    <td>1-10</td>
+                    <td>
+                        <span class="bi bi-info-circle" title="Bet credits you will win this round. Earn double credits back if correct."></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <button
+                            hx-post="/api/lobby/{{$.LobbyId}}/add-extra-response"
+                            hx-confirm="Are you sure you want to use an extra response?"
+                            {{if or .BoardHasAnyRevealed (lt .PlayerCreditsRemaining 2)}}
+                                style="opacity: 0.3; cursor: not-allowed;"
+                                disabled
+                            {{end}}
+                        >
+                            Extra Response
+                        </button>
+                    </td>
+                    <td>2</td>
+                    <td>
+                        <span class="bi bi-info-circle" title="Get an extra response for the round."></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <button
+                            hx-post="/api/lobby/{{$.LobbyId}}/card/steal/play"
+                            hx-confirm="Are you sure you want to use a Steal Card?"
+                            {{if or .PlayerIsReady (lt .PlayerCreditsRemaining 1)}}
+                                style="opacity: 0.3; cursor: not-allowed;"
+                                disabled
+                            {{end}}
+                        >
+                            Steal Card
+                        </button>
+                    </td>
+                    <td>1</td>
+                    <td>
+                        <span class="bi bi-info-circle"
+                              title="Steal a random card from another player in the lobby.&#010;They will receive an extra credit to spend as a result."
+                        ></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <button
+                            hx-post="/api/lobby/{{$.LobbyId}}/card/surprise/play"
+                            hx-confirm="Are you sure you want to use a Surprise Card?"
+                            {{if or .PlayerIsReady (lt .PlayerCreditsRemaining 1)}}
+                                style="opacity: 0.3; cursor: not-allowed;"
+                                disabled
+                            {{end}}
+                        >
+                            Surprise Card
+                        </button>
+                    </td>
+                    <td>1</td>
+                    <td>
+                        <span class="bi bi-info-circle"
+                              title="Draw a random card from the draw pile.&#010;You will not know which card you played."
+                        ></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <button
+                            onclick="document.getElementById('find-card-dialog').showModal()"
+                            {{if or .PlayerIsReady (lt .PlayerCreditsRemaining 2)}}
+                                style="opacity: 0.3; cursor: not-allowed;"
+                                disabled
+                            {{end}}
+                        >
+                            Find Card
+                        </button>
+                    </td>
+                    <td>2</td>
+                    <td>
+                        <span class="bi bi-info-circle" title="Find a card from the draw pile."></span>
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <button
+                            onclick="document.getElementById('wild-card-dialog').showModal()"
+                            {{if or .PlayerIsReady (lt .PlayerCreditsRemaining 3)}}
+                                style="opacity: 0.3; cursor: not-allowed;"
+                                disabled
+                            {{end}}
+                        >
+                            Wild Card
+                        </button>
+                    </td>
+                    <td>3</td>
+                    <td>
+                        <span class="bi bi-info-circle" title="Provide any text you want to play as a card."></span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
             {{end}}
-          </td>
-        </tr>
         {{end}}
-      </tbody>
-    </table>
-  </div>
-  {{else}}
-  <div>{{$cardCount}}/{{.LobbyPlayerCount}} cards have been played...</div>
-  {{end}}
-</div>
-<div id="lobby-game-stats">
-  <table>
-    <thead>
-      <tr>
-        <th>User</th>
-        <th>Wins</th>
-      </tr>
-    </thead>
-    <tbody>
-      {{range .Wins}}
-      <tr>
-        <td>{{.UserName}}</td>
-        <td>{{.WinCount}}</td>
-      </tr>
-      {{end}}
-    </tbody>
-  </table>
-</div>
+    </div>
+    <div id="lobby-game-board">
+        <h3 id="prompt-card">
+            {{if not .JudgeCardText.Valid}}
+                <span>[NO PROMPT CARD]</span>
+            {{else}}
+                <span class="wrap-new-lines">{{.JudgeCardText.String}}</span>
+                {{if .JudgeCardDeck.Valid}}
+                    <span class="bi bi-info-circle" style="float: right" title="{{.JudgeCardDeck.String}}"></span>
+                {{end}}
+                {{if .JudgeCardImage.Valid}}
+                    <br/>
+                    <br/>
+                    <img src="data:image;base64,{{.JudgeCardImage.String}}" alt="Card Image"/>
+                {{end}}
+            {{end}}
+        </h3>
+        {{if .PlayerIsJudge}}
+            <span id="judge-settings">
+                <label for="setResponseCount">Responses:</label>
+                <input
+                        type="number"
+                        id="setResponseCount"
+                        name="responseCount"
+                        min="1"
+                        max="3"
+                        value="{{.JudgeResponseCount}}"
+                        required="required"
+                        hx-put="/api/lobby/{{.LobbyId}}/response-count"
+                        hx-trigger="change"
+                />
+                <span class="bi bi-skip-forward-circle clickable"
+                      style="float: right"
+                      hx-post="/api/lobby/{{.LobbyId}}/skip-prompt"
+                      hx-confirm="Are you sure you want to skip this prompt?"
+                >
+                    Skip Prompt
+                </span>
+            </span>
+        {{end}}
+        {{if .JudgeCardText.Valid}}
+            <br/>
+            {{if .BoardIsReady}}
+                <div id="board-responses">
+                    <table id="board-responses-table">
+                        <tbody>
+                        {{range .BoardResponses}}
+                            <tr>
+                                {{if $.PlayerIsJudge}}
+                                    <td style="width: 1em">
+                                        {{if .IsRevealed}}
+                                            {{if .IsRuledOut}}
+                                                <span title="Undo Rule Out of Response"
+                                                    class="bi bi-arrow-counterclockwise clickable"
+                                                    hx-post="/api/lobby/{{$.LobbyId}}/response/{{.ResponseId}}/toggle-rule-out"
+                                                ></span>
+                                            {{else}}
+                                                <span title="Rule Out Response"
+                                                    class="bi bi-trash clickable"
+                                                    hx-post="/api/lobby/{{$.LobbyId}}/response/{{.ResponseId}}/toggle-rule-out"
+                                                ></span>
+                                            {{end}}
+                                        {{end}}
+                                    </td>
+                                {{end}}
+                                <td
+                                        {{if $.PlayerIsJudge}}
+                                            {{if not .IsRevealed}}
+                                                class="clickable"
+                                                hx-post="/api/lobby/{{$.LobbyId}}/response/{{.ResponseId}}/reveal"
+                                            {{else if and $.BoardIsAllRevealed (not .IsRuledOut)}}
+                                                class="clickable"
+                                                hx-post="/api/lobby/{{$.LobbyId}}/response/{{.ResponseId}}/pick-winner"
+                                                hx-confirm="Are you sure you want to pick this response as the winner?"
+                                            {{end}}
+                                        {{end}}
+                                >
+                                    <hr/>
+                                    {{if not .IsRevealed}}
+                                        <p style="padding: 20px">
+                                            {{if $.PlayerIsJudge}}
+                                                <span class="bi bi-hand-index">
+                                                    Click to reveal...
+                                                </span>
+                                            {{else}}
+                                                <span class="bi bi-hourglass-split">
+                                                    Waiting to be revealed...
+                                                </span>
+                                            {{end}}
+                                        </p>
+                                    {{else}}
+                                        {{$isRuledOut := .IsRuledOut}}
+                                        {{range .ResponseCards}}
+                                            <p
+                                                    {{if $isRuledOut}}
+                                                        style="padding: 20px; text-decoration: line-through; opacity: 0.3;"
+                                                    {{else}}
+                                                        style="padding: 20px;"
+                                                    {{end}}
+                                            >
+                                                <span class="wrap-new-lines">{{.Text}}</span>
+                                                <span class="bi bi-info-circle"
+                                                      style="float: right"
+                                                      title="{{.DeckName}}"
+                                                ></span>
+                                                {{if .Image.Valid}}
+                                                    <br/>
+                                                    <br/>
+                                                    <img src="data:image;base64,{{.Image.String}}" alt="Card Image"/>
+                                                {{end}}
+                                            </p>
+                                        {{end}}
+                                    {{end}}
+                                </td>
+                            </tr>
+                        {{end}}
+                        {{if and .PlayerIsJudge .BoardIsAllRevealed (not .BoardIsAllRuledOut)}}
+                            <tr>
+                                <td>
+                                    <span class="bi bi-shuffle"></span>
+                                </td>
+                                <td class="clickable"
+                                    hx-post="/api/lobby/{{$.LobbyId}}/pick-random-winner"
+                                    hx-confirm="Are you sure you want to pick a random winner?">
+                                    <hr/>
+                                    <p style="padding: 20px">
+                                        Random Winner
+                                    </p>
+                                </td>
+                            </tr>
+                        {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            {{else}}
+                <div id="player-responses">
+                    <table id="player-responses-table">
+                        <tbody>
+                        {{range .PlayerResponses}}
+                            <tr>
+                                <td>
+                                    {{$playerResponseCardCount := len .ResponseCards}}
+                                    {{if gt $playerResponseCardCount 0}}
+                                        <hr/>
+                                    {{end}}
+                                    {{range .ResponseCards}}
+                                        <p style="padding: 20px">
+                                            {{if not .SpecialCategory.Valid}}
+                                                <span title="Withdraw"
+                                                      class="bi bi-backspace clickable"
+                                                      hx-post="/api/lobby/{{$.LobbyId}}/response-card/{{.ResponseCardId}}/withdraw"
+                                                ></span>
+                                            {{end}}
+                                            {{if eq .SpecialCategory.String "SURPRISE"}}
+                                                <span>[***SURPRISE CARD PLAYED!***]</span>
+                                            {{else}}
+                                                <span class="wrap-new-lines">{{.Text}}</span>
+                                            {{end}}
+                                            <span class="bi bi-info-circle"
+                                                  style="float: right"
+                                                  title="{{.DeckName}}"
+                                            ></span>
+                                            {{if .Image.Valid}}
+                                                <br/>
+                                                <br/>
+                                                <img src="data:image;base64,{{.Image.String}}" alt="Card Image"/>
+                                            {{end}}
+                                        </p>
+                                    {{end}}
+                                </td>
+                            </tr>
+                        {{end}}
+                        </tbody>
+                    </table>
+                </div>
+                <br/>
+                <div id="players-responded">
+                    <table id="players-responded-table">
+                        <thead>
+                        <tr>
+                            <th style="padding: 20px">Player</th>
+                            <th style="padding: 20px">Cards Played</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {{range .BoardResponses}}
+                            <tr>
+                                <td>{{.PlayerUserName}}</td>
+                                <td style="text-align: center">
+                                    {{len .ResponseCards}}/{{$.JudgeBlankCount}}
+                                </td>
+                            </tr>
+                        {{end}}
+                        </tbody>
+                    </table>
+                </div>
+            {{end}}
+            <br/>
+        {{end}}
+    </div>
+    <div id="lobby-game-stats">
+        <table>
+            <thead>
+            <tr>
+                <th>Player</th>
+                <th>Wins</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{range .Wins}}
+                <tr>
+                    <td>{{.Name}}</td>
+                    <td>{{.Count}}</td>
+                </tr>
+            {{end}}
+            <tr>
+                <td colspan="2">
+                    <hr/>
+                </td>
+            </tr>
+            <tr>
+                <td>Total</td>
+                <td>{{.TotalRoundsPlayed}}</td>
+            </tr>
+            </tbody>
+        </table>
+        <br/>
+        <br/>
+        <table>
+            <thead>
+            <tr>
+                <th>Upcoming Judges</th>
+            </tr>
+            </thead>
+            <tbody>
+            {{range .UpcomingJudges}}
+                <tr>
+                    <td>{{.}}</td>
+                </tr>
+            {{end}}
+            </tbody>
+        </table>
+        <br/>
+        <br/>
+        {{$kickVoteCount := len .KickVotes}}
+        {{if gt $kickVoteCount 0}}
+            <table>
+                <thead>
+                <tr>
+                    <th colspan="2">Vote to Kick</th>
+                </tr>
+                </thead>
+                <tbody>
+                {{range .KickVotes}}
+                    <tr>
+                        {{if .Voted}}
+                            <td>
+                                <span title="Undo Vote to Kick"
+                                      class="bi bi-arrow-counterclockwise clickable"
+                                      hx-post="/api/lobby/{{$.LobbyId}}/player/{{.PlayerId}}/kick/undo"
+                                      hx-target="#lobby-grid-interface"
+                                >
+                                    Undo
+                                </span>
+                            </td>
+                        {{else}}
+                            <td>
+                                <span title="Vote to Kick"
+                                      class="bi bi-door-open clickable"
+                                      hx-post="/api/lobby/{{$.LobbyId}}/player/{{.PlayerId}}/kick"
+                                      hx-confirm="Are you sure you want to vote to kick {{.UserName}}?"
+                                      hx-target="#lobby-grid-interface"
+                                >
+                                    Kick
+                                </span>
+                            </td>
+                        {{end}}
+                        <td>{{.UserName}}</td>
+                    </tr>
+                {{end}}
+                </tbody>
+            </table>
+        {{end}}
+    </div>
 {{end}}

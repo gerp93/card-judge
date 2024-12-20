@@ -14,7 +14,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to parse form."))
+		_, _ = w.Write([]byte("Failed to parse form."))
 		return
 	}
 
@@ -30,7 +30,7 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	users, err := database.SearchUsers(search)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -39,18 +39,18 @@ func Search(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("Failed to parse HTML."))
+		_, _ = w.Write([]byte("Failed to parse HTML."))
 		return
 	}
 
-	tmpl.ExecuteTemplate(w, "user-table-rows", users)
+	_ = tmpl.ExecuteTemplate(w, "user-table-rows", users)
 }
 
 func Create(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to parse form."))
+		_, _ = w.Write([]byte("Failed to parse form."))
 		return
 	}
 
@@ -69,52 +69,50 @@ func Create(w http.ResponseWriter, r *http.Request) {
 
 	if name == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("No name found."))
+		_, _ = w.Write([]byte("No name found."))
 		return
 	}
 
 	if password == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("No password found."))
+		_, _ = w.Write([]byte("No password found."))
 		return
 	}
 
 	if password != passwordConfirm {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Passwords do not match."))
+		_, _ = w.Write([]byte("Passwords do not match."))
 		return
 	}
 
-	existingUserId := database.GetUserIdByName(name)
-	if existingUserId != uuid.Nil {
+	if database.UserNameExists(name) {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("User name already exists."))
+		_, _ = w.Write([]byte("User name already exists."))
 		return
 	}
 
-	id, err := database.CreateUser(name, password)
+	err = database.CreateUser(name, password, false)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
-	err = auth.SetCookieUserId(w, id)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
-		return
-	}
-
-	w.Header().Add("HX-Refresh", "true")
-	w.WriteHeader(http.StatusCreated)
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte("Your request has been submitted. Please wait for an administrator to approve this account."))
 }
 
-func CreateDefault(w http.ResponseWriter, r *http.Request) {
+func CreateAdmin(w http.ResponseWriter, r *http.Request) {
+	if !isAdmin(r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = w.Write([]byte("User does not have access."))
+		return
+	}
+
 	err := r.ParseForm()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to parse form."))
+		_, _ = w.Write([]byte("Failed to parse form."))
 		return
 	}
 
@@ -133,7 +131,7 @@ func CreateDefault(w http.ResponseWriter, r *http.Request) {
 
 	if name == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("No name found."))
+		_, _ = w.Write([]byte("No name found."))
 		return
 	}
 
@@ -141,21 +139,20 @@ func CreateDefault(w http.ResponseWriter, r *http.Request) {
 		password = "password"
 	} else if password != passwordConfirm {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Passwords do not match."))
+		_, _ = w.Write([]byte("Passwords do not match."))
 		return
 	}
 
-	existingUserId := database.GetUserIdByName(name)
-	if existingUserId != uuid.Nil {
+	if database.UserNameExists(name) {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("User name already exists."))
+		_, _ = w.Write([]byte("User name already exists."))
 		return
 	}
 
-	_, err = database.CreateUser(name, password)
+	err = database.CreateUser(name, password, true)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -167,7 +164,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to parse form."))
+		_, _ = w.Write([]byte("Failed to parse form."))
 		return
 	}
 
@@ -183,40 +180,79 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	if name == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("No name found."))
+		_, _ = w.Write([]byte("No name found."))
 		return
 	}
 
 	if password == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("No password found."))
+		_, _ = w.Write([]byte("No password found."))
 		return
 	}
 
-	userId := database.GetUserIdByName(name)
-	if userId == uuid.Nil {
+	allowLogin, err := database.AllowUserLoginAttempt(r.RemoteAddr, name)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	if !allowLogin {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("User name does not exist."))
+		_, _ = w.Write([]byte("Too many login attempts, please wait an hour to try again."))
+		return
+	}
+
+	err = database.AddUserLoginAttempt(r.RemoteAddr, name)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	if !database.UserNameExists(name) {
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte("User name does not exist."))
+		return
+	}
+
+	userId, err := database.GetUserIdByName(name)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	isApproved, err := database.GetUserIsApproved(userId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	if !isApproved {
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte("User account is not yet approved by an administrator."))
 		return
 	}
 
 	passwordHash, err := database.GetUserPasswordHash(userId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
 	if !auth.PasswordMatchesHash(password, passwordHash) {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Provided password is not valid."))
+		_, _ = w.Write([]byte("Provided password is not valid."))
 		return
 	}
 
 	err = auth.SetCookieUserId(w, userId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -224,7 +260,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func Logout(w http.ResponseWriter, r *http.Request) {
+func Logout(w http.ResponseWriter, _ *http.Request) {
 	auth.RemoveCookieUserId(w)
 	w.Header().Add("HX-Refresh", "true")
 	w.WriteHeader(http.StatusOK)
@@ -235,20 +271,20 @@ func SetName(w http.ResponseWriter, r *http.Request) {
 	userId, err := uuid.Parse(userIdString)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to get user id from path."))
+		_, _ = w.Write([]byte("Failed to get user id from path."))
 		return
 	}
 
 	if !isCurrentUser(r, userId) {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("User does not have access."))
+		_, _ = w.Write([]byte("User does not have access."))
 		return
 	}
 
 	err = r.ParseForm()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to parse form."))
+		_, _ = w.Write([]byte("Failed to parse form."))
 		return
 	}
 
@@ -261,21 +297,20 @@ func SetName(w http.ResponseWriter, r *http.Request) {
 
 	if name == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("No name found."))
+		_, _ = w.Write([]byte("No name found."))
 		return
 	}
 
-	existingUserId := database.GetUserIdByName(name)
-	if existingUserId != uuid.Nil {
+	if database.UserNameExists(name) {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("User name already exists."))
+		_, _ = w.Write([]byte("User name already exists."))
 		return
 	}
 
 	err = database.SetUserName(userId, name)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -288,20 +323,20 @@ func SetPassword(w http.ResponseWriter, r *http.Request) {
 	userId, err := uuid.Parse(userIdString)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to get user id from path."))
+		_, _ = w.Write([]byte("Failed to get user id from path."))
 		return
 	}
 
 	if !isCurrentUser(r, userId) {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("User does not have access."))
+		_, _ = w.Write([]byte("User does not have access."))
 		return
 	}
 
 	err = r.ParseForm()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to parse form."))
+		_, _ = w.Write([]byte("Failed to parse form."))
 		return
 	}
 
@@ -317,20 +352,20 @@ func SetPassword(w http.ResponseWriter, r *http.Request) {
 
 	if password == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("No password found."))
+		_, _ = w.Write([]byte("No password found."))
 		return
 	}
 
 	if password != passwordConfirm {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Passwords do not match."))
+		_, _ = w.Write([]byte("Passwords do not match."))
 		return
 	}
 
 	err = database.SetUserPassword(userId, password)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -343,25 +378,51 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 	userId, err := uuid.Parse(userIdString)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to get user id from path."))
+		_, _ = w.Write([]byte("Failed to get user id from path."))
 		return
 	}
 
 	if !isAdmin(r) {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("User does not have access."))
+		_, _ = w.Write([]byte("User does not have access."))
 		return
 	}
 
 	err = database.SetUserPassword(userId, "password")
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("&#9989;"))
+	_, _ = w.Write([]byte("<span class='bi bi-check-square'></span>"))
+}
+
+func Approve(w http.ResponseWriter, r *http.Request) {
+	userIdString := r.PathValue("userId")
+	userId, err := uuid.Parse(userIdString)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte("Failed to get user id from path."))
+		return
+	}
+
+	if !isAdmin(r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = w.Write([]byte("User does not have access."))
+		return
+	}
+
+	err = database.ApproveUser(userId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte("<span class='bi bi-check-square'></span>"))
 }
 
 func SetColorTheme(w http.ResponseWriter, r *http.Request) {
@@ -369,20 +430,20 @@ func SetColorTheme(w http.ResponseWriter, r *http.Request) {
 	userId, err := uuid.Parse(userIdString)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to get user id from path."))
+		_, _ = w.Write([]byte("Failed to get user id from path."))
 		return
 	}
 
 	if !isCurrentUser(r, userId) {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("User does not have access."))
+		_, _ = w.Write([]byte("User does not have access."))
 		return
 	}
 
 	err = r.ParseForm()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to parse form."))
+		_, _ = w.Write([]byte("Failed to parse form."))
 		return
 	}
 
@@ -395,14 +456,14 @@ func SetColorTheme(w http.ResponseWriter, r *http.Request) {
 
 	if colorTheme == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("No color theme found."))
+		_, _ = w.Write([]byte("No color theme found."))
 		return
 	}
 
 	err = database.SetUserColorTheme(userId, colorTheme)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -415,20 +476,20 @@ func SetIsAdmin(w http.ResponseWriter, r *http.Request) {
 	userId, err := uuid.Parse(userIdString)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to get user id from path."))
+		_, _ = w.Write([]byte("Failed to get user id from path."))
 		return
 	}
 
 	if !isAdmin(r) {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("User does not have access."))
+		_, _ = w.Write([]byte("User does not have access."))
 		return
 	}
 
 	err = r.ParseForm()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to parse form."))
+		_, _ = w.Write([]byte("Failed to parse form."))
 		return
 	}
 
@@ -442,7 +503,7 @@ func SetIsAdmin(w http.ResponseWriter, r *http.Request) {
 	err = database.SetUserIsAdmin(userId, isAdmin)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
@@ -455,21 +516,21 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	userId, err := uuid.Parse(userIdString)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to get user id from path."))
+		_, _ = w.Write([]byte("Failed to get user id from path."))
 		return
 	}
 
 	isCurrentUser := isCurrentUser(r, userId)
 	if !isCurrentUser && !isAdmin(r) {
 		w.WriteHeader(http.StatusUnauthorized)
-		w.Write([]byte("User does not have access."))
+		_, _ = w.Write([]byte("User does not have access."))
 		return
 	}
 
 	err = database.DeleteUser(userId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 

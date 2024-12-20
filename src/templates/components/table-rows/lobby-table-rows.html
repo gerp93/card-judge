@@ -1,9 +1,10 @@
-{{define "lobby-table-rows"}} {{range .}}
-<tr>
-  <td>{{.CreatedOnDate.Format "2006-01-02"}}</td>
-  <td>{{.ChangedOnDate.Format "2006-01-02"}}</td>
-  <td style="white-space: pre-wrap"><a href="/lobby/{{.Id}}">{{.Name}}</a></td>
-  <td>{{if .PasswordHash.Valid}} Protected &#128274; {{else}} Open {{end}}</td>
-  <td>{{.UserCount}}</td>
-</tr>
-{{end}} {{end}}
+{{define "lobby-table-rows"}}
+    {{range .}}
+        <tr>
+            <td>{{.CreatedOnDate.Format "2006-01-02"}}</td>
+            <td class="wrap-new-lines"><a href="/lobby/{{.Id}}">{{.Name}}</a></td>
+            <td>{{if .PasswordHash.Valid}} <span class="bi bi-lock">Protected</span> {{else}} Open {{end}}</td>
+            <td>{{.UserCount}}</td>
+        </tr>
+    {{end}}
+{{end}}

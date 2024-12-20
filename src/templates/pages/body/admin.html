@@ -1,72 +1,73 @@
 {{define "body"}}
-<h1>Admin</h1>
-<form hx-post="/api/user/create/default" hx-target="find .htmx-result">
-  <h3>Create a New User</h3>
-  <label for="createUserName">Name:</label>
-  <input
-    type="text"
-    id="createUserName"
-    name="name"
-    maxlength="255"
-    placeholder="Enter User Name"
-    required="true"
-    autocomplete="off"
-  />
-  <br />
-  <br />
-  <details>
-    <summary>Password (default = <code>password</code>)</summary>
-    <label for="createUserPassword">Password:</label>
-    <input
-      type="password"
-      id="createUserPassword"
-      name="password"
-      maxlength="255"
-      placeholder="Enter User Password"
-      autocomplete="off"
-    />
-    <br />
-    <label for="createUserPasswordConfirm">Confirm Password:</label>
-    <input
-      type="password"
-      id="createUserPasswordConfirm"
-      name="passwordConfirm"
-      maxlength="255"
-      placeholder="Confirm User Password"
-      autocomplete="off"
-    />
-    <br />
-  </details>
-  <br />
-  <div class="htmx-result"></div>
-  <input type="submit" value="Create User" />
-</form>
-<br />
-<h3>Users</h3>
-<table>
-  <thead>
-    <tr>
-      <th>Created</th>
-      <th>Changed</th>
-      <th>
-        <label for="userSearch">Name</label>
+    <h1>Admin</h1>
+    <form hx-post="/api/user/create/admin" hx-target="find .htmx-result">
+        <h3>Create a New User</h3>
+        <label for="createUserName">Name:</label>
         <input
-          type="search"
-          id="userSearch"
-          name="search"
-          maxlength="255"
-          placeholder="Search..."
-          autocomplete="off"
-          hx-post="/api/user/search"
-          hx-trigger="load, input changed delay:500ms, search"
-          hx-target="#user-table-rows"
+                type="text"
+                id="createUserName"
+                name="name"
+                maxlength="255"
+                placeholder="Enter User Name"
+                required="required"
+                autocomplete="off"
         />
-      </th>
-      <th>Is Admin</th>
-      <th>Password Reset</th>
-      <th>Delete</th>
-    </tr>
-  </thead>
-  <tbody id="user-table-rows"></tbody>
-</table>
+        <br/>
+        <br/>
+        <details>
+            <summary>Password (default = <code>password</code>)</summary>
+            <label for="createUserPassword">Password:</label>
+            <input
+                    type="password"
+                    id="createUserPassword"
+                    name="password"
+                    maxlength="255"
+                    placeholder="Enter User Password"
+                    autocomplete="off"
+            />
+            <br/>
+            <label for="createUserPasswordConfirm">Confirm Password:</label>
+            <input
+                    type="password"
+                    id="createUserPasswordConfirm"
+                    name="passwordConfirm"
+                    maxlength="255"
+                    placeholder="Confirm User Password"
+                    autocomplete="off"
+            />
+            <br/>
+        </details>
+        <br/>
+        <div class="htmx-result"></div>
+        <input type="submit" value="Create User"/>
+    </form>
+    <br/>
+    <h3>Users</h3>
+    <table>
+        <thead>
+        <tr>
+            <th>Created</th>
+            <th>Changed</th>
+            <th>
+                <label for="userSearch">Name</label>
+                <input
+                        type="search"
+                        id="userSearch"
+                        name="search"
+                        maxlength="255"
+                        placeholder="Search..."
+                        autocomplete="off"
+                        hx-post="/api/user/search"
+                        hx-trigger="load, input changed delay:500ms, search"
+                        hx-target="#user-table-rows"
+                />
+            </th>
+            <th>Is Approved</th>
+            <th>Is Admin</th>
+            <th>Password Reset</th>
+            <th>Delete</th>
+        </tr>
+        </thead>
+        <tbody id="user-table-rows"></tbody>
+    </table>
 {{end}}

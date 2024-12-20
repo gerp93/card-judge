@@ -1,73 +1,73 @@
 {{define "body"}}
-<form hx-post="/api/user/login" hx-target="find .htmx-result">
-  <h3>User Login</h3>
-  <label for="userName">Name:</label>
-  <input
-    type="text"
-    id="userName"
-    name="name"
-    maxlength="255"
-    placeholder="Enter User Name"
-    required="true"
-    autocomplete="username"
-  />
-  <br />
-  <label for="userPassword">Password:</label>
-  <input
-    type="password"
-    id="userPassword"
-    name="password"
-    maxlength="255"
-    placeholder="Enter User Password"
-    required="true"
-    autocomplete="current-password"
-  />
-  <br />
-  <br />
-  <div class="htmx-result"></div>
-  <input type="submit" value="Login" />
-</form>
-<br />
-<details>
-  <summary>Create a New User</summary>
-  <br />
-  <form hx-post="/api/user/create" hx-target="find .htmx-result">
-    <label for="createUserName">Name:</label>
-    <input
-      type="text"
-      id="createUserName"
-      name="name"
-      maxlength="255"
-      placeholder="Enter User Name"
-      required="true"
-      autocomplete="username"
-    />
-    <br />
-    <label for="createUserPassword">Password:</label>
-    <input
-      type="password"
-      id="createUserPassword"
-      name="password"
-      maxlength="255"
-      placeholder="Enter User Password"
-      required="true"
-      autocomplete="new-password"
-    />
-    <br />
-    <label for="createUserPasswordConfirm">Confirm Password:</label>
-    <input
-      type="password"
-      id="createUserPasswordConfirm"
-      name="passwordConfirm"
-      maxlength="255"
-      placeholder="Confirm User Password"
-      required="true"
-      autocomplete="new-password"
-    />
-    <br />
-    <br />
-    <div class="htmx-result"></div>
-    <input type="submit" value="Create User" />
-  </form>
-</details>
+    <form hx-post="/api/user/login" hx-target="find .htmx-result">
+        <h3>User Login</h3>
+        <label for="userName">Name:</label>
+        <input
+                type="text"
+                id="userName"
+                name="name"
+                maxlength="255"
+                placeholder="Enter User Name"
+                required="required"
+                autocomplete="username"
+        />
+        <br/>
+        <label for="userPassword">Password:</label>
+        <input
+                type="password"
+                id="userPassword"
+                name="password"
+                maxlength="255"
+                placeholder="Enter User Password"
+                required="required"
+                autocomplete="current-password"
+        />
+        <br/>
+        <br/>
+        <div class="htmx-result"></div>
+        <input type="submit" value="Login"/>
+    </form>
+    <br/>
+    <details>
+        <summary>Create a New User</summary>
+        <br/>
+        <form hx-post="/api/user/create" hx-target="find .htmx-result">
+            <label for="createUserName">Name:</label>
+            <input
+                    type="text"
+                    id="createUserName"
+                    name="name"
+                    maxlength="255"
+                    placeholder="Enter User Name"
+                    required="required"
+                    autocomplete="username"
+            />
+            <br/>
+            <label for="createUserPassword">Password:</label>
+            <input
+                    type="password"
+                    id="createUserPassword"
+                    name="password"
+                    maxlength="255"
+                    placeholder="Enter User Password"
+                    required="required"
+                    autocomplete="new-password"
+            />
+            <br/>
+            <label for="createUserPasswordConfirm">Confirm Password:</label>
+            <input
+                    type="password"
+                    id="createUserPasswordConfirm"
+                    name="passwordConfirm"
+                    maxlength="255"
+                    placeholder="Confirm User Password"
+                    required="required"
+                    autocomplete="new-password"
+            />
+            <br/>
+            <br/>
+            <div class="htmx-result"></div>
+            <input type="submit" value="Create User"/>
+        </form>
+    </details>
 {{end}}

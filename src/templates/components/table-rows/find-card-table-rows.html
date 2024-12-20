@@ -1,0 +1,21 @@
+{{define "find-card-table-rows"}}
+    {{range .}}
+        <tr>
+            <td class="wrap-new-lines">{{.Text}}</td>
+            <td>{{if .Image.Valid}} <span class="bi bi-card-image"></span> {{end}}</td>
+            <td>
+                <form
+                    hx-post="/api/lobby/{{.LobbyId}}/card/find/play"
+                    hx-confirm="Are you sure you want to play this card?"
+                >
+                    <input type="text" name="cardId" value="{{.Id}}" hidden/>
+                    <input
+                        type="submit"
+                        value="Play"
+                        onclick="document.getElementById('find-card-dialog').close();"
+                    />
+                </form>
+            </td>
+        </tr>
+    {{end}}
+{{end}}

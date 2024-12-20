@@ -1,157 +1,817 @@
 :root {
-  --topbar-text: rgb(255, 255, 255);
-  --topbar-bg: rgb(50, 50, 50);
-  --topbar-hover: rgb(70, 70, 70);
+    --dark-top-bar-bg: rgb(50, 50, 50);
+    --dark-top-bar-hover: rgb(70, 70, 70);
+    --dark-text: rgb(255, 255, 255);
+    --dark-bg: rgb(34, 34, 34);
+    --dark-bg-hover: rgb(54, 54, 54);
+    --dark-primary-action: rgb(7, 72, 75);
+    --dark-primary-action-hover: rgb(8, 94, 99);
+    --dark-accent-green: rgb(120, 255, 99);
+    --dark-accent-red: rgb(255, 100, 100);
+    --dark-accent-blue: rgb(130, 160, 255);
 
-  --light-text: rgb(0, 0, 0);
-  --light-bg: rgb(245, 245, 245);
-  --light-bg-hover: rgb(234, 234, 234);
-  --light-primary-action: rgb(165, 225, 226);
-  --light-primary-action-hover: rgb(145, 200, 201);
-  --light-accent-green: rgb(20, 150, 0);
-  --light-accent-red: rgb(157, 0, 0);
-  --light-accent-blue: rgb(0, 50, 200);
+    --light-top-bar-bg: rgb(200, 200, 200);
+    --light-top-bar-hover: rgb(180, 180, 180);
+    --light-text: rgb(0, 0, 0);
+    --light-bg: rgb(245, 245, 245);
+    --light-bg-hover: rgb(234, 234, 234);
+    --light-primary-action: rgb(215, 254, 255);
+    --light-primary-action-hover: rgb(182, 224, 225);
+    --light-accent-green: rgb(20, 150, 0);
+    --light-accent-red: rgb(157, 0, 0);
+    --light-accent-blue: rgb(0, 50, 200);
 
-  --dark-text: rgb(255, 255, 255);
-  --dark-bg: rgb(34, 34, 34);
-  --dark-bg-hover: rgb(54, 54, 54);
-  --dark-primary-action: rgb(7, 72, 75);
-  --dark-primary-action-hover: rgb(8, 94, 99);
-  --dark-accent-green: rgb(120, 255, 99);
-  --dark-accent-red: rgb(255, 100, 100);
-  --dark-accent-blue: rgb(130, 160, 255);
-}
+    --nord-polar-night-top-bar-bg: rgb(46, 52, 64);
+    --nord-polar-night-top-bar-hover: rgb(59, 66, 82);
+    --nord-polar-night-text: rgb(216, 222, 233);
+    --nord-polar-night-bg: rgb(59, 66, 82);
+    --nord-polar-night-bg-hover: rgb(67, 76, 94);
+    --nord-polar-night-primary-action: rgb(94, 129, 172);
+    --nord-polar-night-primary-action-hover: rgb(129, 161, 193);
+    --nord-polar-night-accent-green: rgb(163, 190, 140);
+    --nord-polar-night-accent-red: rgb(191, 97, 106);
+    --nord-polar-night-accent-blue: rgb(94, 129, 172);
 
-/* light-theme */
+    --dracula-top-bar-bg: rgb(68, 71, 90);
+    --dracula-top-bar-hover: rgb(40, 42, 54);
+    --dracula-text: rgb(248, 248, 242);
+    --dracula-bg: rgb(40, 42, 54);
+    --dracula-bg-hover: rgb(68, 71, 90);
+    --dracula-primary-action: rgb(98, 114, 164);
+    --dracula-primary-action-hover: rgb(112, 131, 189);
+    --dracula-accent-green: rgb(80, 250, 123);
+    --dracula-accent-red: rgb(255, 85, 85);
+    --dracula-accent-blue: rgb(139, 233, 253);
 
-body.light-theme {
-  color: var(--light-text);
-  background-color: var(--light-bg);
-}
+    --purple-top-bar-bg: rgb(30, 30, 63);
+    --purple-top-bar-hover: rgb(45, 43, 85);
+    --purple-text: rgb(165, 153, 233);
+    --purple-bg: rgb(45, 43, 85);
+    --purple-bg-hover: rgb(77, 33, 252);
+    --purple-primary-action: rgb(52, 35, 120);
+    --purple-primary-action-hover: rgb(68, 46, 156);
+    --purple-accent-green: rgb(58, 217, 0);
+    --purple-accent-red: rgb(255, 98, 140);
+    --purple-accent-blue: rgb(179, 98, 255);
 
-body.light-theme a {
-  color: var(--light-accent-blue);
-}
+    --tokyo-night-dark-top-bar-bg: rgb(17, 18, 26);
+    --tokyo-night-dark-top-bar-hover: rgb(37, 38, 46);
+    --tokyo-night-dark-text: rgb(169, 177, 214);
+    --tokyo-night-dark-bg: rgb(26, 27, 38);
+    --tokyo-night-dark-bg-hover: rgb(36, 40, 59);
+    --tokyo-night-dark-primary-action: rgb(65, 72, 104);
+    --tokyo-night-dark-primary-action-hover: rgb(86, 95, 137);
+    --tokyo-night-dark-accent-green: rgb(158, 206, 106);
+    --tokyo-night-dark-accent-red: rgb(247, 118, 142);
+    --tokyo-night-dark-accent-blue: rgb(42, 195, 222);
 
-body.light-theme dialog {
-  color: var(--light-text);
-  background-color: var(--light-bg);
-}
+    --gruvbox-dark-top-bar-bg: rgb(50, 50, 50);
+    --gruvbox-dark-top-bar-hover: rgb(70, 70, 70);
+    --gruvbox-dark-text: rgb(235, 219, 178);
+    --gruvbox-dark-bg: rgb(40, 40, 40);
+    --gruvbox-dark-bg-hover: rgb(60, 56, 54);
+    --gruvbox-dark-primary-action: rgb(80, 73, 69);
+    --gruvbox-dark-primary-action-hover: rgb(102, 92, 84);
+    --gruvbox-dark-accent-green: rgb(152, 151, 26);
+    --gruvbox-dark-accent-red: rgb(204, 36, 29);
+    --gruvbox-dark-accent-blue: rgb(69, 133, 136);
 
-body.light-theme button {
-  color: var(--light-text);
-  background-color: var(--light-primary-action);
-}
-
-body.light-theme button:hover {
-  color: var(--light-text);
-  background-color: var(--light-primary-action-hover);
-}
-
-body.light-theme input {
-  color: var(--light-text);
-  background-color: var(--light-bg);
-}
-
-body.light-theme input[type="submit"] {
-  color: var(--light-text);
-  background-color: var(--light-primary-action);
-}
-
-body.light-theme input[type="submit"]:hover {
-  color: var(--light-text);
-  background-color: var(--light-primary-action-hover);
-}
-
-body.light-theme textarea {
-  color: var(--light-text);
-  background-color: var(--light-bg);
-}
-
-body.light-theme select {
-  color: var(--light-text);
-  background-color: var(--light-bg);
-}
-
-body.light-theme tr:hover {
-  background-color: var(--light-bg-hover);
-}
-
-body.light-theme .htmx-result-good {
-  color: var(--light-accent-green);
-}
-
-body.light-theme .htmx-result-bad {
-  color: var(--light-accent-red);
-}
-
-body.light-theme #lobby-grid-container > div {
-  background-color: var(--light-bg);
+    --gruvbox-light-top-bar-bg: rgb(204, 195, 162);
+    --gruvbox-light-top-bar-hover: rgb(184, 175, 142);
+    --gruvbox-light-text: rgb(60, 56, 54);
+    --gruvbox-light-bg: rgb(251, 241, 199);
+    --gruvbox-light-bg-hover: rgb(235, 219, 178);
+    --gruvbox-light-primary-action: rgb(213, 196, 161);
+    --gruvbox-light-primary-action-hover: rgb(189, 174, 147);
+    --gruvbox-light-accent-green: rgb(152, 151, 26);
+    --gruvbox-light-accent-red: rgb(204, 36, 29);
+    --gruvbox-light-accent-blue: rgb(69, 133, 136);
 }
 
 /* dark-theme */
 
 body.dark-theme {
-  color: var(--dark-text);
-  background: var(--dark-bg);
+    color: var(--dark-text);
+    background: var(--dark-bg);
+}
+
+body.dark-theme #top-bar {
+    background-color: var(--dark-top-bar-bg);
+}
+
+body.dark-theme #top-bar-menu {
+    background-color: var(--dark-top-bar-bg);
+}
+
+body.dark-theme #top-bar-menu .top-bar-menu-link:hover {
+    background-color: var(--dark-top-bar-hover);
 }
 
 body.dark-theme a {
-  color: var(--dark-accent-blue);
+    color: var(--dark-accent-blue);
 }
 
 body.dark-theme dialog {
-  color: var(--dark-text);
-  background: var(--dark-bg);
+    color: var(--dark-text);
+    background: var(--dark-bg);
 }
 
 body.dark-theme button {
-  color: var(--dark-text);
-  background-color: var(--dark-primary-action);
+    color: var(--dark-text);
+    background-color: var(--dark-primary-action);
 }
 
 body.dark-theme button:hover {
-  color: var(--dark-text);
-  background-color: var(--dark-primary-action-hover);
+    color: var(--dark-text);
+    background-color: var(--dark-primary-action-hover);
 }
 
 body.dark-theme input {
-  color: var(--dark-text);
-  background: var(--dark-bg);
+    color: var(--dark-text);
+    background: var(--dark-bg);
 }
 
 body.dark-theme input[type="submit"] {
-  color: var(--dark-text);
-  background-color: var(--dark-primary-action);
+    color: var(--dark-text);
+    background-color: var(--dark-primary-action);
 }
 
 body.dark-theme input[type="submit"]:hover {
-  color: var(--dark-text);
-  background-color: var(--dark-primary-action-hover);
+    color: var(--dark-text);
+    background-color: var(--dark-primary-action-hover);
 }
 
 body.dark-theme textarea {
-  color: var(--dark-text);
-  background: var(--dark-bg);
+    color: var(--dark-text);
+    background: var(--dark-bg);
 }
 
 body.dark-theme select {
-  color: var(--dark-text);
-  background: var(--dark-bg);
+    color: var(--dark-text);
+    background: var(--dark-bg);
 }
 
-body.dark-theme tr:hover {
-  background-color: var(--dark-bg-hover);
+body.dark-theme tbody > tr:hover {
+    background-color: var(--dark-bg-hover);
+}
+
+body.dark-theme .lobby-chat-message-green {
+    color: var(--dark-accent-green);
+}
+
+body.dark-theme .lobby-chat-message-red {
+    color: var(--dark-accent-red);
+}
+
+body.dark-theme .lobby-chat-message-blue {
+    color: var(--dark-accent-blue);
 }
 
 body.dark-theme .htmx-result-good {
-  color: var(--dark-accent-green);
+    color: var(--dark-accent-green);
 }
 
 body.dark-theme .htmx-result-bad {
-  color: var(--dark-accent-red);
+    color: var(--dark-accent-red);
 }
 
 body.dark-theme #lobby-grid-container > div {
-  background-color: var(--dark-bg);
+    background-color: var(--dark-bg);
+}
+
+/* light-theme */
+
+body.light-theme {
+    color: var(--light-text);
+    background-color: var(--light-bg);
+}
+
+body.light-theme #top-bar {
+    background-color: var(--light-top-bar-bg);
+}
+
+body.light-theme #top-bar-menu {
+    background-color: var(--light-top-bar-bg);
+}
+
+body.light-theme #top-bar-menu .top-bar-menu-link:hover {
+    background-color: var(--light-top-bar-hover);
+}
+
+body.light-theme a {
+    color: var(--light-accent-blue);
+}
+
+body.light-theme dialog {
+    color: var(--light-text);
+    background-color: var(--light-bg);
+}
+
+body.light-theme button {
+    color: var(--light-text);
+    background-color: var(--light-primary-action);
+}
+
+body.light-theme button:hover {
+    color: var(--light-text);
+    background-color: var(--light-primary-action-hover);
+}
+
+body.light-theme input {
+    color: var(--light-text);
+    background-color: var(--light-bg);
+}
+
+body.light-theme input[type="submit"] {
+    color: var(--light-text);
+    background-color: var(--light-primary-action);
+}
+
+body.light-theme input[type="submit"]:hover {
+    color: var(--light-text);
+    background-color: var(--light-primary-action-hover);
+}
+
+body.light-theme textarea {
+    color: var(--light-text);
+    background-color: var(--light-bg);
+}
+
+body.light-theme select {
+    color: var(--light-text);
+    background-color: var(--light-bg);
+}
+
+body.light-theme tbody > tr:hover {
+    background-color: var(--light-bg-hover);
+}
+
+body.light-theme .lobby-chat-message-green {
+    color: var(--light-accent-green);
+}
+
+body.light-theme .lobby-chat-message-red {
+    color: var(--light-accent-red);
+}
+
+body.light-theme .lobby-chat-message-blue {
+    color: var(--light-accent-blue);
+}
+
+body.light-theme .htmx-result-good {
+    color: var(--light-accent-green);
+}
+
+body.light-theme .htmx-result-bad {
+    color: var(--light-accent-red);
+}
+
+body.light-theme #lobby-grid-container > div {
+    background-color: var(--light-bg);
+}
+
+/* nord-polar-night-theme */
+
+body.nord-polar-night-theme {
+    color: var(--nord-polar-night-text);
+    background: var(--nord-polar-night-bg);
+}
+
+body.nord-polar-night-theme #top-bar {
+    background-color: var(--nord-polar-night-top-bar-bg);
+}
+
+body.nord-polar-night-theme #top-bar-menu {
+    background-color: var(--nord-polar-night-top-bar-bg);
+}
+
+body.nord-polar-night-theme #top-bar-menu .top-bar-menu-link:hover {
+    background-color: var(--nord-polar-night-top-bar-hover);
+}
+
+body.nord-polar-night-theme a {
+    color: var(--nord-polar-night-accent-blue);
+}
+
+body.nord-polar-night-theme dialog {
+    color: var(--nord-polar-night-text);
+    background: var(--nord-polar-night-bg);
+}
+
+body.nord-polar-night-theme button {
+    color: var(--nord-polar-night-text);
+    background-color: var(--nord-polar-night-primary-action);
+}
+
+body.nord-polar-night-theme button:hover {
+    color: var(--nord-polar-night-text);
+    background-color: var(--nord-polar-night-primary-action-hover);
+}
+
+body.nord-polar-night-theme input {
+    color: var(--nord-polar-night-text);
+    background: var(--nord-polar-night-bg);
+}
+
+body.nord-polar-night-theme input[type="submit"] {
+    color: var(--nord-polar-night-text);
+    background-color: var(--nord-polar-night-primary-action);
+}
+
+body.nord-polar-night-theme input[type="submit"]:hover {
+    color: var(--nord-polar-night-text);
+    background-color: var(--nord-polar-night-primary-action-hover);
+}
+
+body.nord-polar-night-theme textarea {
+    color: var(--nord-polar-night-text);
+    background: var(--nord-polar-night-bg);
+}
+
+body.nord-polar-night-theme select {
+    color: var(--nord-polar-night-text);
+    background: var(--nord-polar-night-bg);
+}
+
+body.nord-polar-night-theme tbody > tr:hover {
+    background-color: var(--nord-polar-night-bg-hover);
+}
+
+body.nord-polar-night-theme .lobby-chat-message-green {
+    color: var(--nord-polar-night-accent-green);
+}
+
+body.nord-polar-night-theme .lobby-chat-message-red {
+    color: var(--nord-polar-night-accent-red);
+}
+
+body.nord-polar-night-theme .lobby-chat-message-blue {
+    color: var(--nord-polar-night-accent-blue);
+}
+
+body.nord-polar-night-theme .htmx-result-good {
+    color: var(--nord-polar-night-accent-green);
+}
+
+body.nord-polar-night-theme .htmx-result-bad {
+    color: var(--nord-polar-night-accent-red);
+}
+
+body.nord-polar-night-theme #lobby-grid-container > div {
+    background-color: var(--nord-polar-night-bg);
+}
+
+/* dracula-theme */
+
+body.dracula-theme {
+    color: var(--dracula-text);
+    background: var(--dracula-bg);
+}
+
+body.dracula-theme #top-bar {
+    background-color: var(--dracula-top-bar-bg);
+}
+
+body.dracula-theme #top-bar-menu {
+    background-color: var(--dracula-top-bar-bg);
+}
+
+body.dracula-theme #top-bar-menu .top-bar-menu-link:hover {
+    background-color: var(--dracula-top-bar-hover);
+}
+
+body.dracula-theme a {
+    color: var(--dracula-accent-blue);
+}
+
+body.dracula-theme dialog {
+    color: var(--dracula-text);
+    background: var(--dracula-bg);
+}
+
+body.dracula-theme button {
+    color: var(--dracula-text);
+    background-color: var(--dracula-primary-action);
+}
+
+body.dracula-theme button:hover {
+    color: var(--dracula-text);
+    background-color: var(--dracula-primary-action-hover);
+}
+
+body.dracula-theme input {
+    color: var(--dracula-text);
+    background: var(--dracula-bg);
+}
+
+body.dracula-theme input[type="submit"] {
+    color: var(--dracula-text);
+    background-color: var(--dracula-primary-action);
+}
+
+body.dracula-theme input[type="submit"]:hover {
+    color: var(--dracula-text);
+    background-color: var(--dracula-primary-action-hover);
+}
+
+body.dracula-theme textarea {
+    color: var(--dracula-text);
+    background: var(--dracula-bg);
+}
+
+body.dracula-theme select {
+    color: var(--dracula-text);
+    background: var(--dracula-bg);
+}
+
+body.dracula-theme tbody > tr:hover {
+    background-color: var(--dracula-bg-hover);
+}
+
+body.dracula-theme .lobby-chat-message-green {
+    color: var(--dracula-accent-green);
+}
+
+body.dracula-theme .lobby-chat-message-red {
+    color: var(--dracula-accent-red);
+}
+
+body.dracula-theme .lobby-chat-message-blue {
+    color: var(--dracula-accent-blue);
+}
+
+body.dracula-theme .htmx-result-good {
+    color: var(--dracula-accent-green);
+}
+
+body.dracula-theme .htmx-result-bad {
+    color: var(--dracula-accent-red);
+}
+
+body.dracula-theme #lobby-grid-container > div {
+    background-color: var(--dracula-bg);
+}
+
+/* purple-theme */
+
+body.purple-theme {
+    color: var(--purple-text);
+    background: var(--purple-bg);
+}
+
+body.purple-theme #top-bar {
+    background-color: var(--purple-top-bar-bg);
+}
+
+body.purple-theme #top-bar-menu {
+    background-color: var(--purple-top-bar-bg);
+}
+
+body.purple-theme #top-bar-menu .top-bar-menu-link:hover {
+    background-color: var(--purple-top-bar-hover);
+}
+
+body.purple-theme a {
+    color: var(--purple-accent-blue);
+}
+
+body.purple-theme dialog {
+    color: var(--purple-text);
+    background: var(--purple-bg);
+}
+
+body.purple-theme button {
+    color: var(--purple-text);
+    background-color: var(--purple-primary-action);
+}
+
+body.purple-theme button:hover {
+    color: var(--purple-text);
+    background-color: var(--purple-primary-action-hover);
+}
+
+body.purple-theme input {
+    color: var(--purple-text);
+    background: var(--purple-bg);
+}
+
+body.purple-theme input[type="submit"] {
+    color: var(--purple-text);
+    background-color: var(--purple-primary-action);
+}
+
+body.purple-theme input[type="submit"]:hover {
+    color: var(--purple-text);
+    background-color: var(--purple-primary-action-hover);
+}
+
+body.purple-theme textarea {
+    color: var(--purple-text);
+    background: var(--purple-bg);
+}
+
+body.purple-theme select {
+    color: var(--purple-text);
+    background: var(--purple-bg);
+}
+
+body.purple-theme tbody > tr:hover {
+    background-color: var(--purple-bg-hover);
+}
+
+body.purple-theme .lobby-chat-message-green {
+    color: var(--purple-accent-green);
+}
+
+body.purple-theme .lobby-chat-message-red {
+    color: var(--purple-accent-red);
+}
+
+body.purple-theme .lobby-chat-message-blue {
+    color: var(--purple-accent-blue);
+}
+
+body.purple-theme .htmx-result-good {
+    color: var(--purple-accent-green);
+}
+
+body.purple-theme .htmx-result-bad {
+    color: var(--purple-accent-red);
+}
+
+body.purple-theme #lobby-grid-container > div {
+    background-color: var(--purple-bg);
+}
+
+/* tokyo-night-dark-theme */
+
+body.tokyo-night-dark-theme {
+    color: var(--tokyo-night-dark-text);
+    background: var(--tokyo-night-dark-bg);
+}
+
+body.tokyo-night-dark-theme #top-bar {
+    background-color: var(--tokyo-night-dark-top-bar-bg);
+}
+
+body.tokyo-night-dark-theme #top-bar-menu {
+    background-color: var(--tokyo-night-dark-top-bar-bg);
+}
+
+body.tokyo-night-dark-theme #top-bar-menu .top-bar-menu-link:hover {
+    background-color: var(--tokyo-night-dark-top-bar-hover);
+}
+
+body.tokyo-night-dark-theme a {
+    color: var(--tokyo-night-dark-accent-blue);
+}
+
+body.tokyo-night-dark-theme dialog {
+    color: var(--tokyo-night-dark-text);
+    background: var(--tokyo-night-dark-bg);
+}
+
+body.tokyo-night-dark-theme button {
+    color: var(--tokyo-night-dark-text);
+    background-color: var(--tokyo-night-dark-primary-action);
+}
+
+body.tokyo-night-dark-theme button:hover {
+    color: var(--tokyo-night-dark-text);
+    background-color: var(--tokyo-night-dark-primary-action-hover);
+}
+
+body.tokyo-night-dark-theme input {
+    color: var(--tokyo-night-dark-text);
+    background: var(--tokyo-night-dark-bg);
+}
+
+body.tokyo-night-dark-theme input[type="submit"] {
+    color: var(--tokyo-night-dark-text);
+    background-color: var(--tokyo-night-dark-primary-action);
+}
+
+body.tokyo-night-dark-theme input[type="submit"]:hover {
+    color: var(--tokyo-night-dark-text);
+    background-color: var(--tokyo-night-dark-primary-action-hover);
+}
+
+body.tokyo-night-dark-theme textarea {
+    color: var(--tokyo-night-dark-text);
+    background: var(--tokyo-night-dark-bg);
+}
+
+body.tokyo-night-dark-theme select {
+    color: var(--tokyo-night-dark-text);
+    background: var(--tokyo-night-dark-bg);
+}
+
+body.tokyo-night-dark-theme tbody > tr:hover {
+    background-color: var(--tokyo-night-dark-bg-hover);
+}
+
+body.tokyo-night-dark-theme .lobby-chat-message-green {
+    color: var(--tokyo-night-dark-accent-green);
+}
+
+body.tokyo-night-dark-theme .lobby-chat-message-red {
+    color: var(--tokyo-night-dark-accent-red);
+}
+
+body.tokyo-night-dark-theme .lobby-chat-message-blue {
+    color: var(--tokyo-night-dark-accent-blue);
+}
+
+body.tokyo-night-dark-theme .htmx-result-good {
+    color: var(--tokyo-night-dark-accent-green);
+}
+
+body.tokyo-night-dark-theme .htmx-result-bad {
+    color: var(--tokyo-night-dark-accent-red);
+}
+
+body.tokyo-night-dark-theme #lobby-grid-container > div {
+    background-color: var(--tokyo-night-dark-bg);
+}
+
+/* gruvbox-dark-theme */
+
+body.gruvbox-dark-theme {
+    color: var(--gruvbox-dark-text);
+    background: var(--gruvbox-dark-bg);
+}
+
+body.gruvbox-dark-theme #top-bar {
+    background-color: var(--gruvbox-dark-top-bar-bg);
+}
+
+body.gruvbox-dark-theme #top-bar-menu {
+    background-color: var(--gruvbox-dark-top-bar-bg);
+}
+
+body.gruvbox-dark-theme #top-bar-menu .top-bar-menu-link:hover {
+    background-color: var(--gruvbox-dark-top-bar-hover);
+}
+
+body.gruvbox-dark-theme a {
+    color: var(--gruvbox-dark-accent-blue);
+}
+
+body.gruvbox-dark-theme dialog {
+    color: var(--gruvbox-dark-text);
+    background: var(--gruvbox-dark-bg);
+}
+
+body.gruvbox-dark-theme button {
+    color: var(--gruvbox-dark-text);
+    background-color: var(--gruvbox-dark-primary-action);
+}
+
+body.gruvbox-dark-theme button:hover {
+    color: var(--gruvbox-dark-text);
+    background-color: var(--gruvbox-dark-primary-action-hover);
+}
+
+body.gruvbox-dark-theme input {
+    color: var(--gruvbox-dark-text);
+    background: var(--gruvbox-dark-bg);
+}
+
+body.gruvbox-dark-theme input[type="submit"] {
+    color: var(--gruvbox-dark-text);
+    background-color: var(--gruvbox-dark-primary-action);
+}
+
+body.gruvbox-dark-theme input[type="submit"]:hover {
+    color: var(--gruvbox-dark-text);
+    background-color: var(--gruvbox-dark-primary-action-hover);
+}
+
+body.gruvbox-dark-theme textarea {
+    color: var(--gruvbox-dark-text);
+    background: var(--gruvbox-dark-bg);
+}
+
+body.gruvbox-dark-theme select {
+    color: var(--gruvbox-dark-text);
+    background: var(--gruvbox-dark-bg);
+}
+
+body.gruvbox-dark-theme tbody > tr:hover {
+    background-color: var(--gruvbox-dark-bg-hover);
+}
+
+body.gruvbox-dark-theme .lobby-chat-message-green {
+    color: var(--gruvbox-dark-accent-green);
+}
+
+body.gruvbox-dark-theme .lobby-chat-message-red {
+    color: var(--gruvbox-dark-accent-red);
+}
+
+body.gruvbox-dark-theme .lobby-chat-message-blue {
+    color: var(--gruvbox-dark-accent-blue);
+}
+
+body.gruvbox-dark-theme .htmx-result-good {
+    color: var(--gruvbox-dark-accent-green);
+}
+
+body.gruvbox-dark-theme .htmx-result-bad {
+    color: var(--gruvbox-dark-accent-red);
+}
+
+body.gruvbox-dark-theme #lobby-grid-container > div {
+    background-color: var(--gruvbox-dark-bg);
+}
+
+/* gruvbox-light-theme */
+
+body.gruvbox-light-theme {
+    color: var(--gruvbox-light-text);
+    background: var(--gruvbox-light-bg);
+}
+
+body.gruvbox-light-theme #top-bar {
+    background-color: var(--gruvbox-light-top-bar-bg);
+}
+
+body.gruvbox-light-theme #top-bar-menu {
+    background-color: var(--gruvbox-light-top-bar-bg);
+}
+
+body.gruvbox-light-theme #top-bar-menu .top-bar-menu-link:hover {
+    background-color: var(--gruvbox-light-top-bar-hover);
+}
+
+body.gruvbox-light-theme a {
+    color: var(--gruvbox-light-accent-blue);
+}
+
+body.gruvbox-light-theme dialog {
+    color: var(--gruvbox-light-text);
+    background: var(--gruvbox-light-bg);
+}
+
+body.gruvbox-light-theme button {
+    color: var(--gruvbox-light-text);
+    background-color: var(--gruvbox-light-primary-action);
+}
+
+body.gruvbox-light-theme button:hover {
+    color: var(--gruvbox-light-text);
+    background-color: var(--gruvbox-light-primary-action-hover);
+}
+
+body.gruvbox-light-theme input {
+    color: var(--gruvbox-light-text);
+    background: var(--gruvbox-light-bg);
+}
+
+body.gruvbox-light-theme input[type="submit"] {
+    color: var(--gruvbox-light-text);
+    background-color: var(--gruvbox-light-primary-action);
+}
+
+body.gruvbox-light-theme input[type="submit"]:hover {
+    color: var(--gruvbox-light-text);
+    background-color: var(--gruvbox-light-primary-action-hover);
+}
+
+body.gruvbox-light-theme textarea {
+    color: var(--gruvbox-light-text);
+    background: var(--gruvbox-light-bg);
+}
+
+body.gruvbox-light-theme select {
+    color: var(--gruvbox-light-text);
+    background: var(--gruvbox-light-bg);
+}
+
+body.gruvbox-light-theme tbody > tr:hover {
+    background-color: var(--gruvbox-light-bg-hover);
+}
+
+body.gruvbox-light-theme .lobby-chat-message-green {
+    color: var(--gruvbox-light-accent-green);
+}
+
+body.gruvbox-light-theme .lobby-chat-message-red {
+    color: var(--gruvbox-light-accent-red);
+}
+
+body.gruvbox-light-theme .lobby-chat-message-blue {
+    color: var(--gruvbox-light-accent-blue);
+}
+
+body.gruvbox-light-theme .htmx-result-good {
+    color: var(--gruvbox-light-accent-green);
+}
+
+body.gruvbox-light-theme .htmx-result-bad {
+    color: var(--gruvbox-light-accent-red);
+}
+
+body.gruvbox-light-theme #lobby-grid-container > div {
+    background-color: var(--gruvbox-light-bg);
 }

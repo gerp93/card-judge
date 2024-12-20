@@ -36,7 +36,7 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
-var lobbyHubs map[uuid.UUID]*Hub = make(map[uuid.UUID]*Hub)
+var lobbyHubs = make(map[uuid.UUID]*Hub)
 
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
@@ -73,7 +73,7 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		message = []byte(c.user.Name + ": " + string(message))
+		message = []byte("<green>" + c.user.Name + "</>: " + string(message))
 		c.hub.broadcast <- message
 	}
 }
@@ -103,14 +103,7 @@ func (c *Client) writePump() {
 			if err != nil {
 				return
 			}
-			w.Write(message)
-
-			// Add queued chat messages to the current websocket message.
-			n := len(c.send)
-			for i := 0; i < n; i++ {
-				w.Write(newline)
-				w.Write(<-c.send)
-			}
+			_, _ = w.Write(message)
 
 			if err := w.Close(); err != nil {
 				return
@@ -130,21 +123,21 @@ func ServeWs(w http.ResponseWriter, r *http.Request) {
 	lobbyId, err := uuid.Parse(lobbyIdString)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to get lobby id from path."))
+		_, _ = w.Write([]byte("Failed to get lobby id from path."))
 		return
 	}
 
 	userId, err := auth.GetCookieUserId(r)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to get user id."))
+		_, _ = w.Write([]byte("Failed to get user id."))
 		return
 	}
 
 	user, err := database.GetUser(userId)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to get user."))
+		_, _ = w.Write([]byte("Failed to get user."))
 		return
 	}
 

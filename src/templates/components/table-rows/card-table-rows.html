@@ -1,98 +1,116 @@
-{{define "card-table-rows"}} {{range .}}
-<tr>
-  <td>{{.CreatedOnDate.Format "2006-01-02"}}</td>
-  <td>{{.ChangedOnDate.Format "2006-01-02"}}</td>
-  <td>{{.CardTypeName}}</td>
-  <td style="white-space: pre-wrap">{{.Text}}</td>
-  <td>
-    <div
-      title="Edit"
-      class="clickable"
-      onclick="document.getElementById('card-{{.Id}}-update-dialog').showModal()"
-    >
-      &#128393;
-    </div>
-    <dialog id="card-{{.Id}}-update-dialog">
-      <div style="display: grid; grid-auto-flow: column">
-        <div>
-          <h3>Edit Card</h3>
-        </div>
-        <div>
-          <div
-            class="close-button"
-            onclick="document.getElementById('card-{{.Id}}-update-dialog').close()"
-          >
-            &#10060;
-          </div>
-        </div>
-      </div>
-      <form hx-put="/api/card/{{.Id}}/card-type" hx-target="find .htmx-result">
-        <h3>Set Card Type</h3>
-        <input
-          type="text"
-          id="deckId{{.Id}}"
-          name="deckId"
-          value="{{.DeckId}}"
-          hidden
-        />
-        <label for="cardTypeName{{.Id}}">Card Type:</label>
-        <select
-          id="cardTypeName{{.Id}}"
-          name="cardTypeName"
-          autocomplete="off"
-          required
-        >
-          {{if eq .CardTypeName "Judge"}}
-          <option value="Judge" selected>Judge</option>
-          <option value="Player">Player</option>
-          {{else}}
-          <option value="Judge">Judge</option>
-          <option value="Player" selected>Player</option>
-          {{end}}
-        </select>
-        <br />
-        <br />
-        <div class="htmx-result"></div>
-        <input type="submit" value="Set Card Type" />
-      </form>
-      <form hx-put="/api/card/{{.Id}}/text" hx-target="find .htmx-result">
-        <h3>Set Card Text</h3>
-        <input
-          type="text"
-          id="deckId{{.Id}}"
-          name="deckId"
-          value="{{.DeckId}}"
-          hidden
-        />
-        <label for="text{{.Id}}" style="vertical-align: top">Text:</label>
-        <textarea
-          id="text{{.Id}}"
-          name="text"
-          maxlength="510"
-          placeholder="Enter Card Text"
-          required="true"
-          cols="40"
-          rows="10"
-          autocomplete="off"
-        >
-{{.Text}}</textarea
-        >
-        <br />
-        <br />
-        <div class="htmx-result"></div>
-        <input type="submit" value="Set Card Text" />
-      </form>
-    </dialog>
-  </td>
-  <td>
-    <div
-      title="Delete"
-      class="clickable"
-      hx-delete="/api/card/{{.Id}}"
-      hx-confirm="Are you sure you want to delete this card?"
-    >
-      &#128465;
-    </div>
-  </td>
-</tr>
-{{end}} {{end}}
+{{define "card-table-rows"}}
+    {{range .}}
+        <tr>
+            <td>{{.CreatedOnDate.Format "2006-01-02"}}</td>
+            <td>{{.ChangedOnDate.Format "2006-01-02"}}</td>
+            <td>{{if eq .Category "PROMPT"}} Prompt {{else}} Response {{end}}</td>
+            <td class="wrap-new-lines">{{.Text}}</td>
+            <td>{{if .Image.Valid}} <span class="bi bi-card-image"></span> {{end}}</td>
+            <td>
+                <span title="Edit"
+                      class="bi bi-pencil clickable"
+                      onclick="document.getElementById('card-{{.Id}}-update-dialog').showModal()"
+                ></span>
+                <dialog id="card-{{.Id}}-update-dialog">
+                    <div style="display: grid; grid-auto-flow: column">
+                        <div>
+                            <h3>Edit Card</h3>
+                        </div>
+                        <div>
+                            <span class="bi bi-x-lg close-button"
+                                  onclick="document.getElementById('card-{{.Id}}-update-dialog').close()"
+                            ></span>
+                        </div>
+                    </div>
+                    <form hx-put="/api/card/{{.Id}}/category" hx-target="find .htmx-result">
+                        <h3>Set Category</h3>
+                        <input
+                                type="text"
+                                id="deckId{{.Id}}"
+                                name="deckId"
+                                value="{{.DeckId}}"
+                                hidden
+                        />
+                        <label for="category{{.Id}}">Category:</label>
+                        <select
+                                id="category{{.Id}}"
+                                name="category"
+                                autocomplete="off"
+                                required="required"
+                        >
+                            {{if eq .Category "PROMPT"}}
+                                <option value="PROMPT" selected>Prompt</option>
+                                <option value="RESPONSE">Response</option>
+                            {{else}}
+                                <option value="PROMPT">Prompt</option>
+                                <option value="RESPONSE" selected>Response</option>
+                            {{end}}
+                        </select>
+                        <br/>
+                        <br/>
+                        <div class="htmx-result"></div>
+                        <input type="submit" value="Set Category"/>
+                    </form>
+                    <form hx-put="/api/card/{{.Id}}/text" hx-target="find .htmx-result">
+                        <h3>Set Card Text</h3>
+                        <input
+                                type="text"
+                                id="deckId{{.Id}}"
+                                name="deckId"
+                                value="{{.DeckId}}"
+                                hidden
+                        />
+                        <label for="text{{.Id}}" style="vertical-align: top">Text:</label>
+                        <textarea
+                                id="text{{.Id}}"
+                                name="text"
+                                maxlength="510"
+                                placeholder="Enter Card Text"
+                                required="required"
+                                cols="40"
+                                rows="10"
+                                autocomplete="off"
+                        >{{.Text}}</textarea>
+                        <br/>
+                        <br/>
+                        <div class="htmx-result"></div>
+                        <input type="submit" value="Set Card Text"/>
+                    </form>
+                    <form enctype="multipart/form-data" hx-put="/api/card/{{.Id}}/image" hx-target="find .htmx-result">
+                        <h3>Set Card Image</h3>
+                        <input
+                                type="file"
+                                id="deckId{{.Id}}"
+                                name="deckId"
+                                value="{{.DeckId}}"
+                                hidden
+                        />
+                        {{if .Image.Valid}}
+                            <img src="data:image;base64,{{.Image.String}}" alt="Card Image"/>
+                            <br/>
+                        {{end}}
+                        <label for="image{{.Id}}">Image:</label>
+                        <input
+                                type="file"
+                                id="image{{.Id}}"
+                                name="image"
+                                accept="image/*"
+                                autocomplete="off"
+                        />
+                        <br/>
+                        <br/>
+                        <div class="htmx-result"></div>
+                        <input type="submit" value="Set Image"/>
+                    </form>
+                </dialog>
+            </td>
+            <td>
+                <span title="Delete"
+                      class="bi bi-trash clickable"
+                      hx-delete="/api/card/{{.Id}}"
+                      hx-confirm="Are you sure you want to delete this card?"
+                ></span>
+            </td>
+        </tr>
+    {{end}}
+{{end}}

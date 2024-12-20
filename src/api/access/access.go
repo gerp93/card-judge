@@ -14,21 +14,21 @@ func Lobby(w http.ResponseWriter, r *http.Request) {
 	lobbyId, err := uuid.Parse(lobbyIdString)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to get lobby id from path."))
+		_, _ = w.Write([]byte("Failed to get lobby id from path."))
 		return
 	}
 
 	lobbyPasswordHash, err := database.GetLobbyPasswordHash(lobbyId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
 	err = r.ParseForm()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to parse form."))
+		_, _ = w.Write([]byte("Failed to parse form."))
 		return
 	}
 
@@ -43,21 +43,21 @@ func Lobby(w http.ResponseWriter, r *http.Request) {
 
 	if !auth.PasswordMatchesHash(password, lobbyPasswordHash.String) {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Provided password is not valid."))
+		_, _ = w.Write([]byte("Provided password is not valid."))
 		return
 	}
 
 	userId := api.GetUserId(r)
 	if userId == uuid.Nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to get user id."))
+		_, _ = w.Write([]byte("Failed to get user id."))
 		return
 	}
 
 	err = database.AddUserLobbyAccess(userId, lobbyId)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to add access."))
+		_, _ = w.Write([]byte("Failed to add access."))
 		return
 	}
 
@@ -70,21 +70,21 @@ func Deck(w http.ResponseWriter, r *http.Request) {
 	deckId, err := uuid.Parse(deckIdString)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to get deck id from path."))
+		_, _ = w.Write([]byte("Failed to get deck id from path."))
 		return
 	}
 
 	deckPasswordHash, err := database.GetDeckPasswordHash(deckId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte(err.Error()))
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
 	err = r.ParseForm()
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to parse form."))
+		_, _ = w.Write([]byte("Failed to parse form."))
 		return
 	}
 
@@ -97,23 +97,23 @@ func Deck(w http.ResponseWriter, r *http.Request) {
 		break
 	}
 
-	if !auth.PasswordMatchesHash(password, deckPasswordHash.String) {
+	if !auth.PasswordMatchesHash(password, deckPasswordHash) {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Provided password is not valid."))
+		_, _ = w.Write([]byte("Provided password is not valid."))
 		return
 	}
 
 	userId := api.GetUserId(r)
 	if userId == uuid.Nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to get user id."))
+		_, _ = w.Write([]byte("Failed to get user id."))
 		return
 	}
 
 	err = database.AddUserDeckAccess(userId, deckId)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write([]byte("Failed to add access."))
+		_, _ = w.Write([]byte("Failed to add access."))
 		return
 	}
 

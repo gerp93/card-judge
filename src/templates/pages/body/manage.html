@@ -1,76 +1,124 @@
 {{define "body"}}
-<form hx-put="/api/user/{{.User.Id}}/name" hx-target="find .htmx-result">
-  <h3>Set User Name</h3>
-  <p>Current Name: {{.User.Name}}</p>
-  <label for="setUserName">New Name:</label>
-  <input
-    type="text"
-    id="setUserName"
-    name="name"
-    maxlength="255"
-    placeholder="Enter Name"
-    required="true"
-    autocomplete="off"
-  />
-  <br />
-  <br />
-  <div class="htmx-result"></div>
-  <input type="submit" value="Set User Name" />
-</form>
-<form hx-put="/api/user/{{.User.Id}}/password" hx-target="find .htmx-result">
-  <h3>Set User Password</h3>
-  <label for="newUserPassword">New Password:</label>
-  <input
-    type="password"
-    id="newUserPassword"
-    name="password"
-    maxlength="255"
-    placeholder="Enter Password"
-    required="true"
-    autocomplete="new-password"
-  />
-  <br />
-  <label for="newUserPasswordConfirm">Confirm New Password:</label>
-  <input
-    type="password"
-    id="newUserPasswordConfirm"
-    name="passwordConfirm"
-    maxlength="255"
-    placeholder="Enter Password"
-    required="true"
-    autocomplete="off"
-  />
-  <br />
-  <br />
-  <div class="htmx-result"></div>
-  <input type="submit" value="Set User Password" />
-</form>
-<form hx-put="/api/user/{{.User.Id}}/color-theme" hx-target="find .htmx-result">
-  <h3>Set Color Theme</h3>
-  <label for="setUserColorTheme">Color Theme:</label>
-  <select id="setUserColorTheme" name="colorTheme" autocomplete="off" required>
-    {{if eq .User.ColorTheme.String "light-theme"}}
-    <option value="dark-theme">&#127762; Dark</option>
-    <option value="light-theme" selected>&#127766; Light</option>
-    {{else}}
-    <option value="dark-theme" selected>&#127762; Dark</option>
-    <option value="light-theme">&#127766; Light</option>
-    {{end}}
-  </select>
-  <br />
-  <br />
-  <div class="htmx-result"></div>
-  <input type="submit" value="Set Color Theme" />
-</form>
-<br />
-<details>
-  <summary>Danger Zone &#9940;</summary>
-  <br />
-  <button
-    hx-delete="/api/user/{{.User.Id}}"
-    hx-confirm="Are you sure you want to delete your user account?"
-  >
-    Delete User Account
-  </button>
-</details>
+    <form hx-put="/api/user/{{.User.Id}}/name" hx-target="find .htmx-result">
+        <h3>Set Name</h3>
+        <p>Current Name: {{.User.Name}}</p>
+        <label for="setUserName">New Name:</label>
+        <input
+                type="text"
+                id="setUserName"
+                name="name"
+                maxlength="255"
+                placeholder="Enter Name"
+                required="required"
+                autocomplete="off"
+        />
+        <br/>
+        <br/>
+        <div class="htmx-result"></div>
+        <input type="submit" value="Set Name"/>
+    </form>
+    <form hx-put="/api/user/{{.User.Id}}/password" hx-target="find .htmx-result">
+        <h3>Set Password</h3>
+        <label for="newUserPassword">New Password:</label>
+        <input
+                type="password"
+                id="newUserPassword"
+                name="password"
+                maxlength="255"
+                placeholder="Enter Password"
+                required="required"
+                autocomplete="new-password"
+        />
+        <br/>
+        <label for="newUserPasswordConfirm">Confirm New Password:</label>
+        <input
+                type="password"
+                id="newUserPasswordConfirm"
+                name="passwordConfirm"
+                maxlength="255"
+                placeholder="Enter Password"
+                required="required"
+                autocomplete="off"
+        />
+        <br/>
+        <br/>
+        <div class="htmx-result"></div>
+        <input type="submit" value="Set Password"/>
+    </form>
+    <form hx-put="/api/user/{{.User.Id}}/color-theme" hx-target="find .htmx-result" hx-trigger="change">
+        <h3>Set Color Theme</h3>
+        <label for="setUserColorTheme">Color Theme:</label>
+        <select id="setUserColorTheme" name="colorTheme" autocomplete="off" required>
+            <option value="dark-theme"
+                    {{if or (not .User.ColorTheme.Valid) (eq .User.ColorTheme.String "dark-theme")}}
+                        selected
+                    {{end}}
+            >
+                Dark
+            </option>
+            <option value="light-theme"
+                    {{if eq .User.ColorTheme.String "light-theme"}}
+                        selected
+                    {{end}}
+            >
+                Light
+            </option>
+            <option value="nord-polar-night-theme"
+                    {{if eq .User.ColorTheme.String "nord-polar-night-theme"}}
+                        selected
+                    {{end}}
+            >
+                Nord Polar Night
+            </option>
+            <option value="dracula-theme"
+                    {{if eq .User.ColorTheme.String "dracula-theme"}}
+                        selected
+                    {{end}}
+            >
+                Dracula
+            </option>
+            <option value="purple-theme"
+                    {{if eq .User.ColorTheme.String "purple-theme"}}
+                        selected
+                    {{end}}
+            >
+                Purple
+            </option>
+            <option value="tokyo-night-dark-theme"
+                    {{if eq .User.ColorTheme.String "tokyo-night-dark-theme"}}
+                        selected
+                    {{end}}
+            >
+                Tokyo Night Dark
+            </option>
+            <option value="gruvbox-dark-theme"
+                    {{if eq .User.ColorTheme.String "gruvbox-dark-theme"}}
+                        selected
+                    {{end}}
+            >
+                GruvBox Dark
+            </option>
+            <option value="gruvbox-light-theme"
+                    {{if eq .User.ColorTheme.String "gruvbox-light-theme"}}
+                        selected
+                    {{end}}
+            >
+                GruvBox Light
+            </option>
+        </select>
+        <br/>
+        <br/>
+        <div class="htmx-result"></div>
+    </form>
+    <br/>
+    <details>
+        <summary><span class="bi bi-radioactive">Danger Zone</span></summary>
+        <br/>
+        <button
+                hx-delete="/api/user/{{.User.Id}}"
+                hx-confirm="Are you sure you want to delete your user account?"
+        >
+            Delete User Account
+        </button>
+    </details>
 {{end}}

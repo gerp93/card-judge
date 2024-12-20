@@ -20,11 +20,28 @@ func Home(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to parse HTML"))
+		_, _ = w.Write([]byte("failed to parse HTML"))
 		return
 	}
 
-	tmpl.ExecuteTemplate(w, "base", basePageData)
+	_ = tmpl.ExecuteTemplate(w, "base", basePageData)
+}
+
+func About(w http.ResponseWriter, r *http.Request) {
+	basePageData := api.GetBasePageData(r)
+	basePageData.PageTitle = "Card Judge - About"
+
+	tmpl, err := template.ParseFiles(
+		"templates/pages/base.html",
+		"templates/pages/body/about.html",
+	)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte("failed to parse HTML"))
+		return
+	}
+
+	_ = tmpl.ExecuteTemplate(w, "base", basePageData)
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
@@ -37,11 +54,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to parse HTML"))
+		_, _ = w.Write([]byte("failed to parse HTML"))
 		return
 	}
 
-	tmpl.ExecuteTemplate(w, "base", basePageData)
+	_ = tmpl.ExecuteTemplate(w, "base", basePageData)
 }
 
 func Manage(w http.ResponseWriter, r *http.Request) {
@@ -54,11 +71,11 @@ func Manage(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to parse HTML"))
+		_, _ = w.Write([]byte("failed to parse HTML"))
 		return
 	}
 
-	tmpl.ExecuteTemplate(w, "base", basePageData)
+	_ = tmpl.ExecuteTemplate(w, "base", basePageData)
 }
 
 func Admin(w http.ResponseWriter, r *http.Request) {
@@ -71,21 +88,53 @@ func Admin(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to parse HTML"))
+		_, _ = w.Write([]byte("failed to parse HTML"))
 		return
 	}
 
-	tmpl.ExecuteTemplate(w, "base", basePageData)
+	_ = tmpl.ExecuteTemplate(w, "base", basePageData)
+}
+
+func Stats(w http.ResponseWriter, r *http.Request) {
+	basePageData := api.GetBasePageData(r)
+	basePageData.PageTitle = "Card Judge - Stats"
+
+	personalStats, err := database.GetPersonalStats(basePageData.User.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte("failed to get personal stats"))
+		return
+	}
+
+	tmpl, err := template.ParseFiles(
+		"templates/pages/base.html",
+		"templates/pages/body/stats.html",
+	)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte("failed to parse HTML"))
+		return
+	}
+
+	type data struct {
+		api.BasePageData
+		PersonalStats database.StatPersonal
+	}
+
+	_ = tmpl.ExecuteTemplate(w, "base", data{
+		BasePageData:  basePageData,
+		PersonalStats: personalStats,
+	})
 }
 
 func Lobbies(w http.ResponseWriter, r *http.Request) {
 	basePageData := api.GetBasePageData(r)
 	basePageData.PageTitle = "Card Judge - Lobbies"
 
-	decks, err := database.GetUserDecks(basePageData.User.Id)
+	decks, err := database.GetReadableDecks(basePageData.User.Id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to get user decks"))
+		_, _ = w.Write([]byte("failed to get user decks"))
 		return
 	}
 
@@ -95,7 +144,7 @@ func Lobbies(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to parse HTML"))
+		_, _ = w.Write([]byte("failed to parse HTML"))
 		return
 	}
 
@@ -104,7 +153,7 @@ func Lobbies(w http.ResponseWriter, r *http.Request) {
 		Decks []database.Deck
 	}
 
-	tmpl.ExecuteTemplate(w, "base", data{
+	_ = tmpl.ExecuteTemplate(w, "base", data{
 		BasePageData: basePageData,
 		Decks:        decks,
 	})
@@ -132,7 +181,14 @@ func Lobby(w http.ResponseWriter, r *http.Request) {
 	basePageData := api.GetBasePageData(r)
 	basePageData.PageTitle = "Card Judge - Lobby"
 
-	if !database.UserHasLobbyAccess(basePageData.User.Id, lobbyId) {
+	hasLobbyAccess, err := database.UserHasLobbyAccess(basePageData.User.Id, lobbyId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte("failed to check lobby access"))
+		return
+	}
+
+	if !hasLobbyAccess {
 		http.Redirect(w, r, fmt.Sprintf("/lobby/%s/access", lobbyId), http.StatusSeeOther)
 		return
 	}
@@ -143,14 +199,14 @@ func Lobby(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to parse HTML"))
+		_, _ = w.Write([]byte("failed to parse HTML"))
 		return
 	}
 
 	playerId, err := database.AddUserToLobby(lobbyId, basePageData.User.Id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to join lobby"))
+		_, _ = w.Write([]byte("failed to join lobby"))
 		return
 	}
 
@@ -160,7 +216,7 @@ func Lobby(w http.ResponseWriter, r *http.Request) {
 		PlayerId uuid.UUID
 	}
 
-	tmpl.ExecuteTemplate(w, "base", data{
+	_ = tmpl.ExecuteTemplate(w, "base", data{
 		BasePageData: basePageData,
 		Lobby:        lobby,
 		PlayerId:     playerId,
@@ -189,7 +245,14 @@ func LobbyAccess(w http.ResponseWriter, r *http.Request) {
 	basePageData := api.GetBasePageData(r)
 	basePageData.PageTitle = "Card Judge - Lobby Access"
 
-	if database.UserHasLobbyAccess(basePageData.User.Id, lobbyId) {
+	hasLobbyAccess, err := database.UserHasLobbyAccess(basePageData.User.Id, lobbyId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte("failed to check lobby access"))
+		return
+	}
+
+	if hasLobbyAccess {
 		http.Redirect(w, r, fmt.Sprintf("/lobby/%s", lobbyId), http.StatusSeeOther)
 		return
 	}
@@ -200,7 +263,7 @@ func LobbyAccess(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to parse HTML"))
+		_, _ = w.Write([]byte("failed to parse HTML"))
 		return
 	}
 
@@ -209,7 +272,7 @@ func LobbyAccess(w http.ResponseWriter, r *http.Request) {
 		Lobby database.Lobby
 	}
 
-	tmpl.ExecuteTemplate(w, "base", data{
+	_ = tmpl.ExecuteTemplate(w, "base", data{
 		BasePageData: basePageData,
 		Lobby:        lobby,
 	})
@@ -225,11 +288,11 @@ func Decks(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to parse HTML"))
+		_, _ = w.Write([]byte("failed to parse HTML"))
 		return
 	}
 
-	tmpl.ExecuteTemplate(w, "base", basePageData)
+	_ = tmpl.ExecuteTemplate(w, "base", basePageData)
 }
 
 func Deck(w http.ResponseWriter, r *http.Request) {
@@ -251,17 +314,17 @@ func Deck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cards, err := database.GetCardsInDeck(deckId, "%")
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to get cards in deck"))
-		return
-	}
-
 	basePageData := api.GetBasePageData(r)
 	basePageData.PageTitle = "Card Judge - Deck"
 
-	if !database.UserHasDeckAccess(basePageData.User.Id, deckId) {
+	hasDeckAccess, err := database.UserHasDeckAccess(basePageData.User.Id, deckId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte("failed to check deck access"))
+		return
+	}
+
+	if !hasDeckAccess {
 		http.Redirect(w, r, fmt.Sprintf("/deck/%s/access", deckId), http.StatusSeeOther)
 		return
 	}
@@ -272,20 +335,18 @@ func Deck(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to parse HTML"))
+		_, _ = w.Write([]byte("failed to parse HTML"))
 		return
 	}
 
 	type data struct {
 		api.BasePageData
-		Deck  database.Deck
-		Cards []database.CardDetails
+		Deck database.Deck
 	}
 
-	tmpl.ExecuteTemplate(w, "base", data{
+	_ = tmpl.ExecuteTemplate(w, "base", data{
 		BasePageData: basePageData,
 		Deck:         deck,
-		Cards:        cards,
 	})
 }
 
@@ -311,7 +372,14 @@ func DeckAccess(w http.ResponseWriter, r *http.Request) {
 	basePageData := api.GetBasePageData(r)
 	basePageData.PageTitle = "Card Judge - Deck"
 
-	if database.UserHasDeckAccess(basePageData.User.Id, deckId) {
+	hasDeckAccess, err := database.UserHasDeckAccess(basePageData.User.Id, deckId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte("failed to check deck access"))
+		return
+	}
+
+	if hasDeckAccess {
 		http.Redirect(w, r, fmt.Sprintf("/deck/%s", deckId), http.StatusSeeOther)
 		return
 	}
@@ -322,7 +390,7 @@ func DeckAccess(w http.ResponseWriter, r *http.Request) {
 	)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
-		w.Write([]byte("failed to parse HTML"))
+		_, _ = w.Write([]byte("failed to parse HTML"))
 		return
 	}
 
@@ -331,7 +399,7 @@ func DeckAccess(w http.ResponseWriter, r *http.Request) {
 		Deck database.Deck
 	}
 
-	tmpl.ExecuteTemplate(w, "base", data{
+	_ = tmpl.ExecuteTemplate(w, "base", data{
 		BasePageData: basePageData,
 		Deck:         deck,
 	})

@@ -1,20 +1,20 @@
 {{define "body"}}
-<form hx-post="/api/access/deck/{{.Deck.Id}}" hx-target="find .htmx-result">
-  <h3>Deck: {{.Deck.Name}}</h3>
-  <p>You must provide the password to see cards.</p>
-  <input
-    type="password"
-    id="password"
-    name="password"
-    maxlength="255"
-    placeholder="Enter Deck Password"
-    required="true"
-    autofocus="true"
-    autocomplete="off"
-  />
-  <br />
-  <br />
-  <div class="htmx-result"></div>
-  <input type="submit" value="Submit" />
-</form>
+    <form hx-post="/api/access/deck/{{.Deck.Id}}" hx-target="find .htmx-result">
+        <h3>Deck: {{.Deck.Name}}</h3>
+        <p>You must provide the password to see cards.</p>
+        <input
+                type="password"
+                id="password"
+                name="password"
+                maxlength="255"
+                placeholder="Enter Deck Password"
+                required="required"
+                autofocus="autofocus"
+                autocomplete="off"
+        />
+        <br/>
+        <br/>
+        <div class="htmx-result"></div>
+        <input type="submit" value="Submit"/>
+    </form>
 {{end}}

@@ -1,20 +1,31 @@
 {{define "body"}}
-<link rel="stylesheet" href="/static/css/home.css" />
-<div id="home">
-  <h1>Card Judge</h1>
-  <div id="home-buttons">
-    {{if .LoggedIn}}
-    <div>
-      <button onclick="window.location.href='/lobbies'">Game Lobbies</button>
+    <link rel="stylesheet" href="/static/css/home.css"/>
+    <div id="home">
+        <h1>Card Judge</h1>
+        <div id="home-buttons">
+            {{if .LoggedIn}}
+                <div>
+                    <button onclick="window.location.href='/lobbies'">Game Lobbies</button>
+                </div>
+                <div>
+                    <button onclick="window.location.href='/decks'">Card Decks</button>
+                </div>
+                <div>
+                    <button onclick="window.location.href='/stats'">Statistics</button>
+                </div>
+            {{else}}
+                <div>
+                    <button onclick="window.location.href='/login'">Login</button>
+                </div>
+            {{end}}
+            <div>
+                <button onclick="window.location.href='/about'">About</button>
+            </div>
+            {{if .User.IsAdmin}}
+                <div>
+                    <button onclick="window.location.href='/admin'">Admin</button>
+                </div>
+            {{end}}
+        </div>
     </div>
-    <div>
-      <button onclick="window.location.href='/decks'">Card Decks</button>
-    </div>
-    {{else}}
-    <div>
-      <button onclick="window.location.href='/login'">Login</button>
-    </div>
-    {{end}}
-  </div>
-</div>
 {{end}}

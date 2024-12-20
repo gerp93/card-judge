@@ -1,0 +1,109 @@
+{{define "body"}}
+    <link rel="stylesheet" href="/static/css/stats.css"/>
+    <h1>Statistics</h1>
+    <h2>{{.User.Name}}</h2>
+    <div>
+        <table>
+            <tbody>
+            <tr>
+                <td>Games Played</td>
+                <td>{{.PersonalStats.GamePlayCount}}</td>
+            </tr>
+            <tr>
+                <td>Games Won</td>
+                <td>{{.PersonalStats.GameWinCount}}</td>
+            </tr>
+            <tr><td colspan="2"><hr/></td></tr>
+            <tr>
+                <td>Rounds Played</td>
+                <td>{{.PersonalStats.RoundPlayCount}}</td>
+            </tr>
+            <tr>
+                <td>Rounds Won</td>
+                <td>{{.PersonalStats.RoundWinCount}}</td>
+            </tr>
+            <tr><td colspan="2"><hr/></td></tr>
+            <tr>
+                <td>Cards Played</td>
+                <td>{{.PersonalStats.CardPlayCount}}</td>
+            </tr>
+            <tr>
+                <td>Cards Drawn</td>
+                <td>{{.PersonalStats.CardDrawCount}}</td>
+            </tr>
+            <tr>
+                <td>Cards Discarded</td>
+                <td>{{.PersonalStats.CardDiscardCount}}</td>
+            </tr>
+            <tr>
+                <td>Cards Skipped</td>
+                <td>{{.PersonalStats.CardSkipCount}}</td>
+            </tr>
+            <tr><td colspan="2"><hr/></td></tr>
+            <tr>
+                <td>Credits Spent</td>
+                <td>{{.PersonalStats.CreditsSpentCount}}</td>
+            </tr>
+            <tr>
+                <td>Credits Earned</td>
+                <td>{{.PersonalStats.CreditsEarnedCount}}</td>
+            </tr>
+            <tr><td colspan="2"><hr/></td></tr>
+            <tr>
+                <td>Times Kicked</td>
+                <td>{{.PersonalStats.LobbyKickCount}}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    <h2>Leaderboard</h2>
+    <form
+            hx-post="/api/stats/leaderboard"
+            hx-trigger="load, change"
+            hx-target="#leaderboard"
+    >
+        <label for="leaderboardTopic">Topic:</label>
+        <select id="leaderboardTopic" name="topic">
+            <option disabled>Games</option>
+            <option value="game-win-ratio" selected>Best Game Win Ratio</option>
+            <option value="game-win">Most Games Won</option>
+            <option value="game-play">Most Games Played</option>
+            <option disabled>Rounds</option>
+            <option value="round-win-ratio">Best Round Win Ratio</option>
+            <option value="round-win">Most Rounds Won</option>
+            <option value="round-play">Most Rounds Played</option>
+            <option disabled>Time</option>
+            <option value="round-judge-time">Time to Judge a Round</option>
+            <option value="round-play-time">Time to Play a Round</option>
+            <option disabled>Cards</option>
+            <option value="card-play">Most Cards Played</option>
+            <option value="card-draw">Most Cards Drawn</option>
+            <option value="card-discard">Most Cards Discarded</option>
+            <option value="card-skip">Most Cards Skipped</option>
+            <option disabled>Picks</option>
+            <option value="picked-judge">Most Picked (judge)</option>
+            <option value="picked-player">Most Picked (winner)</option>
+            <option disabled>Credits</option>
+            <option value="credits-spent">Most Credits Spent</option>
+            <option value="credits-earned">Most Credits Earned</option>
+            <option value="credits-spent-category">Most Credits Spent (Category)</option>
+            <option value="credits-earned-category">Most Credits Earned (Category)</option>
+            <option value="credits-spent-game">Most Credits Spent (Game)</option>
+            <option value="credits-earned-game">Most Credits Earned (Game)</option>
+            <option disabled>Gambling</option>
+            <option value="gamble">Largest Gamble</option>
+            <option value="gamble-win">Largest Gamble Win</option>
+            <option value="bet">Largest Bet</option>
+            <option value="bet-win">Largest Bet Win</option>
+            <option disabled>Other</option>
+            <option value="kick">Most Kicks</option>
+        </select>
+        <label for="leaderboardSubject">Subject:</label>
+        <select id="leaderboardSubject" name="subject">
+            <option value="player" selected>Player</option>
+            <option value="card">Card</option>
+            <option value="special-category">Special Category</option>
+        </select>
+    </form>
+    <div id="leaderboard"></div>
+{{end}}

@@ -4,12 +4,10 @@ import (
 	"database/sql"
 	"errors"
 	"log"
-	"strings"
 	"time"
 
 	"github.com/google/uuid"
 	"github.com/grantfbarnes/card-judge/auth"
-	"github.com/grantfbarnes/card-judge/helper"
 )
 
 type User struct {
@@ -20,23 +18,8 @@ type User struct {
 	Name         string
 	PasswordHash string
 	ColorTheme   sql.NullString
+	IsApproved   bool
 	IsAdmin      bool
-}
-
-func UserHasLobbyAccess(userId uuid.UUID, lobbyId uuid.UUID) bool {
-	lobbyIds, err := getUserLobbyAccess(userId)
-	if err != nil {
-		return false
-	}
-	return helper.IsIdInArray(lobbyId, lobbyIds)
-}
-
-func UserHasDeckAccess(userId uuid.UUID, deckId uuid.UUID) bool {
-	deckIds, err := getUserDeckAccess(userId)
-	if err != nil {
-		return false
-	}
-	return helper.IsIdInArray(deckId, deckIds)
 }
 
 func SearchUsers(search string) ([]User, error) {
@@ -52,14 +35,15 @@ func SearchUsers(search string) ([]User, error) {
 			NAME,
 			PASSWORD_HASH,
 			COLOR_THEME,
+			IS_APPROVED,
 			IS_ADMIN
 		FROM USER
 		WHERE NAME LIKE ?
 		ORDER BY
-			TO_DAYS(CHANGED_ON_DATE) DESC,
+			CHANGED_ON_DATE DESC,
 			NAME ASC
 	`
-	rows, err := Query(sqlString, search)
+	rows, err := query(sqlString, search)
 	if err != nil {
 		return nil, err
 	}
@@ -74,6 +58,7 @@ func SearchUsers(search string) ([]User, error) {
 			&user.Name,
 			&user.PasswordHash,
 			&user.ColorTheme,
+			&user.IsApproved,
 			&user.IsAdmin); err != nil {
 			log.Println(err)
 			return result, errors.New("failed to scan row in query results")
@@ -83,7 +68,9 @@ func SearchUsers(search string) ([]User, error) {
 	return result, nil
 }
 
-func getUsers() ([]User, error) {
+func GetUser(userId uuid.UUID) (User, error) {
+	var user User
+
 	sqlString := `
 		SELECT
 			ID,
@@ -92,47 +79,12 @@ func getUsers() ([]User, error) {
 			NAME,
 			PASSWORD_HASH,
 			COLOR_THEME,
-			IS_ADMIN
-		FROM USER
-	`
-	rows, err := Query(sqlString)
-	if err != nil {
-		return nil, err
-	}
-
-	result := make([]User, 0)
-	for rows.Next() {
-		var user User
-		if err := rows.Scan(
-			&user.Id,
-			&user.CreatedOnDate,
-			&user.ChangedOnDate,
-			&user.Name,
-			&user.PasswordHash,
-			&user.ColorTheme,
-			&user.IsAdmin); err != nil {
-			log.Println(err)
-			return result, errors.New("failed to scan row in query results")
-		}
-		result = append(result, user)
-	}
-	return result, nil
-}
-
-func getUserInDB(userId uuid.UUID) (user User, err error) {
-	sqlString := `
-		SELECT
-			ID,
-			CREATED_ON_DATE,
-			CHANGED_ON_DATE,
-			NAME,
-			PASSWORD_HASH,
-			COLOR_THEME,
+			IS_APPROVED,
 			IS_ADMIN
 		FROM USER
 		WHERE ID = ?
 	`
-	rows, err := Query(sqlString, userId)
+	rows, err := query(sqlString, userId)
 	if err != nil {
 		return user, err
 	}
@@ -145,6 +97,7 @@ func getUserInDB(userId uuid.UUID) (user User, err error) {
 			&user.Name,
 			&user.PasswordHash,
 			&user.ColorTheme,
+			&user.IsApproved,
 			&user.IsAdmin); err != nil {
 			log.Println(err)
 			return user, errors.New("failed to scan row in query results")
@@ -154,98 +107,186 @@ func getUserInDB(userId uuid.UUID) (user User, err error) {
 	return user, nil
 }
 
-func GetUser(id uuid.UUID) (User, error) {
-	user, ok := allUsers[id]
-	if !ok {
-		return user, errors.New("user not found")
-	}
-	return user, nil
-}
+func GetUserPasswordHash(userId uuid.UUID) (string, error) {
+	var passwordHash string
 
-func GetUserPasswordHash(id uuid.UUID) (string, error) {
-	user, ok := allUsers[id]
-	if !ok {
-		return "", errors.New("user not found")
+	sqlString := `
+		SELECT
+			PASSWORD_HASH
+		FROM USER
+		WHERE ID = ?
+	`
+	rows, err := query(sqlString, userId)
+	if err != nil {
+		return passwordHash, err
 	}
-	return user.PasswordHash, nil
-}
 
-func GetUserIsAdmin(id uuid.UUID) (bool, error) {
-	user, ok := allUsers[id]
-	if !ok {
-		return false, errors.New("user not found")
-	}
-	return user.IsAdmin, nil
-}
-
-func GetUserIdByName(name string) uuid.UUID {
-	for id, user := range allUsers {
-		if strings.EqualFold(user.Name, name) {
-			return id
+	for rows.Next() {
+		if err := rows.Scan(&passwordHash); err != nil {
+			log.Println(err)
+			return passwordHash, errors.New("failed to scan row in query results")
 		}
 	}
-	return uuid.Nil
+
+	return passwordHash, nil
 }
 
-func CreateUser(name string, password string) (uuid.UUID, error) {
-	id, err := uuid.NewUUID()
+func GetUserIsApproved(userId uuid.UUID) (bool, error) {
+	var isApproved bool
+
+	sqlString := `
+		SELECT
+			IS_APPROVED
+		FROM USER
+		WHERE ID = ?
+	`
+	rows, err := query(sqlString, userId)
 	if err != nil {
-		log.Println(err)
-		return id, errors.New("failed to generate new id")
+		return isApproved, err
 	}
 
+	for rows.Next() {
+		if err := rows.Scan(&isApproved); err != nil {
+			log.Println(err)
+			return isApproved, errors.New("failed to scan row in query results")
+		}
+	}
+
+	return isApproved, nil
+}
+
+func GetUserIsAdmin(userId uuid.UUID) (bool, error) {
+	var isAdmin bool
+
+	sqlString := `
+		SELECT
+			IS_ADMIN
+		FROM USER
+		WHERE ID = ?
+	`
+	rows, err := query(sqlString, userId)
+	if err != nil {
+		return isAdmin, err
+	}
+
+	for rows.Next() {
+		if err := rows.Scan(&isAdmin); err != nil {
+			log.Println(err)
+			return isAdmin, errors.New("failed to scan row in query results")
+		}
+	}
+
+	return isAdmin, nil
+}
+
+func AddUserLoginAttempt(ipAddress string, userName string) error {
+	sqlString := `
+		INSERT INTO LOGIN_ATTEMPT (IP_ADDRESS, USER_NAME)
+		VALUES (?, ?)
+	`
+	return execute(sqlString, ipAddress, userName)
+}
+
+func AllowUserLoginAttempt(ipAddress string, userName string) (bool, error) {
+	sqlString := "SELECT FN_GET_LOGIN_ATTEMPT_IS_ALLOWED (?, ?)"
+	rows, err := query(sqlString, ipAddress, userName)
+	if err != nil {
+		return false, err
+	}
+
+	allowLogin := false
+	for rows.Next() {
+		if err := rows.Scan(&allowLogin); err != nil {
+			log.Println(err)
+			return false, errors.New("failed to scan row in query results")
+		}
+	}
+
+	return allowLogin, nil
+}
+
+func GetUserIdByName(name string) (uuid.UUID, error) {
+	var userId uuid.UUID
+
+	sqlString := `
+		SELECT
+			ID
+		FROM USER
+		WHERE NAME = ?
+	`
+	rows, err := query(sqlString, name)
+	if err != nil {
+		return userId, err
+	}
+
+	for rows.Next() {
+		if err := rows.Scan(&userId); err != nil {
+			log.Println(err)
+			return userId, errors.New("failed to scan row in query results")
+		}
+	}
+
+	if userId == uuid.Nil {
+		return userId, errors.New("user not found")
+	}
+
+	return userId, nil
+}
+
+func UserNameExists(name string) bool {
+	sqlString := `
+		SELECT
+			ID
+		FROM USER
+		WHERE NAME = ?
+	`
+	rows, err := query(sqlString, name)
+	if err != nil {
+		return false
+	}
+
+	return rows.Next()
+}
+
+func CreateUser(name string, password string, isApproved bool) error {
 	passwordHash, err := auth.GetPasswordHash(password)
 	if err != nil {
 		log.Println(err)
-		return id, errors.New("failed to hash password")
+		return errors.New("failed to hash password")
 	}
 
 	sqlString := `
-		INSERT INTO USER (ID, NAME, PASSWORD_HASH)
+		INSERT INTO USER (NAME, PASSWORD_HASH, IS_APPROVED)
 		VALUES (?, ?, ?)
 	`
-	err = Execute(sqlString, id, name, passwordHash)
-	if err != nil {
-		return id, err
-	}
+	return execute(sqlString, name, passwordHash, isApproved)
+}
 
-	allUsers[id], err = getUserInDB(id)
-	if err != nil {
-		return id, err
-	}
-
-	return id, nil
+func ApproveUser(id uuid.UUID) error {
+	sqlString := `
+		UPDATE USER
+		SET IS_APPROVED = 1
+		WHERE ID = ?
+	`
+	return execute(sqlString, id)
 }
 
 func SetUserName(id uuid.UUID, name string) error {
-	user, ok := allUsers[id]
-	if !ok {
-		return errors.New("user not found")
-	}
-
 	sqlString := `
 		UPDATE USER
 		SET
 			NAME = ?
 		WHERE ID = ?
 	`
-	err := Execute(sqlString, name, id)
+	err := execute(sqlString, name, id)
 	if err != nil {
 		return err
 	}
-
-	user.Name = name
-	allUsers[id] = user
 
 	return nil
 }
 
 func SetUserPassword(id uuid.UUID, password string) error {
-	user, ok := allUsers[id]
-	if !ok {
-		return errors.New("user not found")
-	}
-
 	passwordHash, err := auth.GetPasswordHash(password)
 	if err != nil {
 		log.Println(err)
@@ -258,64 +299,45 @@ func SetUserPassword(id uuid.UUID, password string) error {
 			PASSWORD_HASH = ?
 		WHERE ID = ?
 	`
-	err = Execute(sqlString, passwordHash, id)
+	err = execute(sqlString, passwordHash, id)
 	if err != nil {
 		return err
 	}
 
-	user.PasswordHash = passwordHash
-	allUsers[id] = user
-
 	return nil
 }
 
-func SetUserColorTheme(id uuid.UUID, colorTheme string) (err error) {
-	user, ok := allUsers[id]
-	if !ok {
-		return errors.New("user not found")
-	}
-
+func SetUserColorTheme(id uuid.UUID, colorTheme string) error {
 	sqlString := `
 		UPDATE USER
 		SET
 			COLOR_THEME = ?
 		WHERE ID = ?
 	`
+	var err error
 	if colorTheme == "" {
-		err = Execute(sqlString, nil, id)
-		user.ColorTheme = sql.NullString{}
+		err = execute(sqlString, nil, id)
 	} else {
-		err = Execute(sqlString, colorTheme, id)
-		user.ColorTheme = sql.NullString{String: colorTheme, Valid: true}
+		err = execute(sqlString, colorTheme, id)
 	}
 	if err != nil {
 		return err
 	}
 
-	allUsers[id] = user
-
 	return nil
 }
 
 func SetUserIsAdmin(id uuid.UUID, isAdmin bool) error {
-	user, ok := allUsers[id]
-	if !ok {
-		return errors.New("user not found")
-	}
-
 	sqlString := `
 		UPDATE USER
 		SET
 			IS_ADMIN = ?
 		WHERE ID = ?
 	`
-	err := Execute(sqlString, isAdmin, id)
+	err := execute(sqlString, isAdmin, id)
 	if err != nil {
 		return err
 	}
-
-	user.IsAdmin = isAdmin
-	allUsers[id] = user
 
 	return nil
 }
@@ -325,12 +347,10 @@ func DeleteUser(id uuid.UUID) error {
 		DELETE FROM USER
 		WHERE ID = ?
 	`
-	err := Execute(sqlString, id)
+	err := execute(sqlString, id)
 	if err != nil {
 		return err
 	}
-
-	delete(allUsers, id)
 
 	return nil
 }

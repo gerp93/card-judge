@@ -1,46 +1,54 @@
-{{define "user-table-rows"}} {{range .}}
-<tr>
-  <td>{{.CreatedOnDate.Format "2006-01-02"}}</td>
-  <td>{{.ChangedOnDate.Format "2006-01-02"}}</td>
-  <td style="white-space: pre-wrap">{{.Name}}</td>
-  <td>
-    <select
-      name="isAdmin"
-      hx-put="/api/user/{{.Id}}/is-admin"
-      hx-trigger="change"
-      hx-target="closest td"
-      autocomplete="off"
-    >
-      {{if .IsAdmin}}
-      <option value="0">No</option>
-      <option value="1" selected>Yes</option>
-      {{else}}
-      <option value="0" selected>No</option>
-      <option value="1">Yes</option>
-      {{end}}
-    </select>
-  </td>
-  <td style="text-align: center">
-    <span
-      title="Reset Password"
-      class="clickable"
-      hx-put="/api/user/{{.Id}}/password/reset"
-      hx-confirm="Are you sure you want to reset the password for User {{.Name}}?"
-      hx-target="closest td"
-    >
-      &#8634;
-    </span>
-  </td>
-  <td style="text-align: center">
-    <span
-      title="Delete"
-      class="clickable"
-      hx-delete="/api/user/{{.Id}}"
-      hx-confirm="Are you sure you want to delete User {{.Name}}?"
-      hx-target="closest td"
-    >
-      &#128465;
-    </span>
-  </td>
-</tr>
-{{end}} {{end}}
+{{define "user-table-rows"}}
+    {{range .}}
+        <tr>
+            <td>{{.CreatedOnDate.Format "2006-01-02"}}</td>
+            <td>{{.ChangedOnDate.Format "2006-01-02"}}</td>
+            <td class="wrap-new-lines">{{.Name}}</td>
+            <td style="text-align: center">
+                {{if .IsApproved}}
+                    <span title="User Account Approved" class="bi bi-check-square"></span>
+                {{else}}
+                    <span title="Not Approved. Click to Approve."
+                          class="bi bi-dash-square clickable"
+                          hx-put="/api/user/{{.Id}}/approve"
+                          hx-confirm="Are you sure you want to approve User {{.Name}}?"
+                          hx-target="closest td"
+                    ></span>
+                {{end}}
+            </td>
+            <td>
+                <select
+                        name="isAdmin"
+                        hx-put="/api/user/{{.Id}}/is-admin"
+                        hx-trigger="change"
+                        hx-target="closest td"
+                        autocomplete="off"
+                >
+                    {{if .IsAdmin}}
+                        <option value="0">No</option>
+                        <option value="1" selected>Yes</option>
+                    {{else}}
+                        <option value="0" selected>No</option>
+                        <option value="1">Yes</option>
+                    {{end}}
+                </select>
+            </td>
+            <td style="text-align: center">
+                <span title="Reset Password"
+                      class="bi bi-arrow-counterclockwise clickable"
+                      hx-put="/api/user/{{.Id}}/password/reset"
+                      hx-confirm="Are you sure you want to reset the password for User {{.Name}}?"
+                      hx-target="closest td"
+                ></span>
+            </td>
+            <td style="text-align: center">
+                <span title="Delete"
+                      class="bi bi-trash clickable"
+                      hx-delete="/api/user/{{.Id}}"
+                      hx-confirm="Are you sure you want to delete User {{.Name}}?"
+                      hx-target="closest td"
+                ></span>
+            </td>
+        </tr>
+    {{end}}
+{{end}}
