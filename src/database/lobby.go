@@ -19,6 +19,7 @@ type Lobby struct {
 	CreatedOnDate time.Time
 
 	Name         string
+	GameType     string
 	Message      sql.NullString
 	PasswordHash sql.NullString
 
@@ -169,6 +170,7 @@ func SearchLobbies(name string, page int) ([]LobbyDetails, error) {
 			INNER JOIN PLAYER AS P ON P.LOBBY_ID = L.ID
 			AND P.IS_ACTIVE = 1
 		WHERE L.NAME LIKE ?
+			AND (L.GAME_TYPE IS NULL OR L.GAME_TYPE != 'chronology')
 		GROUP BY L.ID
 		ORDER BY L.NAME
 		LIMIT 10 OFFSET ?
@@ -210,6 +212,7 @@ func CountLobbies(name string) (int, error) {
 			COUNT(*)
 		FROM LOBBY
 		WHERE NAME LIKE ?
+			AND (GAME_TYPE IS NULL OR GAME_TYPE != 'chronology')
 	`
 	rows, err := query(sqlString, name)
 	if err != nil {
@@ -236,6 +239,7 @@ func GetLobby(id uuid.UUID) (Lobby, error) {
 			ID,
 			CREATED_ON_DATE,
 			NAME,
+			COALESCE(GAME_TYPE, 'cah') AS GAME_TYPE,
 			MESSAGE,
 			PASSWORD_HASH,
 			DRAW_PRIORITY,
@@ -257,6 +261,7 @@ func GetLobby(id uuid.UUID) (Lobby, error) {
 			&lobby.Id,
 			&lobby.CreatedOnDate,
 			&lobby.Name,
+			&lobby.GameType,
 			&lobby.Message,
 			&lobby.PasswordHash,
 			&lobby.DrawPriority,

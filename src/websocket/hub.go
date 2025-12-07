@@ -42,6 +42,15 @@ func (h *Hub) run() {
 		case client := <-h.unregister:
 			h.unregisterClient(client)
 			if len(h.clients) == 0 {
+				// Check if this is a Chronology lobby - don't auto-delete those
+				lobby, err := database.GetLobby(h.lobbyId)
+				if err == nil && lobby.GameType == "chronology" {
+					// Don't delete Chronology lobbies when empty
+					// They can be rejoined later
+					delete(lobbyHubs, h.lobbyId)
+					return
+				}
+				// For regular (CAH) lobbies, delete when empty
 				_ = database.DeleteLobby(h.lobbyId)
 				delete(lobbyHubs, h.lobbyId)
 				return
@@ -54,7 +63,7 @@ func (h *Hub) run() {
 
 func (h *Hub) registerClient(client *Client) {
 	h.clients[client] = true
-	h.broadcastMessage([]byte("<blue>Player Joined</>: <green>" + client.user.Name + "</>"))
+	h.broadcastMessage([]byte("chat:" + client.user.Name + " joined"))
 	h.broadcastMessage([]byte("refresh"))
 }
 
@@ -62,9 +71,14 @@ func (h *Hub) unregisterClient(client *Client) {
 	if _, ok := h.clients[client]; ok {
 		delete(h.clients, client)
 		close(client.send)
-		_ = database.SetPlayerInactive(h.lobbyId, client.user.Id)
+		// Only mark player inactive for non-Chronology lobbies
+		// Chronology lobbies use page reloads which briefly disconnect WebSocket
+		lobby, err := database.GetLobby(h.lobbyId)
+		if err != nil || lobby.GameType != "chronology" {
+			_ = database.SetPlayerInactive(h.lobbyId, client.user.Id)
+		}
 	}
-	h.broadcastMessage([]byte("<red>Player Left</>: <green>" + client.user.Name + "</>"))
+	h.broadcastMessage([]byte("chat:" + client.user.Name + " left"))
 	h.broadcastMessage([]byte("refresh"))
 }
 

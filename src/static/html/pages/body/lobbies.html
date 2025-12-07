@@ -1,7 +1,10 @@
 {{define "body"}}
 <div style="display: grid; grid-auto-flow: column">
-    <h2>Lobbies</h2>
+    <h2>CAH Lobbies</h2>
     <div style="text-align: right;">
+        <button onclick="window.location.href='/chronology/lobbies'" style="margin-right: 10px;">
+            <span class="bi bi-clock-history"></span> Chronology
+        </button>
         <button onclick="document.getElementById('lobby-create-dialog').showModal()">
             <span class="bi bi-plus-circle"></span> Create Lobby
         </button>

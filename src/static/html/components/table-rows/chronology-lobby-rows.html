@@ -1,0 +1,33 @@
+{{range .Lobbies}}
+<tr>
+    <td>{{.Name}}</td>
+    <td>{{.PlayerCount}}</td>
+    <td>
+        {{if eq .GameStatus "waiting"}}
+        <span style="color: var(--warning-color);">Waiting</span>
+        {{else if eq .GameStatus "active"}}
+        <span style="color: var(--success-color);">Active</span>
+        {{else if eq .GameStatus "finished"}}
+        <span style="color: var(--text-secondary);">Finished</span>
+        {{else}}
+        {{.GameStatus}}
+        {{end}}
+    </td>
+    <td>
+        {{if .HasPassword}}
+        <span class="bi bi-lock"></span>
+        {{else}}
+        <span class="bi bi-unlock"></span>
+        {{end}}
+    </td>
+    <td>
+        <button onclick="window.location.href='/chronology/{{.Id}}'" class="btn-small">
+            Join
+        </button>
+    </td>
+</tr>
+{{else}}
+<tr>
+    <td colspan="5" style="text-align: center;">No games found. Create one!</td>
+</tr>
+{{end}}

@@ -1,0 +1,11 @@
+{{if .CardId}}
+<div class="current-event-banner">
+    <div class="current-event-label">CURRENT EVENT</div>
+    <div class="current-event-text">{{.CardText}}</div>
+    <div class="current-event-hint">Where does this belong in your timeline?</div>
+</div>
+{{else}}
+<div class="current-event-banner current-event-empty">
+    <div class="current-event-text">Waiting for next card...</div>
+</div>
+{{end}}
