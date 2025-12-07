@@ -1,0 +1,53 @@
+﻿<div id="timeline-container">
+    {{range $pIndex, $player := .AllTimelines}}
+    <div class="player-timeline-row {{if $player.IsCurrent}}current-player{{end}} {{if $player.IsMe}}is-me{{end}}">
+        <div class="player-timeline-header">
+            <span class="player-name">{{$player.PlayerName}}</span>
+            {{if and $player.IsCurrent (eq $.GameStatus "active")}}<span class="turn-badge">🎯 Current Turn</span>{{end}}
+            <span class="card-count">{{len $player.Timeline}} cards</span>
+        </div>
+        <div class="timeline-horizontal">
+            {{if eq (len $player.Timeline) 0}}
+            <div class="timeline-empty-state">
+                <p>No cards yet</p>
+            </div>
+            {{else}}
+            <!-- Place Before first card (only for current player who is viewing, and game is active) -->
+            {{if and $player.IsCurrent $player.IsMe (eq $.GameStatus "active")}}
+            <div class="timeline-slot timeline-slot-end">
+                <button class="place-slot-button" 
+                        hx-post="/api/chronology/{{$.LobbyId}}/place-card" 
+                        hx-vals='{"position": 0}' 
+                        hx-target="#chronology-message"
+                        hx-swap="innerHTML">
+                    <span class="slot-arrow">◀</span>
+                </button>
+            </div>
+            {{end}}
+            {{range $index, $card := $player.Timeline}}
+            <div class="timeline-card-box">
+                <div class="card-year-badge">{{$card.CardYear}}</div>
+                <div class="card-event-text">{{$card.CardText}}</div>
+            </div>
+            <!-- Place After this card (only for current player who is viewing, and game is active) -->
+            {{if and $player.IsCurrent $player.IsMe (eq $.GameStatus "active")}}
+            <div class="timeline-slot {{if eq (add $index 1) (len $player.Timeline)}}timeline-slot-end{{end}}">
+                <button class="place-slot-button" 
+                        hx-post="/api/chronology/{{$.LobbyId}}/place-card" 
+                        hx-vals='{"position": {{add $index 1}}}' 
+                        hx-target="#chronology-message"
+                        hx-swap="innerHTML">
+                    {{if eq (add $index 1) (len $player.Timeline)}}
+                    <span class="slot-arrow">▶</span>
+                    {{else}}
+                    <span class="slot-dot">●</span>
+                    {{end}}
+                </button>
+            </div>
+            {{end}}
+            {{end}}
+            {{end}}
+        </div>
+    </div>
+    {{end}}
+</div>

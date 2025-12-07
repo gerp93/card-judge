@@ -8,3 +8,5 @@ infrastructure/backups/*
 # compiled binaries
 src/main
 src/card-judge
+src/card-judge.exe
+src/main.exe

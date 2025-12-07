@@ -1,0 +1,82 @@
+{{define "body"}}
+<script src="/static/js/chronology.js"></script>
+<link rel="stylesheet" href="/static/css/chronology.css" />
+
+<div id="chronology-container">
+    <!-- Top Header: Lobby Name and Stats only -->
+    <div id="chronology-header">
+        <div class="header-top">
+            <span class="lobby-name">{{.Lobby.Name}}</span>
+            <div class="header-stats">
+                <span class="info-stat">Cards to win: <strong>{{.Game.CardsToWin}}</strong></span>
+                <span class="info-stat" id="draw-pile-count">Remaining: <strong>--</strong></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Event Banner -->
+    <div id="chronology-current-event">
+        <div id="current-card-content"
+             hx-get="/api/chronology/{{.Lobby.Id}}/current-card"
+             hx-trigger="load">
+            <!-- Card loaded via HTMX -->
+        </div>
+    </div>
+
+    <!-- Timeline Section - Centered -->
+    <div id="chronology-timeline-section">
+        <div id="chronology-timeline"
+             hx-get="/api/chronology/{{.Lobby.Id}}/timeline"
+             hx-trigger="load">
+            <!-- Timeline loaded via HTMX -->
+        </div>
+    </div>
+
+    <!-- Controls (Start Game / Game Over only) -->
+    {{if eq .Game.GameStatus "waiting"}}
+    <div id="chronology-controls">
+        <p>Waiting for players to join...</p>
+        <button 
+            hx-post="/api/chronology/{{.Lobby.Id}}/start"
+            hx-target="#chronology-message">
+            Start Game
+        </button>
+        <div id="chronology-message"></div>
+    </div>
+    {{else if eq .Game.GameStatus "finished"}}
+    <div id="chronology-controls">
+        {{if .Game.WinnerId.Valid}}
+        <p class="winner-text">🎉 Winner: <strong>{{.WinnerName}}</strong></p>
+        {{end}}
+        <button 
+            hx-post="/api/chronology/{{.Lobby.Id}}/reset"
+            hx-target="#chronology-message">
+            Start New Game
+        </button>
+        <a href="/chronology/lobbies" class="btn-link">Back to Games</a>
+        <div id="chronology-message"></div>
+    </div>
+    {{else}}
+    <div id="chronology-message"></div>
+    {{end}}
+</div>
+
+<!-- Chat -->
+<div id="chronology-chat">
+    <div id="chronology-chat-messages"></div>
+    <form id="chronology-chat-form">
+        <input
+            id="chronology-chat-input"
+            type="text"
+            maxlength="255"
+            placeholder="Send a message..."
+        />
+        <input type="submit" value="Send" />
+    </form>
+</div>
+
+<script>
+    // Initialize WebSocket for real-time updates
+    initChronologyWebSocket("{{.Lobby.Id}}", "{{.PlayerId}}");
+</script>
+{{end}}
