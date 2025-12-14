@@ -1,0 +1,20 @@
+<table class="scoreboard-table">
+    <thead>
+        <tr>
+            <th>Player</th>
+            <th>Cards</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{range .Players}}
+        <tr class="{{if .IsCurrent}}current-player{{end}} {{if not .IsActive}}inactive{{end}}">
+            <td>{{.UserName}}</td>
+            <td>{{.TimelineSize}} / {{$.CardsToWin}}</td>
+            <td>
+                {{if .IsCurrent}}🎯 Playing{{else if not .IsActive}}Left{{else}}Waiting{{end}}
+            </td>
+        </tr>
+        {{end}}
+    </tbody>
+</table>
