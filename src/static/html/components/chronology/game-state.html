@@ -1,0 +1,87 @@
+<div id="game-state-container">
+    {{if eq .Game.GameStatus "waiting"}}
+    <div class="game-waiting">
+        <p>Waiting for players to join...</p>
+        <p>Players joined: {{len .Players}}</p>
+        <button 
+            hx-post="/api/chronology/{{.LobbyId}}/start"
+            hx-target="#chronology-message"
+            hx-swap="innerHTML"
+            onclick="console.log('Start Game clicked');">
+            Start Game
+        </button>
+        <div id="chronology-message"></div>
+    </div>
+    {{else if eq .Game.GameStatus "finished"}}
+    <div class="game-finished">
+        <h3>Game Over!</h3>
+        {{if .Game.WinnerId.Valid}}
+        <p>We have a winner!</p>
+        {{end}}
+    </div>
+    {{else}}
+    <!-- Active Game State -->
+    <div class="game-active">
+        <div class="game-info-bar">
+            <span>Cards remaining: <strong>{{.DrawPileCount}}</strong></span>
+            <span>Cards to win: <strong>{{.Game.CardsToWin}}</strong></span>
+        </div>
+
+        {{if .CurrentCard.CardId}}
+        <div class="current-card-display">
+            <h4>Current Event</h4>
+            <div class="chronology-card">
+                <p class="card-text">{{.CurrentCard.CardText}}</p>
+                {{if .IsMyTurn}}
+                <p class="card-hint">(Year hidden - place it in your timeline!)</p>
+                {{end}}
+            </div>
+        </div>
+        {{else}}
+        <div class="no-current-card">
+            <p>Drawing next card...</p>
+        </div>
+        {{end}}
+
+        <div class="turn-indicator">
+            {{if .IsMyTurn}}
+            <p class="your-turn">🎯 It's your turn!</p>
+            {{else}}
+            <p class="waiting-turn">Waiting for another player...</p>
+            {{end}}
+        </div>
+        <div id="chronology-message"></div>
+    </div>
+    {{end}}
+
+    <!-- Players Summary -->
+    <div class="players-summary">
+        <h4>Scoreboard</h4>
+        <table class="players-table">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Timeline</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Players}}
+                <tr class="{{if .IsCurrent}}current-player{{end}} {{if not .IsActive}}inactive-player{{end}}">
+                    <td>{{.UserName}}</td>
+                    <td>{{.TimelineSize}} cards</td>
+                    <td>
+                        {{if .IsCurrent}}
+                        <span class="status-playing">Playing</span>
+                        {{else if not .IsActive}}
+                        <span class="status-inactive">Left</span>
+                        {{else}}
+                        <span class="status-waiting">Waiting</span>
+                        {{end}}
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+</div>

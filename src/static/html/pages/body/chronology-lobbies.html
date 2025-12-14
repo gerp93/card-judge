@@ -1,0 +1,125 @@
+{{define "body"}}
+<div class="deck-header">
+    <h2>Chronology Games</h2>
+    <div class="deck-header-actions">
+        <button onclick="window.location.href='/lobbies'" class="deck-back-button" style="margin-right: 10px;">
+            <span class="bi bi-arrow-left"></span> CAH Lobbies
+        </button>
+        <button onclick="document.getElementById('chronology-create-dialog').showModal()" class="deck-create-button">
+            <span class="bi bi-plus-circle"></span> Create Game
+        </button>
+    </div>
+</div>
+
+<dialog id="chronology-create-dialog">
+    <div class="dialog-header-grid">
+        <div>
+            <h3>Create Chronology Game</h3>
+        </div>
+        <div>
+            <span
+                class="bi bi-x-lg close-button"
+                onclick="document.getElementById('chronology-create-dialog').close()"
+            ></span>
+        </div>
+    </div>
+    <form
+        hx-post="/api/chronology/create"
+        hx-target="find .htmx-result"
+    >
+        <div class="form-input">
+            <label for="createChronologyName">Game Name</label>
+            <input
+                type="text"
+                id="createChronologyName"
+                name="name"
+                maxlength="255"
+                placeholder="Enter Game Name"
+                required="required"
+                autocomplete="off"
+            />
+            <label for="createChronologyCardsToWin">Cards to Win</label>
+            <input
+                type="number"
+                id="createChronologyCardsToWin"
+                name="cardsToWin"
+                min="3"
+                max="20"
+                value="5"
+                required="required"
+            />
+        </div>
+        <br />
+        <details>
+            <summary>Password (optional)</summary>
+            <div class="form-input">
+                <label for="createChronologyPassword">Password</label>
+                <input
+                    type="password"
+                    id="createChronologyPassword"
+                    name="password"
+                    maxlength="255"
+                    placeholder="Enter Password"
+                    autocomplete="off"
+                />
+            </div>
+        </details>
+        <br />
+        <details open>
+            <summary>Select Decks (cards must have years in text)</summary>
+            <div style="max-height: 200px; overflow-y: auto; padding: 10px;">
+                {{range .Decks}}
+                <div>
+                    <input
+                        type="checkbox"
+                        id="deck-{{.Id}}"
+                        name="deckId"
+                        value="{{.Id}}"
+                    />
+                    <label for="deck-{{.Id}}">{{.Name}}</label>
+                </div>
+                {{end}}
+            </div>
+        </details>
+        <br />
+        <input type="submit" value="Create Game" />
+        <span class="htmx-result"></span>
+    </form>
+</dialog>
+
+<div class="search-form-container">
+    <form
+        id="searchForm"
+        hx-post="/api/chronology/search"
+        hx-trigger="load, submit"
+        hx-target="#lobbies-table-body"
+    >
+        <div class="search-form-group search-form-group-flex">
+            <label for="searchName">Search:</label>
+            <input
+                type="text"
+                id="searchName"
+                name="name"
+                placeholder="Search by name..."
+                autocomplete="off"
+            />
+        </div>
+        <input type="submit" value="Search" />
+    </form>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Players</th>
+            <th>Status</th>
+            <th>Password</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="lobbies-table-body">
+        <!-- Results loaded via HTMX -->
+    </tbody>
+</table>
+{{end}}

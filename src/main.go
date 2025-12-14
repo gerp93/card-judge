@@ -9,6 +9,7 @@ import (
 	"github.com/grantfbarnes/card-judge/api"
 	apiAccess "github.com/grantfbarnes/card-judge/api/access"
 	apiCard "github.com/grantfbarnes/card-judge/api/card"
+	apiChronology "github.com/grantfbarnes/card-judge/api/chronology"
 	apiDeck "github.com/grantfbarnes/card-judge/api/deck"
 	apiLobby "github.com/grantfbarnes/card-judge/api/lobby"
 	apiPages "github.com/grantfbarnes/card-judge/api/pages"
@@ -38,6 +39,7 @@ func main() {
 		return
 	}
 	defer db.Close()
+
 
 	for _, sqlFile := range static.SQLFiles {
 		err = database.RunFile(sqlFile)
@@ -69,6 +71,11 @@ func main() {
 	http.Handle("GET /decks", api.MiddlewareForPages(http.HandlerFunc(apiPages.Decks)))
 	http.Handle("GET /deck/{deckId}", api.MiddlewareForPages(http.HandlerFunc(apiPages.Deck)))
 	http.Handle("GET /deck/{deckId}/access", api.MiddlewareForPages(http.HandlerFunc(apiPages.DeckAccess)))
+
+	// chronology pages
+	http.Handle("GET /chronology/lobbies", api.MiddlewareForPages(http.HandlerFunc(apiPages.ChronologyLobbies)))
+	http.Handle("GET /chronology/{lobbyId}", api.MiddlewareForPages(http.HandlerFunc(apiPages.ChronologyLobby)))
+	http.Handle("GET /chronology/{lobbyId}/access", api.MiddlewareForPages(http.HandlerFunc(apiPages.ChronologyLobbyAccess)))
 
 	// user
 	http.Handle("POST /api/user/create", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.Create)))
@@ -144,6 +151,18 @@ func main() {
 	http.Handle("PUT /api/lobby/{lobbyId}/lose-streak-threshold", api.MiddlewareForAPIs(http.HandlerFunc(apiLobby.SetLoseStreakThreshold)))
 	http.Handle("PUT /api/lobby/{lobbyId}/response-count", api.MiddlewareForAPIs(http.HandlerFunc(apiLobby.SetResponseCount)))
 	http.Handle("PUT /api/lobby/{lobbyId}/set-decks", api.MiddlewareForAPIs(http.HandlerFunc(apiLobby.SetDecks)))
+
+	// chronology
+	http.Handle("POST /api/chronology/create", api.MiddlewareForAPIs(http.HandlerFunc(apiChronology.Create)))
+	http.Handle("POST /api/chronology/{lobbyId}/start", api.MiddlewareForAPIs(http.HandlerFunc(apiChronology.StartGame)))
+	http.Handle("POST /api/chronology/{lobbyId}/reset", api.MiddlewareForAPIs(http.HandlerFunc(apiChronology.ResetGame)))
+	http.Handle("POST /api/chronology/{lobbyId}/place-card", api.MiddlewareForAPIs(http.HandlerFunc(apiChronology.PlaceCard)))
+	http.Handle("GET /api/chronology/{lobbyId}/state", api.MiddlewareForAPIs(http.HandlerFunc(apiChronology.GetGameState)))
+	http.Handle("GET /api/chronology/{lobbyId}/timeline", api.MiddlewareForAPIs(http.HandlerFunc(apiChronology.GetTimeline)))
+	http.Handle("GET /api/chronology/{lobbyId}/current-card", api.MiddlewareForAPIs(http.HandlerFunc(apiChronology.GetCurrentCard)))
+	http.Handle("GET /api/chronology/{lobbyId}/players", api.MiddlewareForAPIs(http.HandlerFunc(apiChronology.GetPlayers)))
+	http.Handle("GET /api/chronology/{lobbyId}/draw-pile-count", api.MiddlewareForAPIs(http.HandlerFunc(apiChronology.GetDrawPileCount)))
+	http.Handle("POST /api/chronology/search", api.MiddlewareForAPIs(http.HandlerFunc(apiChronology.Search)))
 
 	// access
 	http.Handle("POST /api/access/lobby/{lobbyId}", api.MiddlewareForAPIs(http.HandlerFunc(apiAccess.Lobby)))
