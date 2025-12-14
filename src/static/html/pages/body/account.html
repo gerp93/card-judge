@@ -39,70 +39,188 @@
                             required="required"
                             autocomplete="off"
                         >
-                            <option
-                                value="dark-theme"
-                                {{if or (not .User.ColorTheme.Valid) (eq .User.ColorTheme.String "dark-theme")}}
-                                selected
-                                {{end}}
-                            >
-                                Dark
-                            </option>
-                            <option
-                                value="light-theme"
-                                {{if eq .User.ColorTheme.String "light-theme"}}
-                                selected
-                                {{end}}
-                            >
-                                Light
-                            </option>
-                            <option
-                                value="nord-polar-night-theme"
-                                {{if eq .User.ColorTheme.String "nord-polar-night-theme"}}
-                                selected
-                                {{end}}
-                            >
-                                Nord Polar Night
-                            </option>
-                            <option
-                                value="dracula-theme"
-                                {{if eq .User.ColorTheme.String "dracula-theme"}}
-                                selected
-                                {{end}}
-                            >
-                                Dracula
-                            </option>
-                            <option
-                                value="purple-theme"
-                                {{if eq .User.ColorTheme.String "purple-theme"}}
-                                selected
-                                {{end}}
-                            >
-                                Purple
-                            </option>
-                            <option
-                                value="tokyo-night-dark-theme"
-                                {{if eq .User.ColorTheme.String "tokyo-night-dark-theme"}}
-                                selected
-                                {{end}}
-                            >
-                                Tokyo Night Dark
-                            </option>
-                            <option
-                                value="gruvbox-dark-theme"
-                                {{if eq .User.ColorTheme.String "gruvbox-dark-theme"}}
-                                selected
-                                {{end}}
-                            >
-                                GruvBox Dark
-                            </option>
-                            <option
-                                value="gruvbox-light-theme"
-                                {{if eq .User.ColorTheme.String "gruvbox-light-theme"}}
-                                selected
-                                {{end}}
-                            >
-                                GruvBox Light
-                            </option>
+                            <optgroup label="Classic">
+                                <option
+                                    value="dark-theme"
+                                    {{if or (not .User.ColorTheme.Valid) (eq .User.ColorTheme.String "dark-theme")}}
+                                    selected
+                                    {{end}}
+                                >
+                                    🌙 Dark
+                                </option>
+                                <option
+                                    value="light-theme"
+                                    {{if eq .User.ColorTheme.String "light-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    ☀️ Light
+                                </option>
+                                <option
+                                    value="nord-polar-night-theme"
+                                    {{if eq .User.ColorTheme.String "nord-polar-night-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    ❄️ Nord Polar Night
+                                </option>
+                                <option
+                                    value="dracula-theme"
+                                    {{if eq .User.ColorTheme.String "dracula-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    🧛 Dracula
+                                </option>
+                                <option
+                                    value="purple-theme"
+                                    {{if eq .User.ColorTheme.String "purple-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    💜 Purple
+                                </option>
+                                <option
+                                    value="tokyo-night-dark-theme"
+                                    {{if eq .User.ColorTheme.String "tokyo-night-dark-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    🌃 Tokyo Night Dark
+                                </option>
+                                <option
+                                    value="gruvbox-dark-theme"
+                                    {{if eq .User.ColorTheme.String "gruvbox-dark-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    🔳 GruvBox Dark
+                                </option>
+                                <option
+                                    value="gruvbox-light-theme"
+                                    {{if eq .User.ColorTheme.String "gruvbox-light-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    🔲 GruvBox Light
+                                </option>
+                            </optgroup>
+                            <optgroup label="Visual Assault">
+                                <option
+                                    value="retrowave-theme"
+                                    {{if eq .User.ColorTheme.String "retrowave-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    🌅 Retrowave
+                                </option>
+                                <option
+                                    value="bubblegum-theme"
+                                    {{if eq .User.ColorTheme.String "bubblegum-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    🍬 Bubblegum
+                                </option>
+                                <option
+                                    value="electric-lime-theme"
+                                    {{if eq .User.ColorTheme.String "electric-lime-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    ⚡ Electric Lime
+                                </option>
+                                <option
+                                    value="neon-theme"
+                                    {{if eq .User.ColorTheme.String "neon-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    🌈 NEON
+                                </option>
+                                <option
+                                    value="commander-keen-theme"
+                                    {{if eq .User.ColorTheme.String "commander-keen-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    🚀 Commander Keen
+                                </option>
+                                <option
+                                    value="lava-theme"
+                                    {{if eq .User.ColorTheme.String "lava-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    🌋 LAVA
+                                </option>
+                                <option
+                                    value="hacker-theme"
+                                    {{if eq .User.ColorTheme.String "hacker-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    💻 Hacker
+                                </option>
+                                <option
+                                    value="hawkeye-theme"
+                                    {{if eq .User.ColorTheme.String "hawkeye-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    🦅 Hawkeye
+                                </option>
+                                <option
+                                    value="merica-theme"
+                                    {{if eq .User.ColorTheme.String "merica-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    ★ 'MERICA
+                                </option>
+                            </optgroup>
+                            <optgroup label="Tractor">
+                                <option
+                                    value="green-acres-theme"
+                                    {{if eq .User.ColorTheme.String "green-acres-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    🚜 Green Acres
+                                </option>
+                                <option
+                                    value="red-barn-theme"
+                                    {{if eq .User.ColorTheme.String "red-barn-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    🏚️ Red Barn
+                                </option>
+                                <option
+                                    value="flambeau-theme"
+                                    {{if eq .User.ColorTheme.String "flambeau-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    🌾 Flambeau
+                                </option>
+                                <option
+                                    value="flambeau-inverse-theme"
+                                    {{if eq .User.ColorTheme.String "flambeau-inverse-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    🔥 Flambeau (Inverse)
+                                </option>
+                                <option
+                                    value="blue-oval-theme"
+                                    {{if eq .User.ColorTheme.String "blue-oval-theme"}}
+                                    selected
+                                    {{end}}
+                                >
+                                    🔵 Blue Oval
+                                </option>
+                            </optgroup>
                         </select>
                     </div>
                     <div class="htmx-result"></div>
@@ -119,23 +237,33 @@
         hx-target="find .htmx-result"
     >
         <div class="form-input">
-            <label for="newUserPassword">New Password</label>
+            <label for="currentPassword">Current Password</label>
             <input
                 type="password"
-                id="newUserPassword"
-                name="password"
+                id="currentPassword"
+                name="currentPassword"
                 maxlength="255"
-                placeholder="Enter Password"
+                placeholder="Current Password"
+                required="required"
+                autocomplete="password"
+            />
+            <label for="newPassword">New Password</label>
+            <input
+                type="password"
+                id="newPassword"
+                name="newPassword"
+                maxlength="255"
+                placeholder="New Password"
                 required="required"
                 autocomplete="new-password"
             />
-            <label for="newUserPasswordConfirm">Confirm New Password</label>
+            <label for="newPasswordConfirm">Confirm New Password</label>
             <input
                 type="password"
-                id="newUserPasswordConfirm"
-                name="passwordConfirm"
+                id="newPasswordConfirm"
+                name="newPasswordConfirm"
                 maxlength="255"
-                placeholder="Enter Password"
+                placeholder="New Password Again"
                 required="required"
                 autocomplete="off"
             />

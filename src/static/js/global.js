@@ -20,6 +20,40 @@ document.addEventListener("htmx:afterSwap", function (event) {
     }
 });
 
+document.addEventListener("htmx:confirm", function (event) {
+    const message = event.target.getAttribute("hx-confirm");
+    if (message) {
+        // override default browser confirm with custom dialog
+        event.preventDefault();
+        confirmationDialogCreate(event, message);
+    }
+});
+
+let confirmationEvent = null;
+
+function confirmationDialogCreate(event, message) {
+    confirmationEvent = event;
+    document.getElementById("confirmation-dialog-message").textContent = message;
+    document.getElementById("confirmation-dialog").showModal();
+}
+
+function confirmationDialogDelete() {
+    document.getElementById("confirmation-dialog").close();
+    document.getElementById("confirmation-dialog-message").textContent = "";
+    confirmationEvent = null;
+}
+
+function confirmationAnswerYes() {
+    if (confirmationEvent && confirmationEvent.detail) {
+        confirmationEvent.detail.issueRequest(true);
+    }
+    confirmationDialogDelete();
+}
+
+function confirmationAnswerNo() {
+    confirmationDialogDelete();
+}
+
 function addClassToTarget(className, targetElement) {
     if (!targetElement.classList.contains(className)) {
         targetElement.classList.add(className);

@@ -96,52 +96,7 @@
                 ></span>
             </td>
         </tr>
-        {{if not .PlayerIsWinning}}
-        {{if .PlayerIsJudge}}
-        <tr>
-            <td>
-                <button
-                    hx-post="/api/lobby/{{$.LobbyId}}/skip-judge"
-                    hx-confirm="Are you sure you want to skip being judge?"
-                    {{if or .BoardHasAnySpecial .BoardHasAnyRevealed (lt .PlayerCreditsRemaining 5)}}
-                    class="disabled non-clickable"
-                    disabled
-                    {{end}}
-                >
-                    Skip Being Judge
-                </button>
-            </td>
-            <td>5</td>
-            <td>
-                <span
-                    class="bi bi-info-circle"
-                    title="Skip your turn as judge."
-                ></span>
-            </td>
-        </tr>
-        <tr>
-            <td>
-                <button
-                    hx-post="/api/lobby/{{$.LobbyId}}/reset-responses"
-                    hx-confirm="Are you sure you want to reset responses?"
-                    {{$opponentCount := len .Opponents}}
-                    {{if gt $opponentCount 0}}
-                    class="disabled non-clickable"
-                    disabled
-                    {{end}}
-                >
-                    Reset Responses
-                </button>
-            </td>
-            <td></td>
-            <td>
-                <span
-                    class="bi bi-info-circle"
-                    title="Reset player responses back to default."
-                ></span>
-            </td>
-        </tr>
-        {{else}}
+        {{if not .PlayerIsJudge}}
         <tr>
             <td>
                 {{if gt .PlayerBetOnWin 0}}
@@ -176,6 +131,55 @@
                 ></span>
             </td>
         </tr>
+        {{end}}
+        {{if and .PlayerIsJudge (not .PlayerIsWinning)}}
+        <tr>
+            <td>
+                <button
+                    hx-post="/api/lobby/{{$.LobbyId}}/skip-judge"
+                    hx-confirm="Are you sure you want to skip being judge?"
+                    {{if or .BoardHasAnySpecial .BoardHasAnyRevealed (lt .PlayerCreditsRemaining 5)}}
+                    class="disabled non-clickable"
+                    disabled
+                    {{end}}
+                >
+                    Skip Being Judge
+                </button>
+            </td>
+            <td>5</td>
+            <td>
+                <span
+                    class="bi bi-info-circle"
+                    title="Skip your turn as judge."
+                ></span>
+            </td>
+        </tr>
+        {{end}}
+        {{if .PlayerIsJudge}}
+        <tr>
+            <td>
+                <button
+                    hx-post="/api/lobby/{{$.LobbyId}}/reset-responses"
+                    hx-confirm="Are you sure you want to reset responses?"
+                    {{$opponentCount := len .Opponents}}
+                    {{if gt $opponentCount 0}}
+                    class="disabled non-clickable"
+                    disabled
+                    {{end}}
+                >
+                    Reset Responses
+                </button>
+            </td>
+            <td></td>
+            <td>
+                <span
+                    class="bi bi-info-circle"
+                    title="Reset player responses back to default."
+                ></span>
+            </td>
+        </tr>
+        {{end}}
+        {{if and (not .PlayerIsJudge) (not .PlayerIsWinning)}}
         <tr>
             <td>
                 <button
@@ -206,6 +210,8 @@
                 ></span>
             </td>
         </tr>
+        {{end}}
+        {{if and (not .PlayerIsJudge) (not .PlayerIsWinning)}}
         <tr>
             <td>
                 <button
@@ -227,6 +233,31 @@
                 ></span>
             </td>
         </tr>
+        {{end}}
+        {{if and (not .PlayerIsJudge) (not .PlayerIsWinning)}}
+        <tr>
+            <td>
+                <button
+                    hx-post="/api/lobby/{{$.LobbyId}}/card/surprise/play"
+                    hx-confirm="Are you sure you want to use a Surprise Card?"
+                    {{if .PlayerIsReady}}
+                    class="disabled non-clickable"
+                    disabled
+                    {{end}}
+                >
+                    Surprise Card
+                </button>
+            </td>
+            <td>-</td>
+            <td>
+                <span
+                    class="bi bi-info-circle"
+                    title="Draw a random card from the draw pile.&#010;You will not know which card you played."
+                ></span>
+            </td>
+        </tr>
+        {{end}}
+        {{if and (not .PlayerIsJudge) (not .PlayerIsWinning)}}
         <tr>
             <td>
                 <button
@@ -248,27 +279,8 @@
                 ></span>
             </td>
         </tr>
-        <tr>
-            <td>
-                <button
-                    hx-post="/api/lobby/{{$.LobbyId}}/card/surprise/play"
-                    hx-confirm="Are you sure you want to use a Surprise Card?"
-                    {{if or .PlayerIsReady (lt .PlayerCreditsRemaining 1)}}
-                    class="disabled non-clickable"
-                    disabled
-                    {{end}}
-                >
-                    Surprise Card
-                </button>
-            </td>
-            <td>1</td>
-            <td>
-                <span
-                    class="bi bi-info-circle"
-                    title="Draw a random card from the draw pile.&#010;You will not know which card you played."
-                ></span>
-            </td>
-        </tr>
+        {{end}}
+        {{if and (not .PlayerIsJudge) (not .PlayerIsWinning)}}
         <tr>
             <td>
                 <button
@@ -289,6 +301,8 @@
                 ></span>
             </td>
         </tr>
+        {{end}}
+        {{if and (not .PlayerIsJudge) (not .PlayerIsWinning)}}
         <tr>
             <td>
                 <button
@@ -309,7 +323,6 @@
                 ></span>
             </td>
         </tr>
-        {{end}}
         {{end}}
     </tbody>
 </table>
@@ -393,8 +406,8 @@
     </div>
     <form
         hx-post="/api/lobby/{{.LobbyId}}/gamble-credits"
-        hx-confirm="Are you sure you want to gamble these credits?"
         hx-target="find .htmx-result"
+        hx-confirm="Are you sure you want to gamble these credits?"
     >
         <div class="form-input">
             <label for="gambleAmount">Credits</label>
@@ -436,8 +449,8 @@
     </div>
     <form
         hx-post="/api/lobby/{{.LobbyId}}/bet-on-win"
-        hx-confirm="Are you sure you want to place this bet?"
         hx-target="find .htmx-result"
+        hx-confirm="Are you sure you want to place this bet?"
     >
         <div class="form-input">
             <label for="betOnWinAmount">Credits</label>

@@ -6,6 +6,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/grantfbarnes/card-judge/api"
+	"github.com/grantfbarnes/card-judge/auth"
 	"github.com/grantfbarnes/card-judge/database"
 )
 
@@ -241,29 +242,51 @@ func SetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var password string
-	var passwordConfirm string
+	var currentPassword string
+	var newPassword string
+	var newPasswordConfirm string
 	for key, val := range r.Form {
-		if key == "password" {
-			password = val[0]
-		} else if key == "passwordConfirm" {
-			passwordConfirm = val[0]
+		if key == "currentPassword" {
+			currentPassword = val[0]
+		} else if key == "newPassword" {
+			newPassword = val[0]
+		} else if key == "newPasswordConfirm" {
+			newPasswordConfirm = val[0]
 		}
 	}
 
-	if password == "" {
+	if currentPassword == "" {
 		w.WriteHeader(http.StatusBadRequest)
-		_, _ = w.Write([]byte("No password found."))
+		_, _ = w.Write([]byte("No current password found."))
 		return
 	}
 
-	if password != passwordConfirm {
-		w.WriteHeader(http.StatusBadRequest)
-		_, _ = w.Write([]byte("Passwords do not match."))
+	passwordHash, err := database.GetDeckPasswordHash(deckId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
-	err = database.SetDeckPassword(deckId, password)
+	if !auth.PasswordMatchesHash(currentPassword, passwordHash) {
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte("Provided current password is not valid."))
+		return
+	}
+
+	if newPassword == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte("No new password found."))
+		return
+	}
+
+	if newPassword != newPasswordConfirm {
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte("New passwords do not match."))
+		return
+	}
+
+	err = database.SetDeckPassword(deckId, newPassword)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(err.Error()))

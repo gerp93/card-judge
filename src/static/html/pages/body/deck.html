@@ -345,32 +345,41 @@ No cards found with that search criteria.
         hx-target="find .htmx-result"
     >
         <div class="form-input">
-            <label for="setDeckPassword">New Password</label>
+            <label for="currentPassword">Current Password</label>
             <input
                 type="password"
-                id="setDeckPassword"
-                name="password"
+                id="currentPassword"
+                name="currentPassword"
                 maxlength="255"
-                placeholder="Enter Password"
-                autocomplete="new-password"
+                placeholder="Current Password"
                 required="required"
+                autocomplete="password"
             />
-            <label for="setDeckPasswordConfirm">Confirm New Password</label>
+            <label for="newPassword">New Password</label>
             <input
                 type="password"
-                id="setDeckPasswordConfirm"
-                name="passwordConfirm"
+                id="newPassword"
+                name="newPassword"
                 maxlength="255"
-                placeholder="Enter Password"
-                autocomplete="off"
+                placeholder="New Password"
                 required="required"
+                autocomplete="new-password"
+            />
+            <label for="newPasswordConfirm">Confirm New Password</label>
+            <input
+                type="password"
+                id="newPasswordConfirm"
+                name="newPasswordConfirm"
+                maxlength="255"
+                placeholder="New Password Again"
+                required="required"
+                autocomplete="off"
             />
         </div>
-        <br />
         <div class="htmx-result"></div>
         <input
             type="submit"
-            value="Set Deck Password"
+            value="Change Password"
         />
     </form>
     <h3>Set Is Public Read-Only</h3>

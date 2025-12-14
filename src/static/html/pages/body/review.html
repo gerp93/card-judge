@@ -76,7 +76,6 @@ No review cards found.
                     class="bi bi-arrow-counterclockwise clickable"
                     hx-put="/api/card/review/{{.Id}}/recover"
                     hx-confirm="Are you sure you want to recover this card?"
-                    hx-target="closest td"
                 ></span>
             </td>
             <td style="text-align: center">
@@ -85,7 +84,6 @@ No review cards found.
                     class="bi bi-trash clickable"
                     hx-delete="/api/card/review/{{.Id}}"
                     hx-confirm="Are you sure you want to permanently delete this card?"
-                    hx-target="closest td"
                 ></span>
             </td>
         </tr>

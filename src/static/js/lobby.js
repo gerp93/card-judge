@@ -35,6 +35,7 @@ window.onload = () => {
 
         switch (messageText) {
             case "refresh":
+                confirmationDialogDelete();
                 htmx.ajax("GET", "/api" + document.location.pathname + "/html/game-interface", {
                     source: "#lobby-grid-interface",
                     target: "#lobby-grid-interface"
@@ -42,6 +43,7 @@ window.onload = () => {
                 return;
 
             case "refresh-lobby-game-info":
+                confirmationDialogDelete();
                 htmx.ajax("GET", "/api" + document.location.pathname + "/html/lobby-game-info", {
                     source: "#lobby-game-info",
                     target: "#lobby-game-info"
@@ -49,6 +51,7 @@ window.onload = () => {
                 return;
 
             case "refresh-player-hand":
+                confirmationDialogDelete();
                 htmx.ajax("GET", "/api" + document.location.pathname + "/html/player-hand", {
                     source: "#player-hand",
                     target: "#player-hand"
@@ -56,6 +59,7 @@ window.onload = () => {
                 return;
 
             case "refresh-player-specials":
+                confirmationDialogDelete();
                 htmx.ajax("GET", "/api" + document.location.pathname + "/html/player-specials", {
                     source: "#player-specials",
                     target: "#player-specials"
@@ -63,16 +67,10 @@ window.onload = () => {
                 return;
 
             case "refresh-lobby-game-board":
+                confirmationDialogDelete();
                 htmx.ajax("GET", "/api" + document.location.pathname + "/html/lobby-game-board", {
                     source: "#lobby-game-board",
                     target: "#lobby-game-board"
-                });
-                return;
-
-            case "refresh-lobby-game-stats":
-                htmx.ajax("GET", "/api" + document.location.pathname + "/html/lobby-game-stats", {
-                    source: "#lobby-game-stats",
-                    target: "#lobby-game-stats"
                 });
                 return;
 

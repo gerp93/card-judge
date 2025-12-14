@@ -4,13 +4,6 @@
     <span>[NO PROMPT CARD]</span>
     {{else}}
     <span class="wrap-new-lines">{{.JudgeCardText.String}}</span>
-    {{if .JudgeCardDeck.Valid}}
-    <span
-        class="bi bi-info-circle"
-        style="float: right"
-        title="{{.JudgeCardDeck.String}}"
-    ></span>
-    {{end}}
     {{if .JudgeCardYouTube.Valid}}
     <br />
     <br />
@@ -133,11 +126,6 @@
                     >
                         <p>
                             <span class="wrap-new-lines">{{.Text}}</span>
-                            <span
-                                class="bi bi-info-circle"
-                                style="float: right"
-                                title="{{.DeckName}}"
-                            ></span>
                         </p>
                         {{if .YouTube.Valid}}
                         <div class="iframe-container">
@@ -197,12 +185,11 @@
                                 hx-post="/api/lobby/{{$.LobbyId}}/response-card/{{.ResponseCardId}}/withdraw"
                             ></span>
                             {{end}}
+                            {{if eq .SpecialCategory.String "SURPRISE"}}
+                            <span>?????</span>
+                            {{else}}
                             <span class="wrap-new-lines">{{.Text}}</span>
-                            <span
-                                class="bi bi-info-circle"
-                                style="float: right"
-                                title="{{.DeckName}}"
-                            ></span>
+                            {{end}}
                         </p>
                         {{if .YouTube.Valid}}
                         <div class="iframe-container">

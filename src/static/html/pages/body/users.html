@@ -142,8 +142,8 @@ No users found with that search criteria.
                     title="Not Approved. Click to Approve."
                     class="bi bi-dash-square clickable"
                     hx-put="/api/user/{{.Id}}/approve"
-                    hx-confirm="Are you sure you want to approve User {{.Name}}?"
                     hx-target="closest td"
+                    hx-confirm="Are you sure you want to approve User {{.Name}}?"
                 ></span>
                 {{end}}
             </td>
@@ -175,8 +175,8 @@ No users found with that search criteria.
                     title="Reset Password"
                     class="bi bi-arrow-counterclockwise clickable"
                     hx-put="/api/user/{{.Id}}/password/reset"
-                    hx-confirm="Are you sure you want to reset the password for User {{.Name}}?"
                     hx-target="closest td"
+                    hx-confirm="Are you sure you want to reset the password for User {{.Name}}?"
                 ></span>
             </td>
             <td style="text-align: center">
@@ -185,7 +185,6 @@ No users found with that search criteria.
                     class="bi bi-trash clickable"
                     hx-delete="/api/user/{{.Id}}"
                     hx-confirm="Are you sure you want to delete User {{.Name}}?"
-                    hx-target="closest td"
                 ></span>
             </td>
         </tr>

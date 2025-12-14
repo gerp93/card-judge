@@ -101,6 +101,20 @@
     <div id="content">
         <div id="body">{{template "body" .}}</div>
     </div>
+
+    <dialog id="confirmation-dialog">
+        <h3>Confirm</h3>
+        <h5 id="confirmation-dialog-message"></h5>
+        <div style="display: grid; grid-auto-flow: column">
+            <div style="text-align: right;">
+                <button onclick="confirmationAnswerYes()">Yes</button>
+            </div>
+            <div>&nbsp;</div>
+            <div style="text-align: left;">
+                <button onclick="confirmationAnswerNo()">No</button>
+            </div>
+        </div>
+    </dialog>
 </body>
 
 </html>

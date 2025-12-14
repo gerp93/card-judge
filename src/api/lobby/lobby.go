@@ -872,6 +872,34 @@ func BlockResponse(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func PlaySurpriseCard(w http.ResponseWriter, r *http.Request) {
+	lobbyIdString := r.PathValue("lobbyId")
+	lobbyId, err := uuid.Parse(lobbyIdString)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte("Failed to get lobby id from path."))
+		return
+	}
+
+	player, err := getLobbyRequestPlayer(r, lobbyId)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	err = database.PlaySurpriseCard(player.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	websocket.LobbyBroadcast(lobbyId, "refresh-player-specials")
+	websocket.LobbyBroadcast(lobbyId, "refresh-lobby-game-board")
+	w.WriteHeader(http.StatusOK)
+}
+
 func PlayStealCard(w http.ResponseWriter, r *http.Request) {
 	lobbyIdString := r.PathValue("lobbyId")
 	lobbyId, err := uuid.Parse(lobbyIdString)
@@ -896,34 +924,6 @@ func PlayStealCard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	websocket.LobbyBroadcast(lobbyId, "refresh-player-hand")
-	websocket.LobbyBroadcast(lobbyId, "refresh-player-specials")
-	websocket.LobbyBroadcast(lobbyId, "refresh-lobby-game-board")
-	w.WriteHeader(http.StatusOK)
-}
-
-func PlaySurpriseCard(w http.ResponseWriter, r *http.Request) {
-	lobbyIdString := r.PathValue("lobbyId")
-	lobbyId, err := uuid.Parse(lobbyIdString)
-	if err != nil {
-		w.WriteHeader(http.StatusBadRequest)
-		_, _ = w.Write([]byte("Failed to get lobby id from path."))
-		return
-	}
-
-	player, err := getLobbyRequestPlayer(r, lobbyId)
-	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		_, _ = w.Write([]byte(err.Error()))
-		return
-	}
-
-	err = database.PlaySurpriseCard(player.Id)
-	if err != nil {
-		w.WriteHeader(http.StatusInternalServerError)
-		_, _ = w.Write([]byte(err.Error()))
-		return
-	}
-
 	websocket.LobbyBroadcast(lobbyId, "refresh-player-specials")
 	websocket.LobbyBroadcast(lobbyId, "refresh-lobby-game-board")
 	w.WriteHeader(http.StatusOK)
@@ -1070,6 +1070,7 @@ func WithdrawCard(w http.ResponseWriter, r *http.Request) {
 	}
 
 	websocket.PlayerBroadcast(player.Id, "refresh-player-hand")
+	websocket.PlayerBroadcast(player.Id, "refresh-player-specials")
 	websocket.LobbyBroadcast(lobbyId, "refresh-lobby-game-board")
 	w.WriteHeader(http.StatusOK)
 }

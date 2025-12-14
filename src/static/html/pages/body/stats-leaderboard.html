@@ -17,43 +17,52 @@
         id="leaderboardTopic"
         name="topic"
     >
-        <option disabled>Games</option>
-        <option
-            value="game-win-ratio"
-            selected
-        >Best Game Win Ratio</option>
-        <option value="game-win">Most Games Won</option>
-        <option value="game-play">Most Games Played</option>
-        <option disabled>Rounds</option>
-        <option value="round-win-ratio">Best Round Win Ratio</option>
-        <option value="round-win">Most Rounds Won</option>
-        <option value="round-play">Most Rounds Played</option>
-        <option disabled>Time</option>
-        <option value="round-judge-time">Time to Judge a Round</option>
-        <option value="round-play-time">Time to Play a Round</option>
-        <option disabled>Response Cards</option>
-        <option value="response-card-play">Most Response Cards Played</option>
-        <option value="response-card-discard">Most Response Cards Discarded</option>
-        <option disabled>Prompt Cards</option>
-        <option value="prompt-card-play">Most Prompt Cards Played</option>
-        <option value="prompt-card-skip">Most Prompt Cards Skipped</option>
-        <option disabled>Picks</option>
-        <option value="picked-judge">Most Picked (judge)</option>
-        <option value="picked-player">Most Picked (winner)</option>
-        <option disabled>Credits</option>
-        <option value="credits-spent">Most Credits Spent</option>
-        <option value="credits-earned">Most Credits Earned</option>
-        <option value="credits-spent-category">Most Credits Spent (Category)</option>
-        <option value="credits-earned-category">Most Credits Earned (Category)</option>
-        <option value="credits-spent-game">Most Credits Spent (Game)</option>
-        <option value="credits-earned-game">Most Credits Earned (Game)</option>
-        <option disabled>Gambling</option>
-        <option value="gamble">Largest Gamble</option>
-        <option value="gamble-win">Largest Gamble Win</option>
-        <option value="bet">Largest Bet</option>
-        <option value="bet-win">Largest Bet Win</option>
-        <option disabled>Other</option>
-        <option value="kick">Most Kicks</option>
+        <optgroup label="Games">
+            <option
+                value="game-win-ratio"
+                selected
+            >Best Game Win Ratio</option>
+            <option value="game-win">Most Games Won</option>
+            <option value="game-play">Most Games Played</option>
+        </optgroup>
+        <optgroup label="Rounds">
+            <option value="round-win-ratio">Best Round Win Ratio</option>
+            <option value="round-win">Most Rounds Won</option>
+            <option value="round-play">Most Rounds Played</option>
+        </optgroup>
+        <optgroup label="Time">
+            <option value="round-judge-time">Time to Judge a Round</option>
+            <option value="round-play-time">Time to Play a Round</option>
+        </optgroup>
+        <optgroup label="Response Cards">
+            <option value="response-card-play">Most Response Cards Played</option>
+            <option value="response-card-discard">Most Response Cards Discarded</option>
+        </optgroup>
+        <optgroup label="Prompt Cards">
+            <option value="prompt-card-play">Most Prompt Cards Played</option>
+            <option value="prompt-card-skip">Most Prompt Cards Skipped</option>
+        </optgroup>
+        <optgroup label="Picks">
+            <option value="picked-judge">Most Picked (judge)</option>
+            <option value="picked-player">Most Picked (winner)</option>
+        </optgroup>
+        <optgroup label="Credits">
+            <option value="credits-spent">Most Credits Spent</option>
+            <option value="credits-earned">Most Credits Earned</option>
+            <option value="credits-spent-category">Most Credits Spent (Category)</option>
+            <option value="credits-earned-category">Most Credits Earned (Category)</option>
+            <option value="credits-spent-game">Most Credits Spent (Game)</option>
+            <option value="credits-earned-game">Most Credits Earned (Game)</option>
+        </optgroup>
+        <optgroup label="Gambling">
+            <option value="gamble">Largest Gamble</option>
+            <option value="gamble-win">Largest Gamble Win</option>
+            <option value="bet">Largest Bet</option>
+            <option value="bet-win">Largest Bet Win</option>
+        </optgroup>
+        <optgroup label="Other">
+            <option value="kick">Most Kicks</option>
+        </optgroup>
     </select>
     <label for="leaderboardSubject">Subject:</label>
     <select

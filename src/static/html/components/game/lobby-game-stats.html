@@ -61,8 +61,8 @@
                     title="Vote to Kick"
                     class="bi bi-door-open clickable"
                     hx-post="/api/lobby/{{$.LobbyId}}/player/{{.PlayerId}}/kick"
-                    hx-confirm="Are you sure you want to vote to kick {{.UserName}}?"
                     hx-target="#lobby-grid-interface"
+                    hx-confirm="Are you sure you want to vote to kick {{.UserName}}?"
                 >
                     Kick
                 </span>
