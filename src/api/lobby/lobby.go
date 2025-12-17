@@ -1896,7 +1896,52 @@ func SetDecks(w http.ResponseWriter, r *http.Request) {
 	websocket.LobbyBroadcast(lobbyId, "<green>"+player.Name+"</>: Updated draw pile decks.")
 	w.WriteHeader(http.StatusOK)
 }
+func SetEnableLLMGrammarCheck(w http.ResponseWriter, r *http.Request) {
+	lobbyIdString := r.PathValue("lobbyId")
+	lobbyId, err := uuid.Parse(lobbyIdString)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte("Failed to get lobby id from path."))
+		return
+	}
 
+	player, err := getLobbyRequestPlayer(r, lobbyId)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	err = r.ParseForm()
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte("Failed to parse form."))
+		return
+	}
+
+	enabled := false
+	for key, val := range r.Form {
+		if key == "enableLLMGrammarCheck" {
+			enabled = val[0] == "1" || val[0] == "true"
+		}
+	}
+
+	err = database.SetEnableLLMGrammarCheck(lobbyId, enabled)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	status := "disabled"
+	if enabled {
+		status = "enabled"
+	}
+	websocket.LobbyBroadcast(lobbyId, fmt.Sprintf("<green>%s</>: AI grammar checking %s", player.Name, status))
+
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write([]byte("success"))
+}
 func getLobbyRequestPlayer(r *http.Request, lobbyId uuid.UUID) (database.Player, error) {
 	var player database.Player
 

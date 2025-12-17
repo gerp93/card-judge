@@ -93,6 +93,7 @@ func main() {
 
 	// card
 	http.Handle("POST /api/card/find", api.MiddlewareForAPIs(http.HandlerFunc(apiCard.Find)))
+	http.Handle("POST /api/card/validate", api.MiddlewareForAPIs(http.HandlerFunc(apiCard.ValidateCard)))
 	http.Handle("POST /api/card/create", api.MiddlewareForAPIs(http.HandlerFunc(apiCard.Create)))
 	http.Handle("PUT /api/card/{cardId}", api.MiddlewareForAPIs(http.HandlerFunc(apiCard.Update)))
 	http.Handle("PUT /api/card/{cardId}/image", api.MiddlewareForAPIs(http.HandlerFunc(apiCard.SetImage)))
@@ -143,6 +144,7 @@ func main() {
 	http.Handle("PUT /api/lobby/{lobbyId}/win-streak-threshold", api.MiddlewareForAPIs(http.HandlerFunc(apiLobby.SetWinStreakThreshold)))
 	http.Handle("PUT /api/lobby/{lobbyId}/lose-streak-threshold", api.MiddlewareForAPIs(http.HandlerFunc(apiLobby.SetLoseStreakThreshold)))
 	http.Handle("PUT /api/lobby/{lobbyId}/response-count", api.MiddlewareForAPIs(http.HandlerFunc(apiLobby.SetResponseCount)))
+	http.Handle("PUT /api/lobby/{lobbyId}/enable-llm-grammar-check", api.MiddlewareForAPIs(http.HandlerFunc(apiLobby.SetEnableLLMGrammarCheck)))
 	http.Handle("PUT /api/lobby/{lobbyId}/set-decks", api.MiddlewareForAPIs(http.HandlerFunc(apiLobby.SetDecks)))
 
 	// access

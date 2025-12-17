@@ -92,6 +92,9 @@ var SQLFiles = []string{
 	"sql/events/EVT_CLEAN_BAD_RESPONSE_CARDS.sql",
 	"sql/events/EVT_CLEAN_LOGIN_ATTEMPTS.sql",
 
+	// migrations
+	"sql/migrations/001_add_llm_grammar_check.sql",
+
 	// triggers
 	"sql/triggers/TR_AUDIT_CARD_DELETE.sql",
 	"sql/triggers/TR_AUDIT_CARD_UPDATE.sql",

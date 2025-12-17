@@ -124,20 +124,32 @@
                         class="disabled strike"
                         {{end}}
                     >
-                        <p>
-                            <span class="wrap-new-lines">{{.Text}}</span>
-                        </p>
-                        {{if .YouTube.Valid}}
-                        <div class="iframe-container">
-                            <iframe src="https://www.youtube.com/embed/{{.YouTube.String}}"></iframe>
+                        <div 
+                            class="grammar-check-container"
+                            hx-post="/api/card/validate"
+                            hx-include="[name='lobby_id'], [name='judge_card'], [name='response_card']"
+                            hx-target="this"
+                            hx-swap="innerHTML"
+                            hx-trigger="revealed from:body"
+                        >
+                            <input type="hidden" name="lobby_id" value="{{$.LobbyId}}" />
+                            <input type="hidden" name="judge_card" value="{{$.JudgeCardText.String}}" />
+                            <input type="hidden" name="response_card" value="{{.Text}}" />
+                            <p>
+                                <span class="wrap-new-lines">{{.Text}}</span>
+                            </p>
+                            {{if .YouTube.Valid}}
+                            <div class="iframe-container">
+                                <iframe src="https://www.youtube.com/embed/{{.YouTube.String}}"></iframe>
+                            </div>
+                            {{end}}
+                            {{if .Image.Valid}}
+                            <img
+                                src="data:image;base64,{{.Image.String}}"
+                                alt="Card Image"
+                            />
+                            {{end}}
                         </div>
-                        {{end}}
-                        {{if .Image.Valid}}
-                        <img
-                            src="data:image;base64,{{.Image.String}}"
-                            alt="Card Image"
-                        />
-                        {{end}}
                     </div>
                     {{end}}
                     {{end}}

@@ -108,3 +108,21 @@ function submitTableFilterForm() {
         formElement.submit();
     }
 }
+
+// Trigger grammar checks when board responses are updated
+document.addEventListener("htmx:afterSwap", function (event) {
+    if (event.detail.target.id === "board-responses" || event.detail.target.id === "board-responses-table") {
+        const grammarContainers = event.detail.target.querySelectorAll(".grammar-check-container");
+        grammarContainers.forEach((container) => {
+            htmx.ajax("POST", "/api/card/validate", {
+                target: container,
+                swap: "innerHTML",
+                values: {
+                    lobby_id: container.querySelector('input[name="lobby_id"]').value,
+                    judge_card: container.querySelector('input[name="judge_card"]').value,
+                    response_card: container.querySelector('input[name="response_card"]').value
+                }
+            });
+        });
+    }
+});

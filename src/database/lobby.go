@@ -1457,3 +1457,30 @@ func SetJudgeResponseCount(lobbyId uuid.UUID, responseCount int) error {
 	sqlString := "CALL SP_SET_RESPONSE_COUNT (?, ?)"
 	return execute(sqlString, lobbyId, responseCount)
 }
+func SetEnableLLMGrammarCheck(id uuid.UUID, enabled bool) error {
+	sqlString := `
+		UPDATE LOBBY
+		SET ENABLE_LLM_GRAMMAR_CHECK = ?
+		WHERE ID = ?
+	`
+	return execute(sqlString, enabled, id)
+}
+
+func GetLobbyEnableLLMGrammarCheck(id uuid.UUID) (bool, error) {
+	var enabled bool
+	sqlString := `SELECT ENABLE_LLM_GRAMMAR_CHECK FROM LOBBY WHERE ID = ?`
+	rows, err := query(sqlString, id)
+	if err != nil {
+		return enabled, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		if err := rows.Scan(&enabled); err != nil {
+			log.Println(err)
+			return enabled, errors.New("failed to scan row in query results")
+		}
+	}
+
+	return enabled, nil
+}

@@ -1,0 +1,109 @@
+{{define "response-card-grammar-view"}}
+<div class="response-card-container">
+    <div class="view-toggle">
+        <button class="toggle-btn active" data-view="original" onclick="toggleResponseView(event, 'original')">
+            Response Only
+        </button>
+        <button class="toggle-btn" data-view="with-judge" onclick="toggleResponseView(event, 'with-judge')">
+            With Judge Card
+        </button>
+    </div>
+
+    <div class="response-view original-view active">
+        <div style="padding: 20px">
+            <span class="wrap-new-lines">{{.ResponseCard}}</span>
+        </div>
+    </div>
+
+    <div class="response-view with-judge-view">
+        <div style="padding: 20px">
+            <div style="margin-bottom: 12px; font-weight: bold;">
+                <span class="wrap-new-lines">{{.JudgeCard}}</span>
+            </div>
+            <div style="margin-bottom: 12px;">
+                <span class="wrap-new-lines">{{.CorrectedText}}</span>
+            </div>
+            {{if not .IsValid}}
+            <div class="grammar-warning">
+                <span class="bi bi-exclamation-triangle"></span>
+                <span>Grammar corrected by AI</span>
+            </div>
+            {{end}}
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleResponseView(event, viewType) {
+    event.preventDefault();
+    const container = event.target.closest('.response-card-container');
+    
+    container.querySelectorAll('.toggle-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    container.querySelectorAll('.response-view').forEach(view => {
+        view.classList.remove('active');
+    });
+    
+    event.target.classList.add('active');
+    container.querySelector(`.${viewType}-view`).classList.add('active');
+}
+</script>
+
+<style>
+.response-card-container {
+    width: 100%;
+}
+
+.view-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.toggle-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--border-color);
+    background: var(--background-color);
+    color: var(--text-color);
+    cursor: pointer;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.toggle-btn:hover {
+    background: var(--hover-bg, rgba(0, 0, 0, 0.05));
+}
+
+.toggle-btn.active {
+    background: var(--primary-color);
+    color: var(--primary-text, white);
+    border-color: var(--primary-color);
+}
+
+.response-view {
+    display: none;
+}
+
+.response-view.active {
+    display: block;
+}
+
+.grammar-warning {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background-color: var(--warning-bg, #fff3cd);
+    color: var(--warning-text, #856404);
+    border-radius: 4px;
+    border-left: 4px solid var(--warning-border, #ffc107);
+    font-size: 0.85rem;
+    margin-top: 8px;
+}
+
+.grammar-warning .bi {
+    flex-shrink: 0;
+}
+</style>
+{{end}}

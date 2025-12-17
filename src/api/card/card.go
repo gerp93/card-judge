@@ -2,6 +2,7 @@ package apiCard
 
 import (
 	"io"
+	"log"
 	"net/http"
 	"regexp"
 	"strings"
@@ -10,6 +11,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/grantfbarnes/card-judge/api"
 	"github.com/grantfbarnes/card-judge/database"
+	"github.com/grantfbarnes/card-judge/services"
 	"github.com/grantfbarnes/card-judge/static"
 )
 
@@ -425,4 +427,73 @@ func processCardText(text string) (string, error) {
 	normalizedText = strings.TrimSpace(normalizedText)
 
 	return normalizedText, err
+}
+
+type ValidateCardRequest struct {
+	LobbyID      string `json:"lobby_id"`
+	JudgeCard    string `json:"judge_card"`
+	ResponseCard string `json:"response_card"`
+}
+
+func ValidateCard(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		log.Println("[ValidateCard] Failed to parse form:", err)
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte("Failed to parse form"))
+		return
+	}
+
+	lobbyID := r.FormValue("lobby_id")
+	judgeCard := r.FormValue("judge_card")
+	responseCard := r.FormValue("response_card")
+
+	log.Println("[ValidateCard] Received request")
+	log.Println("[ValidateCard] Lobby ID:", lobbyID)
+	log.Println("[ValidateCard] Judge card:", judgeCard)
+	log.Println("[ValidateCard] Response card:", responseCard)
+
+	if lobbyID == "" || judgeCard == "" || responseCard == "" {
+		log.Println("[ValidateCard] Missing required fields")
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte("Missing required fields"))
+		return
+	}
+
+	lobbyIDParsed, err := uuid.Parse(lobbyID)
+	if err != nil {
+		log.Println("[ValidateCard] Failed to parse lobby ID:", err)
+		w.WriteHeader(http.StatusBadRequest)
+		_, _ = w.Write([]byte("Invalid lobby id"))
+		return
+	}
+
+	log.Println("[ValidateCard] Calling CheckGrammarIfEnabled")
+	result, _ := services.CheckGrammarIfEnabled(r.Context(), lobbyIDParsed, judgeCard, responseCard)
+	log.Println("[ValidateCard] Grammar check result - IsValid:", result.IsValid, "CorrectedText:", result.CorrectedText)
+
+	tmpl, err := template.ParseFS(
+		static.StaticFiles,
+		"html/components/game/response-card-grammar-view.html",
+	)
+	if err != nil {
+		log.Println("[ValidateCard] Failed to parse HTML:", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte("Failed to parse HTML"))
+		return
+	}
+
+	type data struct {
+		JudgeCard     string
+		ResponseCard  string
+		CorrectedText string
+		IsValid       bool
+	}
+
+	_ = tmpl.ExecuteTemplate(w, "response-card-grammar-view", data{
+		JudgeCard:     judgeCard,
+		ResponseCard:  responseCard,
+		CorrectedText: result.CorrectedText,
+		IsValid:       result.IsValid,
+	})
 }
