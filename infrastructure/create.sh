@@ -204,7 +204,7 @@ while ! doctl compute droplet get $DROPLET_ID --format=Status --no-header | grep
 	sleep 1m
 done
 
-doctl compute droplet-action power-on $DROPLET_ID --wait > /dev/null
+doctl compute droplet-action power-on $DROPLET_ID --wait
 sleep 15s
 
 echo "Droplet Finished Setup"
@@ -215,7 +215,7 @@ echo "Droplet Finished Setup"
 echo "----------------------------------------"
 echo "Restoring Database..."
 
-scp -o StrictHostKeyChecking=no "$BACKUP_SQL_PATH" root@$DROPLET_IP:/root/restore.sql >/dev/null 2>&1
+scp -o StrictHostKeyChecking=no "$BACKUP_SQL_PATH" root@$DROPLET_IP:/root/restore.sql
 ssh root@$DROPLET_IP 'mariadb CARD_JUDGE < /root/restore.sql'
 
 echo "Database Restored"
