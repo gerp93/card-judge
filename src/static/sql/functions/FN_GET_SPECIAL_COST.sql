@@ -1,20 +1,7 @@
 DROP FUNCTION IF EXISTS FN_GET_SPECIAL_COST;
 
 CREATE FUNCTION FN_GET_SPECIAL_COST(
-    IN VAR_CATEGORY ENUM(
-        'WINNING-STREAK',
-        'LOSING-STREAK',
-        'PURCHASE',
-        'SKIP-JUDGE',
-        'EXTRA-RESPONSE',
-        'BLOCK-RESPONSE',
-        'STEAL',
-        'STEAL-VICTIM',
-        'SURPRISE',
-        'FIND',
-        'WILD',
-        'PERK'
-    )
+    IN VAR_CATEGORY VARCHAR(32)
 )
 RETURNS INT
 BEGIN

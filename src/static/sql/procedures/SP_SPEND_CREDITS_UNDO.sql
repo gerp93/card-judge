@@ -3,25 +3,7 @@ DROP PROCEDURE IF EXISTS SP_SPEND_CREDITS_UNDO;
 CREATE PROCEDURE SP_SPEND_CREDITS_UNDO(
     IN VAR_PLAYER_ID CHAR(36),
     IN VAR_AMOUNT INT,
-    IN VAR_CATEGORY ENUM(
-        'WINNING-STREAK',
-        'LOSING-STREAK',
-        'PURCHASE',
-        'SKIP-JUDGE',
-        'ALERT',
-        'GAMBLE',
-        'GAMBLE-WIN',
-        'BET',
-        'BET-WIN',
-        'EXTRA-RESPONSE',
-        'BLOCK-RESPONSE',
-        'STEAL',
-        'STEAL-VICTIM',
-        'SURPRISE',
-        'FIND',
-        'WILD',
-        'PERK'
-    )
+    IN VAR_CATEGORY VARCHAR(32)
 )
 BEGIN
     DECLARE VAR_LOBBY_ID CHAR(36);
