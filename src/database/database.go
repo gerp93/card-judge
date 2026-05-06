@@ -19,7 +19,7 @@ func CreateDatabaseConnection() (*sql.DB, error) {
 	userPassword := os.Getenv("CARD_JUDGE_SQL_PASSWORD")
 	serverHost := os.Getenv("CARD_JUDGE_SQL_HOST")
 	databaseName := os.Getenv("CARD_JUDGE_SQL_DATABASE")
-	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true", userName, userPassword, serverHost, databaseName)
+	dataSourceName := fmt.Sprintf("%s:%s@tcp(%s:3306)/%s?parseTime=true&multiStatements=true", userName, userPassword, serverHost, databaseName)
 
 	// open database connection
 	db, err := sql.Open("mysql", dataSourceName)
@@ -54,7 +54,17 @@ func RunFile(filePath string) error {
 		return errors.New("failed to read file")
 	}
 
-	return execute(string(bytes))
+	return executeScript(string(bytes))
+}
+
+func executeScript(sqlString string) error {
+	_, err := database.Exec(sqlString)
+	if err != nil {
+		log.Println(err)
+		return errors.New("failed to execute script in database")
+	}
+
+	return nil
 }
 
 func query(sqlString string, params ...any) (*sql.Rows, error) {
