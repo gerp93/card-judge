@@ -13,18 +13,18 @@ function websocketConnect() {
         wsProtocol = "ws://";
     }
 
-    const conn = new WebSocket(wsProtocol + document.location.host + "/ws" + document.location.pathname);
+    const ws = new WebSocket(wsProtocol + document.location.host + "/ws" + document.location.pathname);
 
-    if (!conn) {
+    if (!ws) {
         alert("Failed to make connection.");
         document.location.href = "/lobbies";
     }
 
-    conn.onopen = () => {
+    ws.onopen = () => {
         wsReconnectAttempts = 0;
     };
 
-    conn.onclose = () => {
+    ws.onclose = () => {
         if (wsReconnectAttempts < 3) {
             wsReconnectAttempts++;
             setTimeout(() => { websocketConnect() }, 5000);
@@ -41,11 +41,11 @@ function websocketConnect() {
     lobbyChatForm.onsubmit = (event) => {
         event.preventDefault();
         if (!lobbyChatInput.value) return;
-        conn.send(lobbyChatInput.value);
+        ws.send(lobbyChatInput.value);
         lobbyChatInput.value = "";
     };
 
-    conn.onmessage = (event) => {
+    ws.onmessage = (event) => {
         let messageText = event.data;
 
         switch (messageText) {
