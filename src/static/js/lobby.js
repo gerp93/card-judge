@@ -124,15 +124,7 @@ function websocketConnect() {
         if (messageText.startsWith("alert")) {
             const alertData = messageText.split(";;");
             if (alertData.length === 4) {
-                const alertHeader = document.getElementById("lobby-alert-dialog-header");
-                if (alertHeader) alertHeader.innerText = alertData[2];
-                const alertBody = document.getElementById("lobby-alert-dialog-body");
-                if (alertBody) alertBody.innerText = alertData[3];
-                const alertDialog = document.getElementById("lobby-alert-dialog");
-                if (alertDialog) {
-                    alertDialog.showModal();
-                    setTimeout(() => alertDialog.close(), alertData[1] * 2000);
-                }
+                displayLobbyAlert(alertData[2], alertData[3], alertData[1]);
             }
             return;
         }
@@ -155,6 +147,20 @@ function websocketConnect() {
 
         lobbyChatMessages.scrollTop = lobbyChatMessages.scrollHeight - lobbyChatMessages.clientHeight;
     };
+}
+
+function displayLobbyAlert(header, body, seconds) {
+    const alertHeader = document.getElementById("lobby-alert-dialog-header");
+    if (!alertHeader) return;
+    const alertBody = document.getElementById("lobby-alert-dialog-body");
+    if (!alertBody) return;
+    const alertDialog = document.getElementById("lobby-alert-dialog");
+    if (!alertDialog) return;
+
+    alertHeader.innerText = header;
+    alertBody.innerText = body;
+    alertDialog.showModal();
+    setTimeout(() => alertDialog.close(), seconds * 1000);
 }
 
 let roundTimerInterval = null;
