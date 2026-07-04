@@ -2,6 +2,10 @@ window.onload = () => {
     const lobbyMessageDialog = document.getElementById("lobby-message-dialog");
     if (lobbyMessageDialog) lobbyMessageDialog.showModal();
 
+    websocketConnect();
+};
+
+function websocketConnect() {
     let wsProtocol = "wss://";
     if (document.location.protocol === "http:") {
         wsProtocol = "ws://";
@@ -140,7 +144,7 @@ window.onload = () => {
 
         lobbyChatMessages.scrollTop = lobbyChatMessages.scrollHeight - lobbyChatMessages.clientHeight;
     };
-};
+}
 
 let roundTimerInterval = null;
 
