@@ -27,6 +27,7 @@ function websocketConnect() {
     ws.onclose = () => {
         if (wsReconnectAttempts < 3) {
             wsReconnectAttempts++;
+            displayLobbyAlert("Connection Lost", `Attempting to reconnect (${wsReconnectAttempts}/3)...`, 5);
             setTimeout(() => { websocketConnect() }, 5000);
         } else {
             alert("Connection Lost");
