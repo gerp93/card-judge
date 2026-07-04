@@ -1,3 +1,5 @@
+let wsReconnectAttempts = 0;
+
 window.onload = () => {
     const lobbyMessageDialog = document.getElementById("lobby-message-dialog");
     if (lobbyMessageDialog) lobbyMessageDialog.showModal();
@@ -18,9 +20,18 @@ function websocketConnect() {
         document.location.href = "/lobbies";
     }
 
+    conn.onopen = () => {
+        wsReconnectAttempts = 0;
+    };
+
     conn.onclose = () => {
-        alert("Connection Lost");
-        document.location.href = "/lobbies";
+        if (wsReconnectAttempts < 3) {
+            wsReconnectAttempts++;
+            setTimeout(() => { websocketConnect() }, 5000);
+        } else {
+            alert("Connection Lost");
+            document.location.href = "/lobbies";
+        }
     };
 
     const lobbyChatForm = document.getElementById("lobby-chat-form");
