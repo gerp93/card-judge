@@ -1,22 +1,41 @@
+let wsReconnectAttempts = 0;
+
 window.onload = () => {
     const lobbyMessageDialog = document.getElementById("lobby-message-dialog");
     if (lobbyMessageDialog) lobbyMessageDialog.showModal();
 
+    websocketConnect();
+};
+
+function websocketConnect() {
     let wsProtocol = "wss://";
     if (document.location.protocol === "http:") {
         wsProtocol = "ws://";
     }
 
-    const conn = new WebSocket(wsProtocol + document.location.host + "/ws" + document.location.pathname);
+    const ws = new WebSocket(wsProtocol + document.location.host + "/ws" + document.location.pathname);
 
-    if (!conn) {
+    if (!ws) {
         alert("Failed to make connection.");
         document.location.href = "/lobbies";
     }
 
-    conn.onclose = () => {
-        alert("Connection Lost");
-        document.location.href = "/lobbies";
+    ws.onopen = () => {
+        if (wsReconnectAttempts > 0) {
+            displayLobbyAlert("Connection Restored", `Restored on attempt ${wsReconnectAttempts}`, 3);
+        }
+        wsReconnectAttempts = 0;
+    };
+
+    ws.onclose = () => {
+        if (wsReconnectAttempts < 3) {
+            wsReconnectAttempts++;
+            displayLobbyAlert("Connection Lost", `Attempting to reconnect (${wsReconnectAttempts}/3)...`, 5);
+            setTimeout(() => { websocketConnect() }, 5000);
+        } else {
+            alert("Connection Lost");
+            document.location.href = "/lobbies";
+        }
     };
 
     const lobbyChatForm = document.getElementById("lobby-chat-form");
@@ -26,11 +45,11 @@ window.onload = () => {
     lobbyChatForm.onsubmit = (event) => {
         event.preventDefault();
         if (!lobbyChatInput.value) return;
-        conn.send(lobbyChatInput.value);
+        ws.send(lobbyChatInput.value);
         lobbyChatInput.value = "";
     };
 
-    conn.onmessage = (event) => {
+    ws.onmessage = (event) => {
         let messageText = event.data;
 
         switch (messageText) {
@@ -109,15 +128,7 @@ window.onload = () => {
         if (messageText.startsWith("alert")) {
             const alertData = messageText.split(";;");
             if (alertData.length === 4) {
-                const alertHeader = document.getElementById("lobby-alert-dialog-header");
-                if (alertHeader) alertHeader.innerText = alertData[2];
-                const alertBody = document.getElementById("lobby-alert-dialog-body");
-                if (alertBody) alertBody.innerText = alertData[3];
-                const alertDialog = document.getElementById("lobby-alert-dialog");
-                if (alertDialog) {
-                    alertDialog.showModal();
-                    setTimeout(() => alertDialog.close(), alertData[1] * 2000);
-                }
+                displayLobbyAlert(alertData[2], alertData[3], alertData[1]);
             }
             return;
         }
@@ -140,7 +151,21 @@ window.onload = () => {
 
         lobbyChatMessages.scrollTop = lobbyChatMessages.scrollHeight - lobbyChatMessages.clientHeight;
     };
-};
+}
+
+function displayLobbyAlert(header, body, seconds) {
+    const alertHeader = document.getElementById("lobby-alert-dialog-header");
+    if (!alertHeader) return;
+    const alertBody = document.getElementById("lobby-alert-dialog-body");
+    if (!alertBody) return;
+    const alertDialog = document.getElementById("lobby-alert-dialog");
+    if (!alertDialog) return;
+
+    alertHeader.innerText = header;
+    alertBody.innerText = body;
+    alertDialog.showModal();
+    setTimeout(() => alertDialog.close(), seconds * 1000);
+}
 
 let roundTimerInterval = null;
 
