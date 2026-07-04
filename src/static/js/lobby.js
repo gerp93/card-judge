@@ -21,6 +21,9 @@ function websocketConnect() {
     }
 
     ws.onopen = () => {
+        if (wsReconnectAttempts > 0) {
+            displayLobbyAlert("Connection Restored", `Restored on attempt ${wsReconnectAttempts}`, 3);
+        }
         wsReconnectAttempts = 0;
     };
 
