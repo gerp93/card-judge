@@ -522,9 +522,11 @@ func AddUserToLobby(lobbyId uuid.UUID, userId uuid.UUID) (uuid.UUID, error) {
 		return player.Id, err
 	}
 
-	if isNewPlayer {
-		if g := gameshell.Registered(); g != nil {
+	if g := gameshell.Registered(); g != nil {
+		if isNewPlayer {
 			err = g.OnPlayerJoined(player.Id)
+		} else if !player.IsActive {
+			err = g.OnPlayerActive(player.Id)
 		}
 	}
 
@@ -541,14 +543,40 @@ func InitPlayerGame(playerId uuid.UUID) error {
 	return execute(sqlString, playerId)
 }
 
+func SetPlayerActiveGame(playerId uuid.UUID) error {
+	sqlString := "CALL SP_CJ_PLAYER_ACTIVE (?)"
+	return execute(sqlString, playerId)
+}
+
+func SetPlayerInactiveGame(playerId uuid.UUID) error {
+	sqlString := "CALL SP_CJ_PLAYER_INACTIVE (?)"
+	return execute(sqlString, playerId)
+}
+
 func CleanupLobbyGame(lobbyId uuid.UUID) error {
 	sqlString := "CALL SP_CJ_CLEANUP_LOBBY (?)"
 	return execute(sqlString, lobbyId)
 }
 
 func SetPlayerInactive(lobbyId uuid.UUID, userId uuid.UUID) error {
+	player, err := GetLobbyUserPlayer(lobbyId, userId)
+	if err != nil {
+		return err
+	}
+
 	sqlString := "CALL SP_SET_PLAYER_INACTIVE (?, ?)"
-	return execute(sqlString, lobbyId, userId)
+	err = execute(sqlString, lobbyId, userId)
+	if err != nil {
+		return err
+	}
+
+	if player.Id != uuid.Nil && player.IsActive {
+		if g := gameshell.Registered(); g != nil {
+			return g.OnPlayerInactive(player.Id)
+		}
+	}
+
+	return nil
 }
 
 func GetLobbyId(name string) (uuid.UUID, error) {
