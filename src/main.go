@@ -15,6 +15,8 @@ import (
 	apiStats "github.com/grantfbarnes/card-judge/api/stats"
 	apiUser "github.com/grantfbarnes/card-judge/api/user"
 	"github.com/grantfbarnes/card-judge/database"
+	"github.com/grantfbarnes/card-judge/game"
+	"github.com/grantfbarnes/card-judge/gameshell"
 	"github.com/grantfbarnes/card-judge/static"
 	"github.com/grantfbarnes/card-judge/websocket"
 )
@@ -25,6 +27,8 @@ func main() {
 			log.Println("panic occurred:", err)
 		}
 	}()
+
+	gameshell.Register(game.CardJudge{})
 
 	db, err := database.CreateDatabaseConnection()
 	dbConnectAttemptCount := 0

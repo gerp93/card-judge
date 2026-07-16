@@ -12,6 +12,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/grantfbarnes/card-judge/auth"
+	"github.com/grantfbarnes/card-judge/gameshell"
 )
 
 type Lobby struct {
@@ -382,6 +383,13 @@ func CreateLobby(name string, message string, password string, drawPriority stri
 		return id, err
 	}
 
+	if g := gameshell.Registered(); g != nil {
+		err = g.OnRoomCreated(id)
+		if err != nil {
+			return id, err
+		}
+	}
+
 	sqlString = `
 		UPDATE CJ_LOBBY_SETTINGS
 		SET DRAW_PRIORITY = ?,
@@ -499,7 +507,8 @@ func AddUserToLobby(lobbyId uuid.UUID, userId uuid.UUID) (uuid.UUID, error) {
 		return player.Id, errors.New("failed to get player")
 	}
 
-	if player.Id == uuid.Nil {
+	isNewPlayer := player.Id == uuid.Nil
+	if isNewPlayer {
 		player.Id, err = uuid.NewUUID()
 		if err != nil {
 			log.Println(err)
@@ -509,7 +518,27 @@ func AddUserToLobby(lobbyId uuid.UUID, userId uuid.UUID) (uuid.UUID, error) {
 
 	sqlString := "CALL SP_SET_PLAYER_ACTIVE (?, ?, ?)"
 	err = execute(sqlString, player.Id, lobbyId, userId)
+	if err != nil {
+		return player.Id, err
+	}
+
+	if isNewPlayer {
+		if g := gameshell.Registered(); g != nil {
+			err = g.OnPlayerJoined(player.Id)
+		}
+	}
+
 	return player.Id, err
+}
+
+func InitLobbyGame(lobbyId uuid.UUID) error {
+	sqlString := "CALL SP_CJ_INIT_LOBBY (?)"
+	return execute(sqlString, lobbyId)
+}
+
+func InitPlayerGame(playerId uuid.UUID) error {
+	sqlString := "CALL SP_CJ_INIT_PLAYER (?)"
+	return execute(sqlString, playerId)
 }
 
 func SetPlayerInactive(lobbyId uuid.UUID, userId uuid.UUID) error {
