@@ -17,14 +17,56 @@ const userIdRequestContextKey RequestContextKey = "userIdRequestContextKey"
 
 type BasePageData struct {
 	PageTitle string
+	BrandName string
 	User      database.User
 	LoggedIn  bool
+}
+
+type PagePolicy struct {
+	LoginPaths        []string
+	LoginPathPrefixes []string
+	AdminPaths        []string
+}
+
+var brandName = "Card Judge"
+var pagePolicy PagePolicy
+
+func SetBrandName(name string) {
+	brandName = name
+}
+
+func SetPagePolicy(policy PagePolicy) {
+	pagePolicy = policy
+}
+
+func pageRequiresLogin(path string) bool {
+	for _, p := range pagePolicy.LoginPaths {
+		if path == p {
+			return true
+		}
+	}
+	for _, p := range pagePolicy.LoginPathPrefixes {
+		if strings.HasPrefix(path, p) {
+			return true
+		}
+	}
+	return false
+}
+
+func pageRequiresAdmin(path string) bool {
+	for _, p := range pagePolicy.AdminPaths {
+		if path == p {
+			return true
+		}
+	}
+	return false
 }
 
 func MiddlewareForPages(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		basePageData := BasePageData{
-			PageTitle: "Card Judge",
+			PageTitle: brandName,
+			BrandName: brandName,
 			User:      database.User{},
 			LoggedIn:  false,
 		}
@@ -41,14 +83,7 @@ func MiddlewareForPages(next http.Handler) http.Handler {
 		}
 
 		// required to be logged in
-		if r.URL.Path == "/account" ||
-			r.URL.Path == "/users" ||
-			r.URL.Path == "/review" ||
-			r.URL.Path == "/lobbies" ||
-			r.URL.Path == "/decks" ||
-			strings.HasPrefix(r.URL.Path, "/stats/") ||
-			strings.HasPrefix(r.URL.Path, "/lobby/") ||
-			strings.HasPrefix(r.URL.Path, "/deck/") {
+		if pageRequiresLogin(r.URL.Path) {
 			if !basePageData.LoggedIn {
 				auth.SetRedirectUrl(w, r.URL.Path+"?"+r.URL.RawQuery)
 				http.Redirect(w, r, "/login", http.StatusSeeOther)
@@ -65,8 +100,7 @@ func MiddlewareForPages(next http.Handler) http.Handler {
 		}
 
 		// required to be admin
-		if r.URL.Path == "/users" ||
-			r.URL.Path == "/review" {
+		if pageRequiresAdmin(r.URL.Path) {
 			if !basePageData.User.IsAdmin {
 				http.Redirect(w, r, "/", http.StatusSeeOther)
 				return

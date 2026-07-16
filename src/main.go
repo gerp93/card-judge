@@ -14,6 +14,7 @@ import (
 	apiPages "github.com/grantfbarnes/card-judge/api/pages"
 	apiStats "github.com/grantfbarnes/card-judge/api/stats"
 	apiUser "github.com/grantfbarnes/card-judge/api/user"
+	"github.com/grantfbarnes/card-judge/auth"
 	"github.com/grantfbarnes/card-judge/database"
 	"github.com/grantfbarnes/card-judge/game"
 	"github.com/grantfbarnes/card-judge/gameshell"
@@ -29,6 +30,14 @@ func main() {
 	}()
 
 	gameshell.Register(game.CardJudge{})
+
+	api.SetBrandName("Card Judge")
+	auth.SetCookiePrefix("CARD-JUDGE")
+	api.SetPagePolicy(api.PagePolicy{
+		LoginPaths:        []string{"/account", "/users", "/review", "/lobbies", "/decks"},
+		LoginPathPrefixes: []string{"/stats/", "/lobby/", "/deck/"},
+		AdminPaths:        []string{"/users", "/review"},
+	})
 
 	db, err := database.CreateDatabaseConnection()
 	dbConnectAttemptCount := 0

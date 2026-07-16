@@ -15,8 +15,13 @@ import (
 	"github.com/google/uuid"
 )
 
-const cookieNameUserToken string = "CARD-JUDGE-USER-TOKEN"
-const cookieNameRedirectURL string = "CARD-JUDGE-REDIRECT-URL"
+var cookieNameUserToken string = "CARD-JUDGE-USER-TOKEN"
+var cookieNameRedirectURL string = "CARD-JUDGE-REDIRECT-URL"
+
+func SetCookiePrefix(prefix string) {
+	cookieNameUserToken = prefix + "-USER-TOKEN"
+	cookieNameRedirectURL = prefix + "-REDIRECT-URL"
+}
 
 var secret []byte = getRandomBytes()
 
