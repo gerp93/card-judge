@@ -4,9 +4,9 @@ import (
 	"encoding/csv"
 	"net/http"
 
+	"github.com/gerp93/gameshell-framework/api"
+	"github.com/gerp93/gameshell-framework/auth"
 	"github.com/google/uuid"
-	"github.com/grantfbarnes/card-judge/api"
-	"github.com/grantfbarnes/card-judge/auth"
 	"github.com/grantfbarnes/card-judge/database"
 )
 

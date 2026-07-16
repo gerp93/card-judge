@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"text/template"
 
+	"github.com/gerp93/gameshell-framework/api"
 	"github.com/google/uuid"
-	"github.com/grantfbarnes/card-judge/api"
 	"github.com/grantfbarnes/card-judge/database"
 	"github.com/grantfbarnes/card-judge/static"
 )

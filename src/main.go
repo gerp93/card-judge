@@ -6,7 +6,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/grantfbarnes/card-judge/api"
+	gameshell "github.com/gerp93/gameshell-framework"
+	"github.com/gerp93/gameshell-framework/api"
+	"github.com/gerp93/gameshell-framework/auth"
+	gsDatabase "github.com/gerp93/gameshell-framework/database"
+	gsStatic "github.com/gerp93/gameshell-framework/static"
+	"github.com/gerp93/gameshell-framework/websocket"
 	apiAccess "github.com/grantfbarnes/card-judge/api/access"
 	apiCard "github.com/grantfbarnes/card-judge/api/card"
 	apiDeck "github.com/grantfbarnes/card-judge/api/deck"
@@ -14,12 +19,8 @@ import (
 	apiPages "github.com/grantfbarnes/card-judge/api/pages"
 	apiStats "github.com/grantfbarnes/card-judge/api/stats"
 	apiUser "github.com/grantfbarnes/card-judge/api/user"
-	"github.com/grantfbarnes/card-judge/auth"
-	"github.com/grantfbarnes/card-judge/database"
 	"github.com/grantfbarnes/card-judge/game"
-	"github.com/grantfbarnes/card-judge/gameshell"
 	"github.com/grantfbarnes/card-judge/static"
-	"github.com/grantfbarnes/card-judge/websocket"
 )
 
 func main() {
@@ -39,12 +40,14 @@ func main() {
 		AdminPaths:        []string{"/users", "/review"},
 	})
 
-	db, err := database.CreateDatabaseConnection()
+	gsDatabase.SetEnvPrefix("CARD_JUDGE")
+
+	db, err := gsDatabase.CreateDatabaseConnection()
 	dbConnectAttemptCount := 0
 	for err != nil && dbConnectAttemptCount < 6 {
 		time.Sleep(10 * time.Second)
 		dbConnectAttemptCount += 1
-		db, err = database.CreateDatabaseConnection()
+		db, err = gsDatabase.CreateDatabaseConnection()
 	}
 	if err != nil {
 		log.Fatalln(err)
@@ -52,8 +55,22 @@ func main() {
 	}
 	defer db.Close()
 
+	// framework schema must load before game schema
+	for _, sqlFile := range gsStatic.SQLFiles {
+		err = gsDatabase.RunFile(sqlFile)
+		if err != nil {
+			log.Fatalln(err)
+			return
+		}
+	}
+
 	for _, sqlFile := range static.SQLFiles {
-		err = database.RunFile(sqlFile)
+		bytes, err := static.StaticFiles.ReadFile(sqlFile)
+		if err != nil {
+			log.Fatalln(err)
+			return
+		}
+		err = gsDatabase.Execute(string(bytes))
 		if err != nil {
 			log.Fatalln(err)
 			return

@@ -6,8 +6,9 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/gerp93/gameshell-framework/api"
+	gsDatabase "github.com/gerp93/gameshell-framework/database"
 	"github.com/google/uuid"
-	"github.com/grantfbarnes/card-judge/api"
 	"github.com/grantfbarnes/card-judge/database"
 	"github.com/grantfbarnes/card-judge/static"
 )
@@ -100,7 +101,7 @@ func Users(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	totalRowCount, err := database.CountUsers(name)
+	totalRowCount, err := gsDatabase.CountUsers(name)
 	if err != nil {
 		totalRowCount = 0
 	}
@@ -114,7 +115,7 @@ func Users(w http.ResponseWriter, r *http.Request) {
 		page = totalPageCount
 	}
 
-	users, err := database.SearchUsers(name, page)
+	users, err := gsDatabase.SearchUsers(name, page)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("failed to get table rows"))
@@ -138,7 +139,7 @@ func Users(w http.ResponseWriter, r *http.Request) {
 		Page     int
 		LastPage int
 		RowCount int
-		Users    []database.User
+		Users    []gsDatabase.User
 	}
 
 	_ = tmpl.ExecuteTemplate(w, "base", data{
@@ -265,7 +266,7 @@ func StatsUsers(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	totalRowCount, err := database.CountUsers(name)
+	totalRowCount, err := gsDatabase.CountUsers(name)
 	if err != nil {
 		totalRowCount = 0
 	}
@@ -279,7 +280,7 @@ func StatsUsers(w http.ResponseWriter, r *http.Request) {
 		page = totalPageCount
 	}
 
-	users, err := database.SearchUsers(name, page)
+	users, err := gsDatabase.SearchUsers(name, page)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("failed to get table rows"))
@@ -303,7 +304,7 @@ func StatsUsers(w http.ResponseWriter, r *http.Request) {
 		Page     int
 		LastPage int
 		RowCount int
-		Users    []database.User
+		Users    []gsDatabase.User
 	}
 
 	_ = tmpl.ExecuteTemplate(w, "base", data{
@@ -589,7 +590,7 @@ func Lobby(w http.ResponseWriter, r *http.Request) {
 	basePageData := api.GetBasePageData(r)
 	basePageData.PageTitle = "Card Judge - Lobby"
 
-	hasLobbyAccess, err := database.UserHasLobbyAccess(basePageData.User.Id, lobbyId)
+	hasLobbyAccess, err := gsDatabase.UserHasLobbyAccess(basePageData.User.Id, lobbyId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("failed to check lobby access"))
@@ -619,7 +620,7 @@ func Lobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	playerId, err := database.AddUserToLobby(lobbyId, basePageData.User.Id)
+	playerId, err := gsDatabase.AddUserToLobby(lobbyId, basePageData.User.Id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("failed to join lobby"))
@@ -663,7 +664,7 @@ func LobbyAccess(w http.ResponseWriter, r *http.Request) {
 	basePageData := api.GetBasePageData(r)
 	basePageData.PageTitle = "Card Judge - Lobby Access"
 
-	hasLobbyAccess, err := database.UserHasLobbyAccess(basePageData.User.Id, lobbyId)
+	hasLobbyAccess, err := gsDatabase.UserHasLobbyAccess(basePageData.User.Id, lobbyId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("failed to check lobby access"))

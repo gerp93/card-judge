@@ -26,29 +26,35 @@ framework, no ORM, no build step for the front-end.
 
 The repo root is a thin wrapper. **All application code lives under `src/`,
 which is the Go module root** (`module github.com/grantfbarnes/card-judge`, Go
-1.22.5).
+1.22.5). The reusable platform lives in the separate
+**`github.com/gerp93/gameshell-framework`** module (auth, page middleware,
+user/lobby-shell/player-base data layer, websocket hub, framework schema) —
+this repo holds only the game.
 
 ```
 src/
-  main.go            entry point: DB connect, schema load, ALL route wiring, server
-  go.mod             module + deps (mysql, uuid, gorilla/websocket, x/crypto)
-  api/               HTTP handlers, grouped by domain
-    api.go           middleware (MiddlewareForPages / MiddlewareForAPIs) + BasePageData
+  main.go            entry point: registers the Game impl + framework params,
+                     DB connect, framework schema then game schema, ALL route
+                     wiring, server
+  go.mod             module + framework dependency (pinned version)
+  game/              hooks.go — CardJudge implements gameshell.Game
+  api/               game HTTP handlers, grouped by domain
     pages/           full-page renderers (package apiPages)
     user/ deck/ card/ lobby/ access/ stats/   (packages apiUser, apiDeck, ...)
-  database/          data-access layer: one file per domain, hand-written SQL
-    database.go      connection + unexported query()/execute()/RunFile() helpers
-  auth/              cookie tokens (cookie.go) + bcrypt passwords (password.go)
-  websocket/         gorilla hub.go / client.go, one hub per lobby
+  database/          game data-access: one file per domain, hand-written SQL
+    database.go      unexported query()/execute() delegating to the framework
   static/            embedded assets (//go:embed)
-    static.go        embed.FS + SQLFiles (the ORDERED schema-load manifest)
-    sql/             tables/ views/ functions/ procedures/ events/ triggers/
+    static.go        embed.FS + SQLFiles (ORDERED game schema manifest, runs
+                     AFTER the framework schema)
+    sql/             game tables/ views/ functions/ procedures/ events/ triggers/
     html/            pages/ (base.html + body/*) and components/ (HTMX fragments)
     css/ js/ images/
 ```
 
 There is intentionally **no `cmd/`, `internal/`, or `pkg/`** — flat top-level
-packages under `src/`. Keep it that way.
+packages under `src/`. Keep it that way. Handlers that need framework data
+functions import them as `gsDatabase "github.com/gerp93/gameshell-framework/database"`
+alongside the game `database` package.
 
 ## The most important architectural fact
 
@@ -191,6 +197,8 @@ preserved. Landed so far (see PR #9):
   database — dropped objects (e.g. the replaced triggers) need a manual `DROP`
   on already-provisioned databases, or a fresh `setup.sql`.
 
-Still ahead: physical package reorg into `src/gameshell/` vs `src/game/`
-groups, then extraction of the framework into its own repo (semver-tagged)
-with card-judge depending on a pinned version.
+The physical extraction is DONE: the framework code lives in the
+`gameshell-framework` repo and card-judge consumes it as a module dependency.
+Until the framework repo is published and tagged, `go.mod` carries a
+temporary `replace` directive pointing at a sibling checkout — remove it and
+pin the tagged version once `github.com/gerp93/gameshell-framework` exists.

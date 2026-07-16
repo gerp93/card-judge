@@ -5,21 +5,18 @@ import "embed"
 //go:embed *
 var StaticFiles embed.FS
 
-// SQLFiles is the ordered list of SQL files to execute for database setup.
+// SQLFiles is the ordered list of game SQL files to execute for database
+// setup, after the framework schema has been applied.
 // Order matters: settings -> tables -> functions -> procedures -> events -> triggers
 // Tables must be in dependency order (e.g., DECK before CARD).
 var SQLFiles = []string{
 	// database
-	"sql/settings.sql",
 
 	// tables
-	"sql/tables/USER.sql",
 	"sql/tables/DECK.sql",
 	"sql/tables/CARD.sql",
-	"sql/tables/LOBBY.sql",
 	"sql/tables/CJ_LOBBY_SETTINGS.sql",
 	"sql/tables/DRAW_PILE.sql",
-	"sql/tables/PLAYER.sql",
 	"sql/tables/CJ_PLAYER_STATE.sql",
 	"sql/tables/JUDGE.sql",
 	"sql/tables/HAND.sql",
@@ -30,8 +27,6 @@ var SQLFiles = []string{
 	"sql/tables/CREDITS_SPENT.sql",
 	"sql/tables/KICK.sql",
 	"sql/tables/USER_ACCESS_DECK.sql",
-	"sql/tables/USER_ACCESS_LOBBY.sql",
-	"sql/tables/LOGIN_ATTEMPT.sql",
 	"sql/tables/LOG_CREDITS_SPENT.sql",
 	"sql/tables/LOG_DISCARD.sql",
 	"sql/tables/LOG_SKIP.sql",
@@ -41,7 +36,6 @@ var SQLFiles = []string{
 	"sql/tables/LOG_FLIP_TABLE.sql",
 	"sql/tables/AUDIT_CARD.sql",
 	"sql/tables/AUDIT_DECK.sql",
-	"sql/tables/AUDIT_USER.sql",
 
 	// views
 	"sql/views/V_ROUND_WINNER.sql",
@@ -51,15 +45,12 @@ var SQLFiles = []string{
 	"sql/functions/FN_GET_DRAW_PILE_CARD_ID.sql",
 	"sql/functions/FN_GET_LOBBY_JUDGE_BLANK_COUNT.sql",
 	"sql/functions/FN_GET_LOBBY_JUDGE_PLAYER_ID.sql",
-	"sql/functions/FN_GET_LOGIN_ATTEMPT_IS_ALLOWED.sql",
 	"sql/functions/FN_GET_PLAYER_HANDICAP.sql",
 	"sql/functions/FN_GET_PLAYER_HANDICAP_INVERSE.sql",
-	"sql/functions/FN_GET_PLAYER_LOBBY_ID.sql",
 	"sql/functions/FN_GET_PLAYER_RESPONSE_CARD_COUNT.sql",
 	"sql/functions/FN_GET_PLAYER_RESPONSE_COUNT.sql",
 	"sql/functions/FN_GET_SPECIAL_COST.sql",
 	"sql/functions/FN_USER_HAS_DECK_ACCESS.sql",
-	"sql/functions/FN_USER_HAS_LOBBY_ACCESS.sql",
 
 	// procedures
 	"sql/procedures/SP_ADD_EXTRA_RESPONSE.sql",
@@ -97,8 +88,6 @@ var SQLFiles = []string{
 	"sql/procedures/SP_SET_MISSING_JUDGE_PLAYER.sql",
 	"sql/procedures/SP_SET_NEXT_JUDGE_CARD.sql",
 	"sql/procedures/SP_SET_NEXT_JUDGE_PLAYER.sql",
-	"sql/procedures/SP_SET_PLAYER_ACTIVE.sql",
-	"sql/procedures/SP_SET_PLAYER_INACTIVE.sql",
 	"sql/procedures/SP_SET_RESPONSE_COUNT.sql",
 	"sql/procedures/SP_SET_RESPONSES_LOBBY.sql",
 	"sql/procedures/SP_SET_RESPONSES_PLAYER.sql",
@@ -115,24 +104,17 @@ var SQLFiles = []string{
 	"sql/procedures/SP_WITHDRAW_RESPONSE.sql",
 
 	// events
-	"sql/events/EVT_CLEAN_AUDIT_USER.sql",
 	"sql/events/EVT_CLEAN_BAD_PROMPT_CARDS.sql",
 	"sql/events/EVT_CLEAN_CJ_AUDIT_TABLES.sql",
 	"sql/events/EVT_CLEAN_BAD_RESPONSE_CARDS.sql",
-	"sql/events/EVT_CLEAN_LOGIN_ATTEMPTS.sql",
 
 	// triggers
 	"sql/triggers/TR_AUDIT_CARD_DELETE.sql",
 	"sql/triggers/TR_AUDIT_CARD_UPDATE.sql",
 	"sql/triggers/TR_AUDIT_DECK_DELETE.sql",
 	"sql/triggers/TR_AUDIT_DECK_UPDATE.sql",
-	"sql/triggers/TR_AUDIT_USER_DELETE.sql",
-	"sql/triggers/TR_AUDIT_USER_UPDATE.sql",
 	"sql/triggers/TR_CJ_LOBBY_SETTINGS_AFTER_UPDATE.sql",
-	"sql/triggers/TR_PLAYER_BEFORE_INSERT.sql",
 	"sql/triggers/TR_REVOKE_ACCESS_AF_UP_DECK.sql",
-	"sql/triggers/TR_REVOKE_ACCESS_AF_UP_LOBBY.sql",
 	"sql/triggers/TR_SET_CHANGED_ON_DATE_BF_UP_CARD.sql",
 	"sql/triggers/TR_SET_CHANGED_ON_DATE_BF_UP_DECK.sql",
-	"sql/triggers/TR_SET_CHANGED_ON_DATE_BF_UP_USER.sql",
 }
