@@ -12,11 +12,16 @@ type Player struct {
 	Id            uuid.UUID
 	CreatedOnDate time.Time
 
-	Name              string
-	LobbyId           uuid.UUID
-	UserId            uuid.UUID
-	JoinOrder         int
-	IsActive          bool
+	Name      string
+	LobbyId   uuid.UUID
+	UserId    uuid.UUID
+	JoinOrder int
+	IsActive  bool
+}
+
+type PlayerGameState struct {
+	PlayerId uuid.UUID
+
 	WinningStreak     int
 	LosingStreak      int
 	CreditsSpent      int
@@ -39,19 +44,9 @@ func GetPlayer(playerId uuid.UUID) (Player, error) {
 			P.LOBBY_ID,
 			P.USER_ID,
 			P.JOIN_ORDER,
-			P.IS_ACTIVE,
-			CJPS.WINNING_STREAK,
-			CJPS.LOSING_STREAK,
-			CJPS.CREDITS_SPENT,
-			CJPS.BET_ON_WIN,
-			CJPS.EXTRA_RESPONSES,
-			CJPS.HAND_SIZE_ADVANTAGE,
-			CJPS.DISCARD_ADVANTAGE,
-			CJPS.HANDICAP_ADVANTAGE,
-			CJPS.SPY_ADVANTAGE
+			P.IS_ACTIVE
 		FROM PLAYER AS P
 			INNER JOIN USER AS U ON U.ID = P.USER_ID
-			INNER JOIN CJ_PLAYER_STATE AS CJPS ON CJPS.PLAYER_ID = P.ID
 		WHERE P.ID = ?
 	`
 	rows, err := query(sqlString, playerId)
@@ -69,15 +64,6 @@ func GetPlayer(playerId uuid.UUID) (Player, error) {
 			&player.UserId,
 			&player.JoinOrder,
 			&player.IsActive,
-			&player.WinningStreak,
-			&player.LosingStreak,
-			&player.CreditsSpent,
-			&player.BetOnWin,
-			&player.ExtraResponses,
-			&player.HandSizeAdvantage,
-			&player.DiscardAdvantage,
-			&player.HandicapAdvantage,
-			&player.SpyAdvantage,
 		); err != nil {
 			log.Println(err)
 			return player, errors.New("failed to scan row in query results")
@@ -98,19 +84,9 @@ func GetLobbyUserPlayer(lobbyId uuid.UUID, userId uuid.UUID) (Player, error) {
 			P.LOBBY_ID,
 			P.USER_ID,
 			P.JOIN_ORDER,
-			P.IS_ACTIVE,
-			CJPS.WINNING_STREAK,
-			CJPS.LOSING_STREAK,
-			CJPS.CREDITS_SPENT,
-			CJPS.BET_ON_WIN,
-			CJPS.EXTRA_RESPONSES,
-			CJPS.HAND_SIZE_ADVANTAGE,
-			CJPS.DISCARD_ADVANTAGE,
-			CJPS.HANDICAP_ADVANTAGE,
-			CJPS.SPY_ADVANTAGE
+			P.IS_ACTIVE
 		FROM PLAYER AS P
 			INNER JOIN USER AS U ON U.ID = P.USER_ID
-			INNER JOIN CJ_PLAYER_STATE AS CJPS ON CJPS.PLAYER_ID = P.ID
 		WHERE P.LOBBY_ID = ?
 			AND P.USER_ID = ?
 	`
@@ -129,15 +105,6 @@ func GetLobbyUserPlayer(lobbyId uuid.UUID, userId uuid.UUID) (Player, error) {
 			&player.UserId,
 			&player.JoinOrder,
 			&player.IsActive,
-			&player.WinningStreak,
-			&player.LosingStreak,
-			&player.CreditsSpent,
-			&player.BetOnWin,
-			&player.ExtraResponses,
-			&player.HandSizeAdvantage,
-			&player.DiscardAdvantage,
-			&player.HandicapAdvantage,
-			&player.SpyAdvantage,
 		); err != nil {
 			log.Println(err)
 			return player, errors.New("failed to scan row in query results")
@@ -145,4 +112,49 @@ func GetLobbyUserPlayer(lobbyId uuid.UUID, userId uuid.UUID) (Player, error) {
 	}
 
 	return player, nil
+}
+
+func GetPlayerGameState(playerId uuid.UUID) (PlayerGameState, error) {
+	var state PlayerGameState
+
+	sqlString := `
+		SELECT
+			PLAYER_ID,
+			WINNING_STREAK,
+			LOSING_STREAK,
+			CREDITS_SPENT,
+			BET_ON_WIN,
+			EXTRA_RESPONSES,
+			HAND_SIZE_ADVANTAGE,
+			DISCARD_ADVANTAGE,
+			HANDICAP_ADVANTAGE,
+			SPY_ADVANTAGE
+		FROM CJ_PLAYER_STATE
+		WHERE PLAYER_ID = ?
+	`
+	rows, err := query(sqlString, playerId)
+	if err != nil {
+		return state, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		if err := rows.Scan(
+			&state.PlayerId,
+			&state.WinningStreak,
+			&state.LosingStreak,
+			&state.CreditsSpent,
+			&state.BetOnWin,
+			&state.ExtraResponses,
+			&state.HandSizeAdvantage,
+			&state.DiscardAdvantage,
+			&state.HandicapAdvantage,
+			&state.SpyAdvantage,
+		); err != nil {
+			log.Println(err)
+			return state, errors.New("failed to scan row in query results")
+		}
+	}
+
+	return state, nil
 }

@@ -115,8 +115,9 @@ var SQLFiles = []string{
 	"sql/procedures/SP_WITHDRAW_RESPONSE.sql",
 
 	// events
-	"sql/events/EVT_CLEAN_AUDIT_TABLES.sql",
+	"sql/events/EVT_CLEAN_AUDIT_USER.sql",
 	"sql/events/EVT_CLEAN_BAD_PROMPT_CARDS.sql",
+	"sql/events/EVT_CLEAN_CJ_AUDIT_TABLES.sql",
 	"sql/events/EVT_CLEAN_BAD_RESPONSE_CARDS.sql",
 	"sql/events/EVT_CLEAN_LOGIN_ATTEMPTS.sql",
 

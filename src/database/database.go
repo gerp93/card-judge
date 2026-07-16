@@ -57,6 +57,14 @@ func RunFile(filePath string) error {
 	return execute(string(bytes))
 }
 
+func Query(sqlString string, params ...any) (*sql.Rows, error) {
+	return query(sqlString, params...)
+}
+
+func Execute(sqlString string, params ...any) error {
+	return execute(sqlString, params...)
+}
+
 func query(sqlString string, params ...any) (*sql.Rows, error) {
 	statement, err := database.Prepare(sqlString)
 	if err != nil {

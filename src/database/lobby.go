@@ -344,7 +344,7 @@ func GetLobbyPasswordHash(id uuid.UUID) (sql.NullString, error) {
 	return passwordHash, nil
 }
 
-func CreateLobby(name string, message string, password string, drawPriority string, handSize int, roundTimer int, freeCredits int, freeSpecialCards bool, winStreakThreshold int, loseStreakThreshold int) (uuid.UUID, error) {
+func CreateLobby(name string, message string, password string) (uuid.UUID, error) {
 	id, err := uuid.NewUUID()
 	if err != nil {
 		log.Println(err)
@@ -390,7 +390,11 @@ func CreateLobby(name string, message string, password string, drawPriority stri
 		}
 	}
 
-	sqlString = `
+	return id, nil
+}
+
+func SetLobbySettings(lobbyId uuid.UUID, drawPriority string, handSize int, roundTimer int, freeCredits int, freeSpecialCards bool, winStreakThreshold int, loseStreakThreshold int) error {
+	sqlString := `
 		UPDATE CJ_LOBBY_SETTINGS
 		SET DRAW_PRIORITY = ?,
 			HAND_SIZE = ?,
@@ -401,7 +405,7 @@ func CreateLobby(name string, message string, password string, drawPriority stri
 			LOSE_STREAK_THRESHOLD = ?
 		WHERE LOBBY_ID = ?
 	`
-	return id, execute(sqlString, drawPriority, handSize, roundTimer, freeCredits, freeSpecialCards, winStreakThreshold, loseStreakThreshold, id)
+	return execute(sqlString, drawPriority, handSize, roundTimer, freeCredits, freeSpecialCards, winStreakThreshold, loseStreakThreshold, lobbyId)
 }
 
 func SyncDecksInLobby(lobbyId uuid.UUID, deckIdsPrompt []uuid.UUID, deckIdsResponse []uuid.UUID) error {

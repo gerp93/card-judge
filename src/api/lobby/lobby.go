@@ -402,7 +402,14 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lobbyId, err := database.CreateLobby(name, message, password, drawPriority, handSize, roundTimer, freeCredits, freeSpecialCards, winStreakThreshold, loseStreakThreshold)
+	lobbyId, err := database.CreateLobby(name, message, password)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	err = database.SetLobbySettings(lobbyId, drawPriority, handSize, roundTimer, freeCredits, freeSpecialCards, winStreakThreshold, loseStreakThreshold)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(err.Error()))
@@ -635,7 +642,14 @@ func AlertLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if lobby.FreeCredits-player.CreditsSpent < credits {
+	playerState, err := database.GetPlayerGameState(player.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	if lobby.FreeCredits-playerState.CreditsSpent < credits {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("You do not have that many credits to spend."))
 		return
@@ -701,7 +715,14 @@ func GambleCredits(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if lobby.FreeCredits-player.CreditsSpent < credits {
+	playerState, err := database.GetPlayerGameState(player.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	if lobby.FreeCredits-playerState.CreditsSpent < credits {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("You do not have that many credits to gamble."))
 		return
@@ -741,9 +762,16 @@ func BetOnWin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if player.BetOnWin > 0 {
+	playerState, err := database.GetPlayerGameState(player.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	if playerState.BetOnWin > 0 {
 		w.WriteHeader(http.StatusNotAcceptable)
-		_, _ = w.Write([]byte(fmt.Sprintf("A bet of %d has already been placed.", player.BetOnWin)))
+		_, _ = w.Write([]byte(fmt.Sprintf("A bet of %d has already been placed.", playerState.BetOnWin)))
 		return
 	}
 
@@ -779,7 +807,7 @@ func BetOnWin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if lobby.FreeCredits-player.CreditsSpent < credits {
+	if lobby.FreeCredits-playerState.CreditsSpent < credits {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("You do not have that many credits to bet."))
 		return
@@ -814,7 +842,14 @@ func BetOnWinUndo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if player.BetOnWin == 0 {
+	playerState, err := database.GetPlayerGameState(player.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	if playerState.BetOnWin == 0 {
 		w.WriteHeader(http.StatusNotAcceptable)
 		_, _ = w.Write([]byte("No bet has been placed."))
 		return
@@ -1134,9 +1169,16 @@ func PerkHandSizeAdvantage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	playerState, err := database.GetPlayerGameState(player.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
 	websocket.PlayerBroadcast(player.Id, "refresh-player-hand")
 	websocket.PlayerBroadcast(player.Id, "refresh-player-specials")
-	websocket.PlayerBroadcast(player.Id, fmt.Sprintf("Perk: Your hand size is now increased by <green>%d</> more than the lobby default.", player.HandSizeAdvantage+2))
+	websocket.PlayerBroadcast(player.Id, fmt.Sprintf("Perk: Your hand size is now increased by <green>%d</> more than the lobby default.", playerState.HandSizeAdvantage))
 
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte("success"))
