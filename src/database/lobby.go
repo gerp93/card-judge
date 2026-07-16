@@ -541,6 +541,11 @@ func InitPlayerGame(playerId uuid.UUID) error {
 	return execute(sqlString, playerId)
 }
 
+func CleanupLobbyGame(lobbyId uuid.UUID) error {
+	sqlString := "CALL SP_CJ_CLEANUP_LOBBY (?)"
+	return execute(sqlString, lobbyId)
+}
+
 func SetPlayerInactive(lobbyId uuid.UUID, userId uuid.UUID) error {
 	sqlString := "CALL SP_SET_PLAYER_INACTIVE (?, ?)"
 	return execute(sqlString, lobbyId, userId)

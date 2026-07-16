@@ -13,6 +13,10 @@ type Game interface {
 	// OnPlayerJoined runs after a new base PLAYER row is inserted, letting the
 	// game bootstrap its own per-player state.
 	OnPlayerJoined(playerId uuid.UUID) error
+	// OnRoomEmpty runs when the last client disconnects from a room, letting
+	// the game clean up its own per-room state before the shell deletes the
+	// base LOBBY row.
+	OnRoomEmpty(lobbyId uuid.UUID) error
 }
 
 var registeredGame Game

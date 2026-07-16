@@ -159,24 +159,38 @@ on websocket connect (`AddUserToLobby` → `SP_SET_PLAYER_ACTIVE`) and disconnec
 
 ---
 
-## Planned direction — the "Gameshell Framework" split (in progress)
+## The "Gameshell Framework" split (in progress)
 
 This repo is being split so the reusable platform becomes a separately
 versioned Go module, `github.com/gerp93/gameshell-framework`, that many games
-depend on. The plan (see the approved plan doc) is a **move, not a rewrite** —
-all conventions above are preserved.
+depend on. The split is a **move, not a rewrite** — all conventions above are
+preserved. Landed so far (see PR #9):
 
-- **Framework owns** auth, users, the lobby/room *shell*, participant/presence,
-  the websocket transport, password-gated access, and audit — plus **slim base
-  tables**: `LOBBY(ID, CREATED_ON_DATE, NAME, MESSAGE, PASSWORD_HASH)` and
-  `PLAYER(ID, CREATED_ON_DATE, LOBBY_ID, USER_ID, JOIN_ORDER, IS_ACTIVE)`.
-- **card-judge owns** everything about cards/judge/credits/specials/perks, and
-  adds its removed columns back via **1:1 extension tables**
-  (`CJ_LOBBY_SETTINGS`, `CJ_PLAYER_STATE`) joined by FK.
-- Game logic that today lives in hardcoded couplings moves behind a **`Game`
-  interface with lifecycle hooks** (`OnRoomCreated`, `OnPlayerJoined`,
-  `OnPlayerLeft`, `OnRoomEmpty`) — replacing `TR_LOBBY_AFTER_INSERT`'s game
-  bootstrap and `hub.go`'s direct `DeleteLobby`/`SetPlayerInactive` calls.
-- **Dependency direction is one-way:** the framework must never import a game.
+- **Slim base tables:** `LOBBY(ID, CREATED_ON_DATE, NAME, MESSAGE,
+  PASSWORD_HASH)` and `PLAYER(ID, CREATED_ON_DATE, LOBBY_ID, USER_ID,
+  JOIN_ORDER, IS_ACTIVE)` hold only platform columns. card-judge's game
+  columns live in **1:1 extension tables** (`CJ_LOBBY_SETTINGS`,
+  `CJ_PLAYER_STATE`) joined by FK; game `SP_*`/`FN_*` read/write those.
+- **`Game` interface with lifecycle hooks** (`src/gameshell/gameshell.go`):
+  `OnRoomCreated`, `OnPlayerJoined`, `OnRoomEmpty`. card-judge implements it in
+  `src/game/hooks.go` as thin wrappers over `SP_CJ_INIT_LOBBY`,
+  `SP_CJ_INIT_PLAYER`, `SP_CJ_CLEANUP_LOBBY`. These replaced the game
+  bootstrap/cleanup triggers (`TR_LOBBY_AFTER_INSERT`, `TR_PLAYER_AFTER_INSERT`,
+  `TR_LOBBY_AFTER_DELETE`) — do not reintroduce game logic in triggers on the
+  base tables. `main.go` registers the game via `gameshell.Register`.
+- **Declarative page policy:** required-login/admin paths are set by the app
+  at startup (`api.SetPagePolicy` in `main.go`), and the brand + cookie prefix
+  are parameters (`api.SetBrandName`, `auth.SetCookiePrefix`).
+- **Dependency direction is one-way:** only `main.go` imports `game`;
+  `gameshell` imports nothing from the app. The framework must never import a
+  game.
 - Framework schema loads **before** game schema (extension-table FKs depend on
   it).
+- **Upgrade caveat:** the startup manifest only creates/replaces objects, so
+  removing a SQL object from `SQLFiles` does not drop it from an existing
+  database — dropped objects (e.g. the replaced triggers) need a manual `DROP`
+  on already-provisioned databases, or a fresh `setup.sql`.
+
+Still ahead: physical package reorg into `src/gameshell/` vs `src/game/`
+groups, then extraction of the framework into its own repo (semver-tagged)
+with card-judge depending on a pinned version.

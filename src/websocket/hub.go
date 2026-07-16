@@ -3,6 +3,7 @@ package websocket
 import (
 	"github.com/google/uuid"
 	"github.com/grantfbarnes/card-judge/database"
+	"github.com/grantfbarnes/card-judge/gameshell"
 )
 
 // Hub maintains the set of active clients and broadcasts messages to the
@@ -42,6 +43,9 @@ func (h *Hub) run() {
 		case client := <-h.unregister:
 			h.unregisterClient(client)
 			if len(h.clients) == 0 {
+				if g := gameshell.Registered(); g != nil {
+					_ = g.OnRoomEmpty(h.lobbyId)
+				}
 				_ = database.DeleteLobby(h.lobbyId)
 				delete(lobbyHubs, h.lobbyId)
 				return

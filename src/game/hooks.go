@@ -17,3 +17,7 @@ func (CardJudge) OnRoomCreated(lobbyId uuid.UUID) error {
 func (CardJudge) OnPlayerJoined(playerId uuid.UUID) error {
 	return database.InitPlayerGame(playerId)
 }
+
+func (CardJudge) OnRoomEmpty(lobbyId uuid.UUID) error {
+	return database.CleanupLobbyGame(lobbyId)
+}
