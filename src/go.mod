@@ -14,5 +14,3 @@ require (
 )
 
 require github.com/gerp93/gameshell-framework v0.1.0
-
-replace github.com/gerp93/gameshell-framework => ../../gameshell-framework
