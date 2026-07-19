@@ -1,9 +1,9 @@
 # notes
 todo.txt
 
-# ignore everything inside in infrastructure/backups except gitkeep
-infrastructure/backups/*
-!infrastructure/backups/.gitkeep
+# ignore everything inside backups except gitkeep
+backups/*
+!backups/.gitkeep
 
 # compiled binaries
 src/main
