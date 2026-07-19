@@ -42,12 +42,7 @@ function websocketConnect() {
     const lobbyChatMessages = document.getElementById("lobby-chat-messages");
     const lobbyChatInput = document.getElementById("lobby-chat-input");
 
-    lobbyChatForm.onsubmit = (event) => {
-        event.preventDefault();
-        if (!lobbyChatInput.value) return;
-        ws.send(lobbyChatInput.value);
-        lobbyChatInput.value = "";
-    };
+    gsChat.wireForm(lobbyChatForm, lobbyChatInput, ws);
 
     ws.onmessage = (event) => {
         let messageText = event.data;
@@ -133,23 +128,9 @@ function websocketConnect() {
             return;
         }
 
-        messageText = messageText.replaceAll("<red>", '<span class="lobby-chat-message-red">');
-        messageText = messageText.replaceAll("<green>", '<span class="lobby-chat-message-green">');
-        messageText = messageText.replaceAll("<blue>", '<span class="lobby-chat-message-blue">');
-        messageText = messageText.replaceAll("</>", "</span>");
-
-        const now = new Date();
-        messageText = now.getHours().toString().padStart(2, "0") + ":" + now.getMinutes().toString().padStart(2, "0") + " " + messageText;
-
-        const message = document.createElement("div");
-        message.innerHTML = messageText;
-        lobbyChatMessages.appendChild(message);
-
-        while (lobbyChatMessages.childNodes.length > 100) {
-            lobbyChatMessages.removeChild(lobbyChatMessages.childNodes[0]);
-        }
-
-        lobbyChatMessages.scrollTop = lobbyChatMessages.scrollHeight - lobbyChatMessages.clientHeight;
+        // Shared renderer: color tokens + timestamp + history trim
+        // (see gameshell-framework /gs/js/chat.js).
+        gsChat.append(lobbyChatMessages, messageText);
     };
 }
 

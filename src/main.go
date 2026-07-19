@@ -8,6 +8,7 @@ import (
 
 	gameshell "github.com/gerp93/gameshell-framework"
 	"github.com/gerp93/gameshell-framework/api"
+	gsApiDeck "github.com/gerp93/gameshell-framework/api/deck"
 	"github.com/gerp93/gameshell-framework/auth"
 	gsDatabase "github.com/gerp93/gameshell-framework/database"
 	gsStatic "github.com/gerp93/gameshell-framework/static"
@@ -79,6 +80,7 @@ func main() {
 
 	// static files
 	http.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.FS(static.StaticFiles))))
+	http.Handle("GET /gs/", http.StripPrefix("/gs/", http.FileServer(http.FS(gsStatic.StaticFiles))))
 
 	// pages
 	http.Handle("GET /", api.MiddlewareForPages(http.HandlerFunc(apiPages.Home)))
@@ -115,11 +117,11 @@ func main() {
 
 	// deck
 	http.Handle("GET /api/deck/{deckId}/card-export", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.GetCardExport)))
-	http.Handle("POST /api/deck/create", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.Create)))
-	http.Handle("PUT /api/deck/{deckId}/name", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.SetName)))
-	http.Handle("PUT /api/deck/{deckId}/password", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.SetPassword)))
-	http.Handle("PUT /api/deck/{deckId}/is-public-read-only", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.SetIsPublicReadOnly)))
-	http.Handle("DELETE /api/deck/{deckId}", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.Delete)))
+	http.Handle("POST /api/deck/create", api.MiddlewareForAPIs(http.HandlerFunc(gsApiDeck.Create)))
+	http.Handle("PUT /api/deck/{deckId}/name", api.MiddlewareForAPIs(http.HandlerFunc(gsApiDeck.SetName)))
+	http.Handle("PUT /api/deck/{deckId}/password", api.MiddlewareForAPIs(http.HandlerFunc(gsApiDeck.SetPassword)))
+	http.Handle("PUT /api/deck/{deckId}/is-public-read-only", api.MiddlewareForAPIs(http.HandlerFunc(gsApiDeck.SetIsPublicReadOnly)))
+	http.Handle("DELETE /api/deck/{deckId}", api.MiddlewareForAPIs(http.HandlerFunc(gsApiDeck.Delete)))
 
 	// card
 	http.Handle("POST /api/card/find", api.MiddlewareForAPIs(http.HandlerFunc(apiCard.Find)))

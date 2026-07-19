@@ -29,3 +29,7 @@ func (CardJudge) OnPlayerInactive(playerId uuid.UUID) error {
 func (CardJudge) OnRoomEmpty(lobbyId uuid.UUID) error {
 	return database.CleanupLobbyGame(lobbyId)
 }
+
+func (CardJudge) OnDeckDeleting(deckId uuid.UUID) error {
+	return database.AuditDeckCardsAsDeleted(deckId)
+}

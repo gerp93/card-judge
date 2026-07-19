@@ -529,7 +529,7 @@ func Lobbies(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	decks, err := database.GetReadableDecks(basePageData.User.Id)
+	decks, err := gsDatabase.GetReadableDecks(basePageData.User.Id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("failed to get user decks"))
@@ -554,7 +554,7 @@ func Lobbies(w http.ResponseWriter, r *http.Request) {
 		LastPage int
 		RowCount int
 		Lobbies  []database.LobbyDetails
-		Decks    []database.Deck
+		Decks    []gsDatabase.Deck
 	}
 
 	_ = tmpl.ExecuteTemplate(w, "base", data{
@@ -602,7 +602,7 @@ func Lobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	decks, err := database.GetReadableDecks(basePageData.User.Id)
+	decks, err := gsDatabase.GetReadableDecks(basePageData.User.Id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("failed to get user decks"))
@@ -631,7 +631,7 @@ func Lobby(w http.ResponseWriter, r *http.Request) {
 		api.BasePageData
 		Lobby    database.Lobby
 		PlayerId uuid.UUID
-		Decks    []database.Deck
+		Decks    []gsDatabase.Deck
 	}
 
 	_ = tmpl.ExecuteTemplate(w, "base", data{
@@ -714,7 +714,7 @@ func Decks(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	totalRowCount, err := database.CountDecks(name)
+	totalRowCount, err := gsDatabase.CountDecks(name)
 	if err != nil {
 		totalRowCount = 0
 	}
@@ -728,7 +728,7 @@ func Decks(w http.ResponseWriter, r *http.Request) {
 		page = totalPageCount
 	}
 
-	decks, err := database.SearchDecks(name, page)
+	decks, err := gsDatabase.SearchDecks(name, page)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("failed to get table rows"))
@@ -752,7 +752,7 @@ func Decks(w http.ResponseWriter, r *http.Request) {
 		Page     int
 		LastPage int
 		RowCount int
-		Decks    []database.DeckDetails
+		Decks    []gsDatabase.DeckDetails
 	}
 
 	_ = tmpl.ExecuteTemplate(w, "base", data{
@@ -773,7 +773,7 @@ func Deck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	deck, err := database.GetDeck(deckId)
+	deck, err := gsDatabase.GetDeck(deckId)
 	if err != nil {
 		http.Redirect(w, r, "/decks", http.StatusSeeOther)
 		return
@@ -787,7 +787,7 @@ func Deck(w http.ResponseWriter, r *http.Request) {
 	basePageData := api.GetBasePageData(r)
 	basePageData.PageTitle = "Card Judge - Deck"
 
-	hasDeckAccess, err := database.UserHasDeckAccess(basePageData.User.Id, deckId)
+	hasDeckAccess, err := gsDatabase.UserHasDeckAccess(basePageData.User.Id, deckId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("failed to check deck access"))
@@ -848,7 +848,7 @@ func Deck(w http.ResponseWriter, r *http.Request) {
 
 	type data struct {
 		api.BasePageData
-		Deck     database.Deck
+		Deck     gsDatabase.Deck
 		Category string
 		Text     string
 		Page     int
@@ -877,7 +877,7 @@ func DeckAccess(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	deck, err := database.GetDeck(deckId)
+	deck, err := gsDatabase.GetDeck(deckId)
 	if err != nil {
 		http.Redirect(w, r, "/decks", http.StatusSeeOther)
 		return
@@ -891,7 +891,7 @@ func DeckAccess(w http.ResponseWriter, r *http.Request) {
 	basePageData := api.GetBasePageData(r)
 	basePageData.PageTitle = "Card Judge - Deck"
 
-	hasDeckAccess, err := database.UserHasDeckAccess(basePageData.User.Id, deckId)
+	hasDeckAccess, err := gsDatabase.UserHasDeckAccess(basePageData.User.Id, deckId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("failed to check deck access"))
@@ -916,7 +916,7 @@ func DeckAccess(w http.ResponseWriter, r *http.Request) {
 
 	type data struct {
 		api.BasePageData
-		Deck database.Deck
+		Deck gsDatabase.Deck
 	}
 
 	_ = tmpl.ExecuteTemplate(w, "base", data{
