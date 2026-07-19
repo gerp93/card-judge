@@ -3,10 +3,10 @@ package apiUser
 import (
 	"net/http"
 
+	"github.com/gerp93/gameshell-framework/api"
+	"github.com/gerp93/gameshell-framework/auth"
+	"github.com/gerp93/gameshell-framework/database"
 	"github.com/google/uuid"
-	"github.com/grantfbarnes/card-judge/api"
-	"github.com/grantfbarnes/card-judge/auth"
-	"github.com/grantfbarnes/card-judge/database"
 )
 
 func Create(w http.ResponseWriter, r *http.Request) {

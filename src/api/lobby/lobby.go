@@ -9,11 +9,12 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/gerp93/gameshell-framework/api"
+	gsDatabase "github.com/gerp93/gameshell-framework/database"
+	"github.com/gerp93/gameshell-framework/websocket"
 	"github.com/google/uuid"
-	"github.com/grantfbarnes/card-judge/api"
 	"github.com/grantfbarnes/card-judge/database"
 	"github.com/grantfbarnes/card-judge/static"
-	"github.com/grantfbarnes/card-judge/websocket"
 )
 
 func GetGameInterfaceHTML(w http.ResponseWriter, r *http.Request) {
@@ -390,7 +391,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	existingLobbyId, err := database.GetLobbyId(name)
+	existingLobbyId, err := gsDatabase.GetLobbyId(name)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(err.Error()))
@@ -402,7 +403,14 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lobbyId, err := database.CreateLobby(name, message, password, drawPriority, handSize, roundTimer, freeCredits, freeSpecialCards, winStreakThreshold, loseStreakThreshold)
+	lobbyId, err := gsDatabase.CreateLobby(name, message, password)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	err = database.SetLobbySettings(lobbyId, drawPriority, handSize, roundTimer, freeCredits, freeSpecialCards, winStreakThreshold, loseStreakThreshold)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(err.Error()))
@@ -416,7 +424,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.AddUserLobbyAccess(userId, lobbyId)
+	err = gsDatabase.AddUserLobbyAccess(userId, lobbyId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(err.Error()))
@@ -635,7 +643,14 @@ func AlertLobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if lobby.FreeCredits-player.CreditsSpent < credits {
+	playerState, err := database.GetPlayerGameState(player.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	if lobby.FreeCredits-playerState.CreditsSpent < credits {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("You do not have that many credits to spend."))
 		return
@@ -701,7 +716,14 @@ func GambleCredits(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if lobby.FreeCredits-player.CreditsSpent < credits {
+	playerState, err := database.GetPlayerGameState(player.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	if lobby.FreeCredits-playerState.CreditsSpent < credits {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("You do not have that many credits to gamble."))
 		return
@@ -741,9 +763,16 @@ func BetOnWin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if player.BetOnWin > 0 {
+	playerState, err := database.GetPlayerGameState(player.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	if playerState.BetOnWin > 0 {
 		w.WriteHeader(http.StatusNotAcceptable)
-		_, _ = w.Write([]byte(fmt.Sprintf("A bet of %d has already been placed.", player.BetOnWin)))
+		_, _ = w.Write([]byte(fmt.Sprintf("A bet of %d has already been placed.", playerState.BetOnWin)))
 		return
 	}
 
@@ -779,7 +808,7 @@ func BetOnWin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if lobby.FreeCredits-player.CreditsSpent < credits {
+	if lobby.FreeCredits-playerState.CreditsSpent < credits {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("You do not have that many credits to bet."))
 		return
@@ -814,7 +843,14 @@ func BetOnWinUndo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if player.BetOnWin == 0 {
+	playerState, err := database.GetPlayerGameState(player.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
+	if playerState.BetOnWin == 0 {
 		w.WriteHeader(http.StatusNotAcceptable)
 		_, _ = w.Write([]byte("No bet has been placed."))
 		return
@@ -930,7 +966,7 @@ func BlockResponse(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	targetPlayer, err := database.GetPlayer(targetPlayerId)
+	targetPlayer, err := gsDatabase.GetPlayer(targetPlayerId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(err.Error()))
@@ -1134,9 +1170,16 @@ func PerkHandSizeAdvantage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	playerState, err := database.GetPlayerGameState(player.Id)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte(err.Error()))
+		return
+	}
+
 	websocket.PlayerBroadcast(player.Id, "refresh-player-hand")
 	websocket.PlayerBroadcast(player.Id, "refresh-player-specials")
-	websocket.PlayerBroadcast(player.Id, fmt.Sprintf("Perk: Your hand size is now increased by <green>%d</> more than the lobby default.", player.HandSizeAdvantage+2))
+	websocket.PlayerBroadcast(player.Id, fmt.Sprintf("Perk: Your hand size is now increased by <green>%d</> more than the lobby default.", playerState.HandSizeAdvantage))
 
 	w.WriteHeader(http.StatusOK)
 	_, _ = w.Write([]byte("success"))
@@ -1330,7 +1373,7 @@ func VoteToKick(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	subjectPlayer, err := database.GetPlayer(subjectPlayerId)
+	subjectPlayer, err := gsDatabase.GetPlayer(subjectPlayerId)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		_, _ = w.Write([]byte(err.Error()))
@@ -1383,7 +1426,7 @@ func VoteToKickUndo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	subjectPlayer, err := database.GetPlayer(subjectPlayerId)
+	subjectPlayer, err := gsDatabase.GetPlayer(subjectPlayerId)
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		_, _ = w.Write([]byte(err.Error()))
@@ -1662,7 +1705,7 @@ func SetName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	existingLobbyId, err := database.GetLobbyId(name)
+	existingLobbyId, err := gsDatabase.GetLobbyId(name)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(err.Error()))
@@ -1675,7 +1718,7 @@ func SetName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.SetLobbyName(lobbyId, name)
+	err = gsDatabase.SetLobbyName(lobbyId, name)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(err.Error()))
@@ -1719,7 +1762,7 @@ func SetMessage(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	err = database.SetLobbyMessage(lobbyId, message)
+	err = gsDatabase.SetLobbyMessage(lobbyId, message)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(err.Error()))
@@ -2262,15 +2305,15 @@ func SetDecks(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func getLobbyRequestPlayer(r *http.Request, lobbyId uuid.UUID) (database.Player, error) {
-	var player database.Player
+func getLobbyRequestPlayer(r *http.Request, lobbyId uuid.UUID) (gsDatabase.Player, error) {
+	var player gsDatabase.Player
 
 	userId := api.GetUserId(r)
 	if userId == uuid.Nil {
 		return player, errors.New("failed to get user id")
 	}
 
-	player, err := database.GetLobbyUserPlayer(lobbyId, userId)
+	player, err := gsDatabase.GetLobbyUserPlayer(lobbyId, userId)
 	if err != nil {
 		return player, err
 	}
