@@ -7,7 +7,6 @@ import (
 	"github.com/gerp93/gameshell-framework/auth"
 	gsDatabase "github.com/gerp93/gameshell-framework/database"
 	"github.com/google/uuid"
-	"github.com/grantfbarnes/card-judge/database"
 )
 
 func Lobby(w http.ResponseWriter, r *http.Request) {
@@ -75,7 +74,7 @@ func Deck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	deckPasswordHash, err := database.GetDeckPasswordHash(deckId)
+	deckPasswordHash, err := gsDatabase.GetDeckPasswordHash(deckId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(err.Error()))
@@ -111,7 +110,7 @@ func Deck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.AddUserDeckAccess(userId, deckId)
+	err = gsDatabase.AddUserDeckAccess(userId, deckId)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to add access."))

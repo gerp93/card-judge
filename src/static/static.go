@@ -13,7 +13,6 @@ var SQLFiles = []string{
 	// database
 
 	// tables
-	"sql/tables/DECK.sql",
 	"sql/tables/CARD.sql",
 	"sql/tables/CJ_LOBBY_SETTINGS.sql",
 	"sql/tables/DRAW_PILE.sql",
@@ -26,7 +25,6 @@ var SQLFiles = []string{
 	"sql/tables/WIN.sql",
 	"sql/tables/CREDITS_SPENT.sql",
 	"sql/tables/KICK.sql",
-	"sql/tables/USER_ACCESS_DECK.sql",
 	"sql/tables/LOG_CREDITS_SPENT.sql",
 	"sql/tables/LOG_DISCARD.sql",
 	"sql/tables/LOG_SKIP.sql",
@@ -35,7 +33,6 @@ var SQLFiles = []string{
 	"sql/tables/LOG_KICK.sql",
 	"sql/tables/LOG_FLIP_TABLE.sql",
 	"sql/tables/AUDIT_CARD.sql",
-	"sql/tables/AUDIT_DECK.sql",
 
 	// views
 	"sql/views/V_ROUND_WINNER.sql",
@@ -50,7 +47,6 @@ var SQLFiles = []string{
 	"sql/functions/FN_GET_PLAYER_RESPONSE_CARD_COUNT.sql",
 	"sql/functions/FN_GET_PLAYER_RESPONSE_COUNT.sql",
 	"sql/functions/FN_GET_SPECIAL_COST.sql",
-	"sql/functions/FN_USER_HAS_DECK_ACCESS.sql",
 
 	// procedures
 	"sql/procedures/SP_ADD_EXTRA_RESPONSE.sql",
@@ -68,7 +64,6 @@ var SQLFiles = []string{
 	"sql/procedures/SP_DRAW_HAND.sql",
 	"sql/procedures/SP_FLIP_TABLE.sql",
 	"sql/procedures/SP_GAMBLE_CREDITS.sql",
-	"sql/procedures/SP_GET_READABLE_DECKS.sql",
 	"sql/procedures/SP_PERK_DISCARD_ADVANTAGE.sql",
 	"sql/procedures/SP_PERK_HANDICAP_ADVANTAGE.sql",
 	"sql/procedures/SP_PERK_HAND_SIZE_ADVANTAGE.sql",
@@ -111,10 +106,6 @@ var SQLFiles = []string{
 	// triggers
 	"sql/triggers/TR_AUDIT_CARD_DELETE.sql",
 	"sql/triggers/TR_AUDIT_CARD_UPDATE.sql",
-	"sql/triggers/TR_AUDIT_DECK_DELETE.sql",
-	"sql/triggers/TR_AUDIT_DECK_UPDATE.sql",
 	"sql/triggers/TR_CJ_LOBBY_SETTINGS_AFTER_UPDATE.sql",
-	"sql/triggers/TR_REVOKE_ACCESS_AF_UP_DECK.sql",
 	"sql/triggers/TR_SET_CHANGED_ON_DATE_BF_UP_CARD.sql",
-	"sql/triggers/TR_SET_CHANGED_ON_DATE_BF_UP_DECK.sql",
 }

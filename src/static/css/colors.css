@@ -353,18 +353,6 @@ tbody>tr:hover {
     color: var(--color-accent-red);
 }
 
-.lobby-chat-message-green {
-    color: var(--color-accent-green);
-}
-
-.lobby-chat-message-red {
-    color: var(--color-accent-red);
-}
-
-.lobby-chat-message-blue {
-    color: var(--color-accent-blue);
-}
-
 progress {
     accent-color: var(--color-accent-red);
 }

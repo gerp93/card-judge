@@ -5,7 +5,7 @@ FOR EACH ROW
 BEGIN
     DECLARE VAR_IS_WILD_CARD BOOLEAN DEFAULT (
             SELECT
-                IS_LOBBY_WILD_DECK
+                IS_HIDDEN
             FROM DECK
             WHERE ID = OLD.DECK_ID
         );
