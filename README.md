@@ -72,6 +72,12 @@ A handicap is in place to help balance the game. A player's handicap is
 the amount of other players in the lobby they are beating. All fixed
 cost specials/perks will have the handicap added to the price.
 
+## Deployment
+
+Deployment is managed by [gameshell-deploy](https://github.com/gerp93/gameshell-deploy).
+Configuration and database backups live in that repo under `games/card-judge/`.
+See the gameshell-deploy README for setup and usage.
+
 ## Environment Variables
 
 The following environment variables are needed to run your own instance:
