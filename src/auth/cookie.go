@@ -43,19 +43,25 @@ func GetUserId(r *http.Request) (uuid.UUID, error) {
 func SetUserId(w http.ResponseWriter, userId uuid.UUID) {
 	token, expiry := getTokenFromUserId(userId)
 	http.SetCookie(w, &http.Cookie{
-		Name:    cookieNameUserToken,
-		Value:   token,
-		Path:    "/",
-		Expires: expiry,
+		Name:     cookieNameUserToken,
+		Value:    token,
+		Path:     "/",
+		Expires:  expiry,
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
 	})
 }
 
 func RemoveUserId(w http.ResponseWriter) {
 	http.SetCookie(w, &http.Cookie{
-		Name:    cookieNameUserToken,
-		Value:   "",
-		Path:    "/",
-		Expires: time.Unix(0, 0),
+		Name:     cookieNameUserToken,
+		Value:    "",
+		Path:     "/",
+		Expires:  time.Unix(0, 0),
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
 	})
 }
 
@@ -69,10 +75,13 @@ func GetRedirectUrl(r *http.Request) string {
 
 func SetRedirectUrl(w http.ResponseWriter, url string) {
 	http.SetCookie(w, &http.Cookie{
-		Name:    cookieNameRedirectURL,
-		Value:   url,
-		Path:    "/",
-		Expires: getExpiry(),
+		Name:     cookieNameRedirectURL,
+		Value:    url,
+		Path:     "/",
+		Expires:  getExpiry(),
+		HttpOnly: true,
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
 	})
 }
 
