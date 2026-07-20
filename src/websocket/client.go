@@ -142,6 +142,13 @@ func ServeWs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	hasLobbyAccess, err := database.UserHasLobbyAccess(userId, lobbyId)
+	if err != nil || !hasLobbyAccess {
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = w.Write([]byte("User does not have access."))
+		return
+	}
+
 	if _, ok := lobbyHubs[lobbyId]; !ok {
 		newHub := newHub(lobbyId)
 		go newHub.run()
