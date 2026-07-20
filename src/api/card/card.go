@@ -1,11 +1,11 @@
 package apiCard
 
 import (
+	"html/template"
 	"io"
 	"net/http"
 	"regexp"
 	"strings"
-	"text/template"
 
 	"github.com/google/uuid"
 	"github.com/grantfbarnes/card-judge/api"
