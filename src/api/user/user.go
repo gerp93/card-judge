@@ -67,7 +67,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func CreateAdmin(w http.ResponseWriter, r *http.Request) {
-	if !isAdmin(r) {
+	if !api.UserIsAdmin(r) {
 		w.WriteHeader(http.StatusUnauthorized)
 		_, _ = w.Write([]byte("User does not have access."))
 		return
@@ -366,7 +366,7 @@ func ResetPassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !isAdmin(r) {
+	if !api.UserIsAdmin(r) {
 		w.WriteHeader(http.StatusUnauthorized)
 		_, _ = w.Write([]byte("User does not have access."))
 		return
@@ -392,7 +392,7 @@ func Approve(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !isAdmin(r) {
+	if !api.UserIsAdmin(r) {
 		w.WriteHeader(http.StatusUnauthorized)
 		_, _ = w.Write([]byte("User does not have access."))
 		return
@@ -464,7 +464,7 @@ func SetIsAdmin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !isAdmin(r) {
+	if !api.UserIsAdmin(r) {
 		w.WriteHeader(http.StatusUnauthorized)
 		_, _ = w.Write([]byte("User does not have access."))
 		return
@@ -505,7 +505,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	isCurrentUser := isCurrentUser(r, userId)
-	if !isCurrentUser && !isAdmin(r) {
+	if !isCurrentUser && !api.UserIsAdmin(r) {
 		w.WriteHeader(http.StatusUnauthorized)
 		_, _ = w.Write([]byte("User does not have access."))
 		return
@@ -529,14 +529,4 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 func isCurrentUser(r *http.Request, checkId uuid.UUID) bool {
 	userId := api.GetUserId(r)
 	return userId == checkId
-}
-
-func isAdmin(r *http.Request) bool {
-	userId := api.GetUserId(r)
-	if userId == uuid.Nil {
-		return false
-	}
-
-	isAdmin, _ := database.GetUserIsAdmin(userId)
-	return isAdmin
 }
