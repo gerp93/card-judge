@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"bytes"
+	"html"
 	"log"
 	"net/http"
 	"time"
@@ -72,8 +73,8 @@ func (c *Client) readPump() {
 			}
 			break
 		}
-		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		message = []byte("<green>" + c.user.Name + "</>: " + string(message))
+		message = bytes.TrimSpace(bytes.ReplaceAll(message, newline, space))
+		message = []byte("<green>" + html.EscapeString(c.user.Name) + "</>: " + html.EscapeString(string(message)))
 		c.hub.broadcast <- message
 	}
 }
