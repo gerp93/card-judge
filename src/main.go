@@ -9,6 +9,7 @@ import (
 	gameshell "github.com/gerp93/gameshell-framework"
 	"github.com/gerp93/gameshell-framework/api"
 	gsApiDeck "github.com/gerp93/gameshell-framework/api/deck"
+	gsApiUser "github.com/gerp93/gameshell-framework/api/user"
 	"github.com/gerp93/gameshell-framework/auth"
 	gsDatabase "github.com/gerp93/gameshell-framework/database"
 	gsStatic "github.com/gerp93/gameshell-framework/static"
@@ -19,7 +20,6 @@ import (
 	apiLobby "github.com/grantfbarnes/card-judge/api/lobby"
 	apiPages "github.com/grantfbarnes/card-judge/api/pages"
 	apiStats "github.com/grantfbarnes/card-judge/api/stats"
-	apiUser "github.com/grantfbarnes/card-judge/api/user"
 	"github.com/grantfbarnes/card-judge/game"
 	"github.com/grantfbarnes/card-judge/static"
 )
@@ -103,17 +103,17 @@ func main() {
 	http.Handle("GET /deck/{deckId}/access", api.MiddlewareForPages(http.HandlerFunc(apiPages.DeckAccess)))
 
 	// user
-	http.Handle("POST /api/user/create", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.Create)))
-	http.Handle("POST /api/user/create/admin", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.CreateAdmin)))
-	http.Handle("POST /api/user/login", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.Login)))
-	http.Handle("POST /api/user/logout", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.Logout)))
-	http.Handle("PUT /api/user/{userId}/name", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.SetName)))
-	http.Handle("PUT /api/user/{userId}/password", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.SetPassword)))
-	http.Handle("PUT /api/user/{userId}/password/reset", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.ResetPassword)))
-	http.Handle("PUT /api/user/{userId}/color-theme", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.SetColorTheme)))
-	http.Handle("PUT /api/user/{userId}/approve", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.Approve)))
-	http.Handle("PUT /api/user/{userId}/is-admin", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.SetIsAdmin)))
-	http.Handle("DELETE /api/user/{userId}", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.Delete)))
+	http.Handle("POST /api/user/create", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.Create)))
+	http.Handle("POST /api/user/create/admin", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.CreateAdmin)))
+	http.Handle("POST /api/user/login", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.Login)))
+	http.Handle("POST /api/user/logout", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.Logout)))
+	http.Handle("PUT /api/user/{userId}/name", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.SetName)))
+	http.Handle("PUT /api/user/{userId}/password", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.SetPassword)))
+	http.Handle("PUT /api/user/{userId}/password/reset", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.ResetPassword)))
+	http.Handle("PUT /api/user/{userId}/color-theme", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.SetColorTheme)))
+	http.Handle("PUT /api/user/{userId}/approve", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.Approve)))
+	http.Handle("PUT /api/user/{userId}/is-admin", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.SetIsAdmin)))
+	http.Handle("DELETE /api/user/{userId}", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.Delete)))
 
 	// deck
 	http.Handle("GET /api/deck/{deckId}/card-export", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.GetCardExport)))

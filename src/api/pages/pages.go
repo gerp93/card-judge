@@ -82,7 +82,15 @@ func Account(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_ = tmpl.ExecuteTemplate(w, "base", basePageData)
+	type data struct {
+		api.BasePageData
+		ThemeGroups []api.ThemeGroup
+	}
+
+	_ = tmpl.ExecuteTemplate(w, "base", data{
+		BasePageData: basePageData,
+		ThemeGroups:  api.ThemeGroups,
+	})
 }
 
 func Users(w http.ResponseWriter, r *http.Request) {
