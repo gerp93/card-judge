@@ -34,6 +34,13 @@ var SQLFiles = []string{
 	"sql/tables/LOG_FLIP_TABLE.sql",
 	"sql/tables/AUDIT_CARD.sql",
 
+	// migrations (idempotent ALTERs for pre-existing databases; run after tables
+	// so the target exists, and before triggers/procedures that reference the
+	// new columns)
+	"sql/migrations/MIG_CARD_ADD_LOBBY_ID.sql",
+	"sql/migrations/MIG_CARD_DECK_ID_NULLABLE.sql",
+	"sql/migrations/MIG_CARD_ADD_LOBBY_FK.sql",
+
 	// views
 	"sql/views/V_ROUND_WINNER.sql",
 	"sql/views/V_GAME_WINNER.sql",
