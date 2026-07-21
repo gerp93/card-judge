@@ -3,10 +3,10 @@ package apiLobby
 import (
 	"errors"
 	"fmt"
+	"html/template"
 	"net/http"
 	"strconv"
 	"strings"
-	"text/template"
 	"time"
 
 	"github.com/google/uuid"
@@ -2243,14 +2243,14 @@ func SetDecks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.SyncDecksInLobby(lobbyId, deckIdsPrompt, deckIdsResponse)
+	player, err := getLobbyRequestPlayer(r, lobbyId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
 
-	player, err := getLobbyRequestPlayer(r, lobbyId)
+	err = database.SyncDecksInLobby(lobbyId, deckIdsPrompt, deckIdsResponse)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(err.Error()))

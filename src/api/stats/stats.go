@@ -1,8 +1,8 @@
 package apiStats
 
 import (
+	"html/template"
 	"net/http"
-	"text/template"
 
 	"github.com/google/uuid"
 	"github.com/grantfbarnes/card-judge/api"

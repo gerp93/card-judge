@@ -46,9 +46,9 @@ func MiddlewareForPages(next http.Handler) http.Handler {
 			r.URL.Path == "/review" ||
 			r.URL.Path == "/lobbies" ||
 			r.URL.Path == "/decks" ||
-			strings.HasPrefix(r.URL.Path, "/stats/") ||
-			strings.HasPrefix(r.URL.Path, "/lobby/") ||
-			strings.HasPrefix(r.URL.Path, "/deck/") {
+			strings.HasPrefix(r.URL.Path, "/stats") ||
+			strings.HasPrefix(r.URL.Path, "/lobby") ||
+			strings.HasPrefix(r.URL.Path, "/deck") {
 			if !basePageData.LoggedIn {
 				auth.SetRedirectUrl(w, r.URL.Path+"?"+r.URL.RawQuery)
 				http.Redirect(w, r, "/login", http.StatusSeeOther)
@@ -93,4 +93,14 @@ func MiddlewareForAPIs(next http.Handler) http.Handler {
 
 func GetUserId(r *http.Request) uuid.UUID {
 	return r.Context().Value(userIdRequestContextKey).(uuid.UUID)
+}
+
+func UserIsAdmin(r *http.Request) bool {
+	userId := GetUserId(r)
+	if userId == uuid.Nil {
+		return false
+	}
+
+	isAdmin, _ := database.GetUserIsAdmin(userId)
+	return isAdmin
 }

@@ -2,6 +2,7 @@ package websocket
 
 import (
 	"bytes"
+	"html"
 	"log"
 	"net/http"
 	"time"
@@ -72,8 +73,8 @@ func (c *Client) readPump() {
 			}
 			break
 		}
-		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		message = []byte("<green>" + c.user.Name + "</>: " + string(message))
+		message = bytes.TrimSpace(bytes.ReplaceAll(message, newline, space))
+		message = []byte("<green>" + html.EscapeString(c.user.Name) + "</>: " + html.EscapeString(string(message)))
 		c.hub.broadcast <- message
 	}
 }
@@ -138,6 +139,13 @@ func ServeWs(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to get user."))
+		return
+	}
+
+	hasLobbyAccess, err := database.UserHasLobbyAccess(userId, lobbyId)
+	if err != nil || !hasLobbyAccess {
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = w.Write([]byte("User does not have access."))
 		return
 	}
 
