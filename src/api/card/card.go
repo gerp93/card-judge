@@ -1,11 +1,11 @@
 package apiCard
 
 import (
+	"html/template"
 	"io"
 	"net/http"
 	"regexp"
 	"strings"
-	"text/template"
 
 	"github.com/gerp93/gameshell-framework/api"
 	gsDatabase "github.com/gerp93/gameshell-framework/database"
@@ -386,6 +386,12 @@ func Recover(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if !api.UserIsAdmin(r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = w.Write([]byte("User does not have access."))
+		return
+	}
+
 	err = database.RecoverCard(id)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -403,6 +409,12 @@ func PermanentlyDelete(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to get id from path."))
+		return
+	}
+
+	if !api.UserIsAdmin(r) {
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = w.Write([]byte("User does not have access."))
 		return
 	}
 

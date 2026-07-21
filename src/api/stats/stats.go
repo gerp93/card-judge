@@ -1,8 +1,8 @@
 package apiStats
 
 import (
+	"html/template"
 	"net/http"
-	"text/template"
 
 	"github.com/gerp93/gameshell-framework/api"
 	"github.com/google/uuid"

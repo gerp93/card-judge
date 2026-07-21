@@ -37,7 +37,7 @@ func main() {
 	auth.SetCookiePrefix("CARD-JUDGE")
 	api.SetPagePolicy(api.PagePolicy{
 		LoginPaths:        []string{"/account", "/users", "/review", "/lobbies", "/decks"},
-		LoginPathPrefixes: []string{"/stats/", "/lobby/", "/deck/"},
+		LoginPathPrefixes: []string{"/stats", "/lobby", "/deck"},
 		AdminPaths:        []string{"/users", "/review"},
 	})
 

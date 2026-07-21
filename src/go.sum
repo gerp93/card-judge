@@ -4,6 +4,8 @@ github.com/gerp93/gameshell-framework v0.3.0 h1:HY0QlrFAH2CgT+b+B4TDigONYh3x2wa/
 github.com/gerp93/gameshell-framework v0.3.0/go.mod h1:rZjFcV/ODjUC5WU3UFQjvF7XmyY/BfYQLtRcarbD/7Y=
 github.com/gerp93/gameshell-framework v0.4.0 h1:YKdqCpIWp9U6CZXkq2XgP0nhUKtFOgARVwEspmV0//g=
 github.com/gerp93/gameshell-framework v0.4.0/go.mod h1:rZjFcV/ODjUC5WU3UFQjvF7XmyY/BfYQLtRcarbD/7Y=
+github.com/gerp93/gameshell-framework v0.5.0 h1:pXzcdC4wjxzbvfPbEV5P4K6bxS9dLy/qvUI3ncI2uHw=
+github.com/gerp93/gameshell-framework v0.5.0/go.mod h1:rZjFcV/ODjUC5WU3UFQjvF7XmyY/BfYQLtRcarbD/7Y=
 github.com/go-sql-driver/mysql v1.8.1 h1:LedoTUt/eveggdHS9qUFC1EFSa8bU2+1pZjSRpvNJ1Y=
 github.com/go-sql-driver/mysql v1.8.1/go.mod h1:wEBSXgmK//2ZFJyE+qWnIsVGmvmEKlqwuVSjsCm7DZg=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
