@@ -41,7 +41,7 @@ func main() {
 		AdminPaths:        []string{"/users", "/review"},
 	})
 
-	gsDatabase.SetEnvPrefix("CARD_JUDGE")
+	gsDatabase.SetEnvVarPrefix("CARD_JUDGE")
 
 	db, err := gsDatabase.CreateDatabaseConnection()
 	dbConnectAttemptCount := 0
