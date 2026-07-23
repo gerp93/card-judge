@@ -6,17 +6,22 @@ import (
 	"os"
 	"time"
 
-	"github.com/grantfbarnes/card-judge/api"
+	gameshell "github.com/gerp93/gameshell-framework"
+	"github.com/gerp93/gameshell-framework/api"
+	gsApiDeck "github.com/gerp93/gameshell-framework/api/deck"
+	gsApiUser "github.com/gerp93/gameshell-framework/api/user"
+	"github.com/gerp93/gameshell-framework/auth"
+	gsDatabase "github.com/gerp93/gameshell-framework/database"
+	gsStatic "github.com/gerp93/gameshell-framework/static"
+	"github.com/gerp93/gameshell-framework/websocket"
 	apiAccess "github.com/grantfbarnes/card-judge/api/access"
 	apiCard "github.com/grantfbarnes/card-judge/api/card"
 	apiDeck "github.com/grantfbarnes/card-judge/api/deck"
 	apiLobby "github.com/grantfbarnes/card-judge/api/lobby"
 	apiPages "github.com/grantfbarnes/card-judge/api/pages"
 	apiStats "github.com/grantfbarnes/card-judge/api/stats"
-	apiUser "github.com/grantfbarnes/card-judge/api/user"
-	"github.com/grantfbarnes/card-judge/database"
+	"github.com/grantfbarnes/card-judge/game"
 	"github.com/grantfbarnes/card-judge/static"
-	"github.com/grantfbarnes/card-judge/websocket"
 )
 
 func main() {
@@ -26,12 +31,24 @@ func main() {
 		}
 	}()
 
-	db, err := database.CreateDatabaseConnection()
+	gameshell.Register(game.CardJudge{})
+
+	api.SetBrandName("Card Judge")
+	auth.SetCookiePrefix("CARD-JUDGE")
+	api.SetPagePolicy(api.PagePolicy{
+		LoginPaths:        []string{"/account", "/users", "/review", "/lobbies", "/decks"},
+		LoginPathPrefixes: []string{"/stats", "/lobby", "/deck"},
+		AdminPaths:        []string{"/users", "/review"},
+	})
+
+	gsDatabase.SetEnvVarPrefix("CARD_JUDGE")
+
+	db, err := gsDatabase.CreateDatabaseConnection()
 	dbConnectAttemptCount := 0
 	for err != nil && dbConnectAttemptCount < 6 {
 		time.Sleep(10 * time.Second)
 		dbConnectAttemptCount += 1
-		db, err = database.CreateDatabaseConnection()
+		db, err = gsDatabase.CreateDatabaseConnection()
 	}
 	if err != nil {
 		log.Fatalln(err)
@@ -39,8 +56,22 @@ func main() {
 	}
 	defer db.Close()
 
+	// framework schema must load before game schema
+	for _, sqlFile := range gsStatic.SQLFiles {
+		err = gsDatabase.RunFile(sqlFile)
+		if err != nil {
+			log.Fatalln(err)
+			return
+		}
+	}
+
 	for _, sqlFile := range static.SQLFiles {
-		err = database.RunFile(sqlFile)
+		bytes, err := static.StaticFiles.ReadFile(sqlFile)
+		if err != nil {
+			log.Fatalln(err)
+			return
+		}
+		err = gsDatabase.Execute(string(bytes))
 		if err != nil {
 			log.Fatalln(err)
 			return
@@ -49,6 +80,7 @@ func main() {
 
 	// static files
 	http.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.FS(static.StaticFiles))))
+	http.Handle("GET /gs/", http.StripPrefix("/gs/", http.FileServer(http.FS(gsStatic.StaticFiles))))
 
 	// pages
 	http.Handle("GET /", api.MiddlewareForPages(http.HandlerFunc(apiPages.Home)))
@@ -71,25 +103,25 @@ func main() {
 	http.Handle("GET /deck/{deckId}/access", api.MiddlewareForPages(http.HandlerFunc(apiPages.DeckAccess)))
 
 	// user
-	http.Handle("POST /api/user/create", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.Create)))
-	http.Handle("POST /api/user/create/admin", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.CreateAdmin)))
-	http.Handle("POST /api/user/login", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.Login)))
-	http.Handle("POST /api/user/logout", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.Logout)))
-	http.Handle("PUT /api/user/{userId}/name", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.SetName)))
-	http.Handle("PUT /api/user/{userId}/password", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.SetPassword)))
-	http.Handle("PUT /api/user/{userId}/password/reset", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.ResetPassword)))
-	http.Handle("PUT /api/user/{userId}/color-theme", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.SetColorTheme)))
-	http.Handle("PUT /api/user/{userId}/approve", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.Approve)))
-	http.Handle("PUT /api/user/{userId}/is-admin", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.SetIsAdmin)))
-	http.Handle("DELETE /api/user/{userId}", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.Delete)))
+	http.Handle("POST /api/user/create", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.Create)))
+	http.Handle("POST /api/user/create/admin", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.CreateAdmin)))
+	http.Handle("POST /api/user/login", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.Login)))
+	http.Handle("POST /api/user/logout", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.Logout)))
+	http.Handle("PUT /api/user/{userId}/name", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.SetName)))
+	http.Handle("PUT /api/user/{userId}/password", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.SetPassword)))
+	http.Handle("PUT /api/user/{userId}/password/reset", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.ResetPassword)))
+	http.Handle("PUT /api/user/{userId}/color-theme", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.SetColorTheme)))
+	http.Handle("PUT /api/user/{userId}/approve", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.Approve)))
+	http.Handle("PUT /api/user/{userId}/is-admin", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.SetIsAdmin)))
+	http.Handle("DELETE /api/user/{userId}", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.Delete)))
 
 	// deck
 	http.Handle("GET /api/deck/{deckId}/card-export", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.GetCardExport)))
-	http.Handle("POST /api/deck/create", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.Create)))
-	http.Handle("PUT /api/deck/{deckId}/name", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.SetName)))
-	http.Handle("PUT /api/deck/{deckId}/password", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.SetPassword)))
-	http.Handle("PUT /api/deck/{deckId}/is-public-read-only", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.SetIsPublicReadOnly)))
-	http.Handle("DELETE /api/deck/{deckId}", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.Delete)))
+	http.Handle("POST /api/deck/create", api.MiddlewareForAPIs(http.HandlerFunc(gsApiDeck.Create)))
+	http.Handle("PUT /api/deck/{deckId}/name", api.MiddlewareForAPIs(http.HandlerFunc(gsApiDeck.SetName)))
+	http.Handle("PUT /api/deck/{deckId}/password", api.MiddlewareForAPIs(http.HandlerFunc(gsApiDeck.SetPassword)))
+	http.Handle("PUT /api/deck/{deckId}/is-public-read-only", api.MiddlewareForAPIs(http.HandlerFunc(gsApiDeck.SetIsPublicReadOnly)))
+	http.Handle("DELETE /api/deck/{deckId}", api.MiddlewareForAPIs(http.HandlerFunc(gsApiDeck.Delete)))
 
 	// card
 	http.Handle("POST /api/card/find", api.MiddlewareForAPIs(http.HandlerFunc(apiCard.Find)))

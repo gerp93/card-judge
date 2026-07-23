@@ -554,6 +554,19 @@ func DeleteCard(id uuid.UUID) error {
 	return execute(sqlString, id)
 }
 
+// AuditDeckCardsAsDeleted snapshots all of a deck's cards into AUDIT_CARD as
+// 'DELETE'. Called from the OnDeckDeleting hook because MariaDB FK cascade does
+// not fire the CARD delete trigger when the framework deletes the deck.
+func AuditDeckCardsAsDeleted(deckId uuid.UUID) error {
+	sqlString := `
+		INSERT INTO AUDIT_CARD(AUDIT_TYPE, CARD_ID, DECK_ID, CATEGORY, TEXT, YOUTUBE, IMAGE)
+		SELECT 'DELETE', ID, DECK_ID, CATEGORY, TEXT, YOUTUBE, IMAGE
+		FROM CARD
+		WHERE DECK_ID = ?
+	`
+	return execute(sqlString, deckId)
+}
+
 func RecoverCard(id uuid.UUID) error {
 	sqlString := `
 		INSERT INTO CARD(DECK_ID, CATEGORY, TEXT, YOUTUBE, IMAGE)
