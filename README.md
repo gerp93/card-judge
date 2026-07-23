@@ -4,6 +4,11 @@ Version: 1.29.0
 
 Card Judge is an open source online multiplayer party game.
 
+Built on [gameshell-framework](https://github.com/gerp93/gameshell-framework)
+(see `src/go.mod` for the pinned version) — the shared user/lobby/realtime
+platform this and other gameshell-framework games run on. Card Judge was the
+first game built on it, and the framework was later extracted out of this repo.
+
 ## Definitions
 
 - A **card** is text categorized as either a *Prompt* or *Response*.
@@ -74,9 +79,12 @@ cost specials/perks will have the handicap added to the price.
 
 ## Deployment
 
-Deployment is managed by [gameshell-deploy](https://github.com/gerp93/gameshell-deploy).
-Configuration and database backups live in that repo under `games/card-judge/`.
-See the gameshell-deploy README for setup and usage.
+Create/restore and backup/delete of Card Judge instances on Digital Ocean is
+handled by the shared [gameshell-deploy](https://github.com/gerp93/gameshell-deploy)
+control plane — this repo has no deploy scripts, `deploy.conf`, or `backups/`
+of its own; that config and data live in gameshell-deploy under
+`games/card-judge/`. See gameshell-deploy's README for prerequisites
+(Digital Ocean account, `doctl`, GPG) and `create.sh`/`delete.sh` usage.
 
 ## Environment Variables
 
