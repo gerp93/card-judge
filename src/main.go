@@ -9,6 +9,7 @@ import (
 	gameshell "github.com/gerp93/gameshell-framework"
 	"github.com/gerp93/gameshell-framework/api"
 	gsApiDeck "github.com/gerp93/gameshell-framework/api/deck"
+	gsApiPages "github.com/gerp93/gameshell-framework/api/pages"
 	gsApiUser "github.com/gerp93/gameshell-framework/api/user"
 	"github.com/gerp93/gameshell-framework/auth"
 	gsDatabase "github.com/gerp93/gameshell-framework/database"
@@ -42,6 +43,11 @@ func main() {
 	})
 
 	gsDatabase.SetEnvVarPrefix("CARD_JUDGE")
+	// Win celebration is intentionally not enabled here — this game doesn't
+	// mount apiUser's win-gif/win-message routes, so the account page's
+	// optional section stays off (the default) rather than pointing at
+	// routes that don't exist.
+	gsApiPages.SetAccountPageFeatures(gsApiPages.AccountPageFeatures{WinCelebration: false})
 
 	db, err := gsDatabase.CreateDatabaseConnection()
 	dbConnectAttemptCount := 0
@@ -85,22 +91,22 @@ func main() {
 	// pages
 	http.Handle("GET /", api.MiddlewareForPages(http.HandlerFunc(apiPages.Home)))
 	http.Handle("GET /about", api.MiddlewareForPages(http.HandlerFunc(apiPages.About)))
-	http.Handle("GET /login", api.MiddlewareForPages(http.HandlerFunc(apiPages.Login)))
-	http.Handle("GET /account", api.MiddlewareForPages(http.HandlerFunc(apiPages.Account)))
+	http.Handle("GET /login", api.MiddlewareForPages(http.HandlerFunc(gsApiPages.Login)))
+	http.Handle("GET /account", api.MiddlewareForPages(http.HandlerFunc(gsApiPages.Account)))
 	http.Handle("GET /stats", api.MiddlewareForPages(http.HandlerFunc(apiPages.Stats)))
 	http.Handle("GET /stats/leaderboard", api.MiddlewareForPages(http.HandlerFunc(apiPages.StatsLeaderboard)))
 	http.Handle("GET /stats/users", api.MiddlewareForPages(http.HandlerFunc(apiPages.StatsUsers)))
 	http.Handle("GET /stats/user/{userId}", api.MiddlewareForPages(http.HandlerFunc(apiPages.StatsUser)))
 	http.Handle("GET /stats/cards", api.MiddlewareForPages(http.HandlerFunc(apiPages.StatsCards)))
 	http.Handle("GET /stats/card/{cardId}", api.MiddlewareForPages(http.HandlerFunc(apiPages.StatsCard)))
-	http.Handle("GET /users", api.MiddlewareForPages(http.HandlerFunc(apiPages.Users)))
+	http.Handle("GET /users", api.MiddlewareForPages(http.HandlerFunc(gsApiPages.Users)))
 	http.Handle("GET /review", api.MiddlewareForPages(http.HandlerFunc(apiPages.Review)))
 	http.Handle("GET /lobbies", api.MiddlewareForPages(http.HandlerFunc(apiPages.Lobbies)))
 	http.Handle("GET /lobby/{lobbyId}", api.MiddlewareForPages(http.HandlerFunc(apiPages.Lobby)))
 	http.Handle("GET /lobby/{lobbyId}/access", api.MiddlewareForPages(http.HandlerFunc(apiPages.LobbyAccess)))
-	http.Handle("GET /decks", api.MiddlewareForPages(http.HandlerFunc(apiPages.Decks)))
+	http.Handle("GET /decks", api.MiddlewareForPages(http.HandlerFunc(gsApiPages.Decks)))
 	http.Handle("GET /deck/{deckId}", api.MiddlewareForPages(http.HandlerFunc(apiPages.Deck)))
-	http.Handle("GET /deck/{deckId}/access", api.MiddlewareForPages(http.HandlerFunc(apiPages.DeckAccess)))
+	http.Handle("GET /deck/{deckId}/access", api.MiddlewareForPages(http.HandlerFunc(gsApiPages.DeckAccess)))
 
 	// user
 	http.Handle("POST /api/user/create", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.Create)))
