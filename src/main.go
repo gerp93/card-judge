@@ -69,7 +69,10 @@ func main() {
 	gsBootstrap.MountStaticAssets(static.StaticFiles)
 
 	// pages (game-owned; framework's core + Features-gated pages are wired by MountFeatures)
-	http.Handle("GET /", api.MiddlewareForPages(http.HandlerFunc(apiPages.Home)))
+	// "/{$}" (not "/"): a bare "/" is a Go 1.22+ subtree wildcard matching
+	// every unmatched path, silently serving Home for any bad URL instead of
+	// a real 404. "{$}" restricts the match to the literal root only.
+	http.Handle("GET /{$}", api.MiddlewareForPages(http.HandlerFunc(apiPages.Home)))
 	http.Handle("GET /about", api.MiddlewareForPages(http.HandlerFunc(apiPages.About)))
 	http.Handle("GET /stats", api.MiddlewareForPages(http.HandlerFunc(apiPages.Stats)))
 	http.Handle("GET /stats/leaderboard", api.MiddlewareForPages(http.HandlerFunc(apiPages.StatsLeaderboard)))
