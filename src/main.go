@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	gameshell "github.com/gerp93/gameshell-framework"
@@ -12,6 +11,7 @@ import (
 	gsApiPages "github.com/gerp93/gameshell-framework/api/pages"
 	gsApiUser "github.com/gerp93/gameshell-framework/api/user"
 	"github.com/gerp93/gameshell-framework/auth"
+	gsBootstrap "github.com/gerp93/gameshell-framework/bootstrap"
 	gsDatabase "github.com/gerp93/gameshell-framework/database"
 	gsStatic "github.com/gerp93/gameshell-framework/static"
 	"github.com/gerp93/gameshell-framework/websocket"
@@ -21,6 +21,7 @@ import (
 	apiLobby "github.com/grantfbarnes/card-judge/api/lobby"
 	apiPages "github.com/grantfbarnes/card-judge/api/pages"
 	apiStats "github.com/grantfbarnes/card-judge/api/stats"
+	"github.com/grantfbarnes/card-judge/database"
 	"github.com/grantfbarnes/card-judge/game"
 	"github.com/grantfbarnes/card-judge/static"
 )
@@ -49,44 +50,23 @@ func main() {
 	// routes that don't exist.
 	gsApiPages.SetAccountPageFeatures(gsApiPages.AccountPageFeatures{WinCelebration: false})
 
-	db, err := gsDatabase.CreateDatabaseConnection()
-	dbConnectAttemptCount := 0
-	for err != nil && dbConnectAttemptCount < 6 {
-		time.Sleep(10 * time.Second)
-		dbConnectAttemptCount += 1
-		db, err = gsDatabase.CreateDatabaseConnection()
-	}
-	if err != nil {
-		log.Fatalln(err)
-		return
-	}
+	db := gsBootstrap.ConnectWithRetry(6, 10*time.Second)
 	defer db.Close()
 
 	// framework schema must load before game schema
-	for _, sqlFile := range gsStatic.SQLFiles {
-		err = gsDatabase.RunFile(sqlFile)
-		if err != nil {
-			log.Fatalln(err)
-			return
-		}
+	gsBootstrap.ApplySchema(gsStatic.StaticFiles, gsStatic.SQLFiles)
+	gsBootstrap.ApplySchema(static.StaticFiles, static.SQLFiles)
+
+	// TODO(remove-me): dev-convenience seed (default/password admin + a few
+	// test players) so a fresh local DB has an immediate login. Flagged for
+	// likely removal — see database/seed_dev_users.go.
+	if err := database.SeedDevUsersIfEmpty(); err != nil {
+		log.Fatalln(err)
+		return
 	}
 
-	for _, sqlFile := range static.SQLFiles {
-		bytes, err := static.StaticFiles.ReadFile(sqlFile)
-		if err != nil {
-			log.Fatalln(err)
-			return
-		}
-		err = gsDatabase.Execute(string(bytes))
-		if err != nil {
-			log.Fatalln(err)
-			return
-		}
-	}
-
-	// static files
-	http.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.FS(static.StaticFiles))))
-	http.Handle("GET /gs/", http.StripPrefix("/gs/", http.FileServer(http.FS(gsStatic.StaticFiles))))
+	// static files (game's own at /static/, shared framework assets at /gs/)
+	gsBootstrap.MountStaticAssets(static.StaticFiles)
 
 	// pages
 	http.Handle("GET /", api.MiddlewareForPages(http.HandlerFunc(apiPages.Home)))
@@ -201,27 +181,5 @@ func main() {
 	// websocket
 	http.HandleFunc("GET /ws/lobby/{lobbyId}", websocket.ServeWs)
 
-	if os.Getenv("CARD_JUDGE_LOG_FILE") != "" {
-		logFile, err := os.OpenFile(os.Getenv("CARD_JUDGE_LOG_FILE"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		defer logFile.Close()
-		log.SetOutput(logFile)
-	}
-
-	port := ":2016"
-	if os.Getenv("CARD_JUDGE_PORT") != "" {
-		port = ":" + os.Getenv("CARD_JUDGE_PORT")
-	}
-
-	log.Println("server is running...")
-	if os.Getenv("CARD_JUDGE_CERT_FILE") != "" && os.Getenv("CARD_JUDGE_KEY_FILE") != "" {
-		err = http.ListenAndServeTLS(port, os.Getenv("CARD_JUDGE_CERT_FILE"), os.Getenv("CARD_JUDGE_KEY_FILE"), nil)
-	} else {
-		err = http.ListenAndServe(port, nil)
-	}
-	if err != nil {
-		log.Fatalln(err)
-	}
+	gsBootstrap.Serve("CARD_JUDGE")
 }
