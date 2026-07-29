@@ -7,9 +7,6 @@ import (
 
 	gameshell "github.com/gerp93/gameshell-framework"
 	"github.com/gerp93/gameshell-framework/api"
-	gsApiDeck "github.com/gerp93/gameshell-framework/api/deck"
-	gsApiPages "github.com/gerp93/gameshell-framework/api/pages"
-	gsApiUser "github.com/gerp93/gameshell-framework/api/user"
 	"github.com/gerp93/gameshell-framework/auth"
 	gsBootstrap "github.com/gerp93/gameshell-framework/bootstrap"
 	gsDatabase "github.com/gerp93/gameshell-framework/database"
@@ -44,11 +41,14 @@ func main() {
 	})
 
 	gsDatabase.SetEnvVarPrefix("CARD_JUDGE")
-	// Win celebration is intentionally not enabled here — this game doesn't
-	// mount apiUser's win-gif/win-message routes, so the account page's
-	// optional section stays off (the default) rather than pointing at
-	// routes that don't exist.
-	gsApiPages.SetAccountPageFeatures(gsApiPages.AccountPageFeatures{WinCelebration: false})
+	// WinCelebration and LobbyTurnTimer stay off deliberately: this game has
+	// no win-image/message UI, and already has its own round-timer concept
+	// (CJ_LOBBY_SETTINGS) rather than the framework's.
+	gsBootstrap.MountFeatures(gsBootstrap.Features{
+		Decks:          true,
+		WinCelebration: false,
+		LobbyTurnTimer: false,
+	})
 
 	db := gsBootstrap.ConnectWithRetry(6, 10*time.Second)
 	defer db.Close()
@@ -68,46 +68,23 @@ func main() {
 	// static files (game's own at /static/, shared framework assets at /gs/)
 	gsBootstrap.MountStaticAssets(static.StaticFiles)
 
-	// pages
+	// pages (game-owned; framework's core + Features-gated pages are wired by MountFeatures)
 	http.Handle("GET /", api.MiddlewareForPages(http.HandlerFunc(apiPages.Home)))
 	http.Handle("GET /about", api.MiddlewareForPages(http.HandlerFunc(apiPages.About)))
-	http.Handle("GET /login", api.MiddlewareForPages(http.HandlerFunc(gsApiPages.Login)))
-	http.Handle("GET /account", api.MiddlewareForPages(http.HandlerFunc(gsApiPages.Account)))
 	http.Handle("GET /stats", api.MiddlewareForPages(http.HandlerFunc(apiPages.Stats)))
 	http.Handle("GET /stats/leaderboard", api.MiddlewareForPages(http.HandlerFunc(apiPages.StatsLeaderboard)))
 	http.Handle("GET /stats/users", api.MiddlewareForPages(http.HandlerFunc(apiPages.StatsUsers)))
 	http.Handle("GET /stats/user/{userId}", api.MiddlewareForPages(http.HandlerFunc(apiPages.StatsUser)))
 	http.Handle("GET /stats/cards", api.MiddlewareForPages(http.HandlerFunc(apiPages.StatsCards)))
 	http.Handle("GET /stats/card/{cardId}", api.MiddlewareForPages(http.HandlerFunc(apiPages.StatsCard)))
-	http.Handle("GET /users", api.MiddlewareForPages(http.HandlerFunc(gsApiPages.Users)))
 	http.Handle("GET /review", api.MiddlewareForPages(http.HandlerFunc(apiPages.Review)))
 	http.Handle("GET /lobbies", api.MiddlewareForPages(http.HandlerFunc(apiPages.Lobbies)))
 	http.Handle("GET /lobby/{lobbyId}", api.MiddlewareForPages(http.HandlerFunc(apiPages.Lobby)))
 	http.Handle("GET /lobby/{lobbyId}/access", api.MiddlewareForPages(http.HandlerFunc(apiPages.LobbyAccess)))
-	http.Handle("GET /decks", api.MiddlewareForPages(http.HandlerFunc(gsApiPages.Decks)))
 	http.Handle("GET /deck/{deckId}", api.MiddlewareForPages(http.HandlerFunc(apiPages.Deck)))
-	http.Handle("GET /deck/{deckId}/access", api.MiddlewareForPages(http.HandlerFunc(gsApiPages.DeckAccess)))
 
-	// user
-	http.Handle("POST /api/user/create", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.Create)))
-	http.Handle("POST /api/user/create/admin", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.CreateAdmin)))
-	http.Handle("POST /api/user/login", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.Login)))
-	http.Handle("POST /api/user/logout", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.Logout)))
-	http.Handle("PUT /api/user/{userId}/name", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.SetName)))
-	http.Handle("PUT /api/user/{userId}/password", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.SetPassword)))
-	http.Handle("PUT /api/user/{userId}/password/reset", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.ResetPassword)))
-	http.Handle("PUT /api/user/{userId}/color-theme", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.SetColorTheme)))
-	http.Handle("PUT /api/user/{userId}/approve", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.Approve)))
-	http.Handle("PUT /api/user/{userId}/is-admin", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.SetIsAdmin)))
-	http.Handle("DELETE /api/user/{userId}", api.MiddlewareForAPIs(http.HandlerFunc(gsApiUser.Delete)))
-
-	// deck
+	// deck (game-owned; card export/CSV is card-judge's own)
 	http.Handle("GET /api/deck/{deckId}/card-export", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.GetCardExport)))
-	http.Handle("POST /api/deck/create", api.MiddlewareForAPIs(http.HandlerFunc(gsApiDeck.Create)))
-	http.Handle("PUT /api/deck/{deckId}/name", api.MiddlewareForAPIs(http.HandlerFunc(gsApiDeck.SetName)))
-	http.Handle("PUT /api/deck/{deckId}/password", api.MiddlewareForAPIs(http.HandlerFunc(gsApiDeck.SetPassword)))
-	http.Handle("PUT /api/deck/{deckId}/is-public-read-only", api.MiddlewareForAPIs(http.HandlerFunc(gsApiDeck.SetIsPublicReadOnly)))
-	http.Handle("DELETE /api/deck/{deckId}", api.MiddlewareForAPIs(http.HandlerFunc(gsApiDeck.Delete)))
 
 	// card
 	http.Handle("POST /api/card/find", api.MiddlewareForAPIs(http.HandlerFunc(apiCard.Find)))
