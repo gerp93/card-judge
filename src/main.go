@@ -44,17 +44,19 @@ func main() {
 	// WinCelebration and LobbyTurnTimer stay off deliberately: this game has
 	// no win-image/message UI, and already has its own round-timer concept
 	// (CJ_LOBBY_SETTINGS) rather than the framework's.
-	gsBootstrap.MountFeatures(gsBootstrap.Features{
+	features := gsBootstrap.Features{
 		Decks:          true,
 		WinCelebration: false,
 		LobbyTurnTimer: false,
-	})
+	}
+	gsBootstrap.MountFeatures(features)
 
 	db := gsBootstrap.ConnectWithRetry(6, 10*time.Second)
 	defer db.Close()
 
 	// framework schema must load before game schema
 	gsBootstrap.ApplySchema(gsStatic.StaticFiles, gsStatic.SQLFiles)
+	gsBootstrap.ApplyFeatureSchema(features)
 	gsBootstrap.ApplySchema(static.StaticFiles, static.SQLFiles)
 
 	// TODO(remove-me): dev-convenience seed (default/password admin + a few
