@@ -9,6 +9,11 @@ introduce new styles, formatters, or abstractions.
 > `.github/copilot-instructions.md` and still apply — this file does not repeat
 > them, it points at them. Read both.
 
+This repo also follows the org-wide conventions in
+[gerp93/KVG_Standards](https://github.com/gerp93/KVG_Standards) (theming,
+CI/release shape, licensing, and other repo-hygiene standards shared across
+gerp93 app repos) — see that repo's `README.md` and `REPO_SCOPE.md`.
+
 ---
 
 ## What this is

@@ -9,6 +9,12 @@ Built on [gameshell-framework](https://github.com/gerp93/gameshell-framework)
 platform this and other gameshell-framework games run on. Card Judge was the
 first game built on it, and the framework was later extracted out of this repo.
 
+This repo follows the shared conventions in
+[gerp93/KVG_Standards](https://github.com/gerp93/KVG_Standards) (theming,
+CI, licensing, and repo-hygiene standards for gerp93 app repos) — see that
+repo's `README.md` and `REPO_SCOPE.md` for what applies here and current
+compliance status.
+
 ## Definitions
 
 - A **card** is text categorized as either a *Prompt* or *Response*.
