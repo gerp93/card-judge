@@ -1,0 +1,16 @@
+# Build+vet gate — logic lives in gerp93/KVG_Standards' ci-go.yml, shared
+# with gameshell-framework and timeline-trivia.
+
+name: CI
+
+on:
+  push:
+    branches: [f-framework-breakout]
+  pull_request:
+    branches: [f-framework-breakout]
+
+jobs:
+  ci:
+    uses: gerp93/KVG_Standards/.github/workflows/ci-go.yml@main
+    with:
+      working_directory: src

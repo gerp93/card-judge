@@ -7,8 +7,9 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/gerp93/gameshell-framework/api"
+	gsDatabase "github.com/gerp93/gameshell-framework/database"
 	"github.com/google/uuid"
-	"github.com/grantfbarnes/card-judge/api"
 	"github.com/grantfbarnes/card-judge/database"
 	"github.com/grantfbarnes/card-judge/static"
 )
@@ -94,7 +95,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hasDeckAccess, err := database.UserHasDeckAccess(userId, deckId)
+	hasDeckAccess, err := gsDatabase.UserHasDeckAccess(userId, deckId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("Failed to check deck access."))
@@ -195,7 +196,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hasDeckAccess, err := database.UserHasDeckAccess(userId, deckId)
+	hasDeckAccess, err := gsDatabase.UserHasDeckAccess(userId, deckId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("Failed to check deck access."))
@@ -286,7 +287,7 @@ func SetImage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hasDeckAccess, err := database.UserHasDeckAccess(userId, deckId)
+	hasDeckAccess, err := gsDatabase.UserHasDeckAccess(userId, deckId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("Failed to check deck access."))
@@ -352,7 +353,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	hasDeckAccess, err := database.UserHasDeckAccess(userId, card.DeckId)
+	hasDeckAccess, err := gsDatabase.UserHasDeckAccess(userId, card.DeckId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte("Failed to check deck access."))

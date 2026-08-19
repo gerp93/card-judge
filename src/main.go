@@ -3,20 +3,24 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 	"time"
 
-	"github.com/grantfbarnes/card-judge/api"
+	gameshell "github.com/gerp93/gameshell-framework"
+	"github.com/gerp93/gameshell-framework/api"
+	"github.com/gerp93/gameshell-framework/auth"
+	gsBootstrap "github.com/gerp93/gameshell-framework/bootstrap"
+	gsDatabase "github.com/gerp93/gameshell-framework/database"
+	gsStatic "github.com/gerp93/gameshell-framework/static"
+	"github.com/gerp93/gameshell-framework/websocket"
 	apiAccess "github.com/grantfbarnes/card-judge/api/access"
 	apiCard "github.com/grantfbarnes/card-judge/api/card"
 	apiDeck "github.com/grantfbarnes/card-judge/api/deck"
 	apiLobby "github.com/grantfbarnes/card-judge/api/lobby"
 	apiPages "github.com/grantfbarnes/card-judge/api/pages"
 	apiStats "github.com/grantfbarnes/card-judge/api/stats"
-	apiUser "github.com/grantfbarnes/card-judge/api/user"
 	"github.com/grantfbarnes/card-judge/database"
+	"github.com/grantfbarnes/card-judge/game"
 	"github.com/grantfbarnes/card-judge/static"
-	"github.com/grantfbarnes/card-judge/websocket"
 )
 
 func main() {
@@ -26,70 +30,66 @@ func main() {
 		}
 	}()
 
-	db, err := database.CreateDatabaseConnection()
-	dbConnectAttemptCount := 0
-	for err != nil && dbConnectAttemptCount < 6 {
-		time.Sleep(10 * time.Second)
-		dbConnectAttemptCount += 1
-		db, err = database.CreateDatabaseConnection()
+	gameshell.Register(game.CardJudge{})
+
+	api.SetBrandName("Card Judge")
+	auth.SetCookiePrefix("CARD-JUDGE")
+	api.SetPagePolicy(api.PagePolicy{
+		LoginPaths:        []string{"/account", "/users", "/review", "/lobbies", "/decks"},
+		LoginPathPrefixes: []string{"/stats", "/lobby", "/deck"},
+		AdminPaths:        []string{"/users", "/review"},
+	})
+
+	gsDatabase.SetEnvVarPrefix("CARD_JUDGE")
+	// WinCelebration and LobbyTurnTimer stay off deliberately: this game has
+	// no win-image/message UI, and already has its own round-timer concept
+	// (CJ_LOBBY_SETTINGS) rather than the framework's.
+	features := gsBootstrap.Features{
+		Decks:          true,
+		WinCelebration: false,
+		LobbyTurnTimer: false,
 	}
-	if err != nil {
+	gsBootstrap.MountFeatures(features)
+
+	db := gsBootstrap.ConnectWithRetry(6, 10*time.Second)
+	defer db.Close()
+
+	// framework schema must load before game schema
+	gsBootstrap.ApplySchema(gsStatic.StaticFiles, gsStatic.SQLFiles)
+	gsBootstrap.ApplyFeatureSchema(features)
+	gsBootstrap.ApplySchema(static.StaticFiles, static.SQLFiles)
+
+	// TODO(remove-me): dev-convenience seed (default/password admin + a few
+	// test players) so a fresh local DB has an immediate login. Flagged for
+	// likely removal — see database/seed_dev_users.go.
+	if err := database.SeedDevUsersIfEmpty(); err != nil {
 		log.Fatalln(err)
 		return
 	}
-	defer db.Close()
 
-	for _, sqlFile := range static.SQLFiles {
-		err = database.RunFile(sqlFile)
-		if err != nil {
-			log.Fatalln(err)
-			return
-		}
-	}
+	// static files (game's own at /static/, shared framework assets at /gs/)
+	gsBootstrap.MountStaticAssets(static.StaticFiles)
 
-	// static files
-	http.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.FS(static.StaticFiles))))
-
-	// pages
-	http.Handle("GET /", api.MiddlewareForPages(http.HandlerFunc(apiPages.Home)))
+	// pages (game-owned; framework's core + Features-gated pages are wired by MountFeatures)
+	// "/{$}" (not "/"): a bare "/" is a Go 1.22+ subtree wildcard matching
+	// every unmatched path, silently serving Home for any bad URL instead of
+	// a real 404. "{$}" restricts the match to the literal root only.
+	http.Handle("GET /{$}", api.MiddlewareForPages(http.HandlerFunc(apiPages.Home)))
 	http.Handle("GET /about", api.MiddlewareForPages(http.HandlerFunc(apiPages.About)))
-	http.Handle("GET /login", api.MiddlewareForPages(http.HandlerFunc(apiPages.Login)))
-	http.Handle("GET /account", api.MiddlewareForPages(http.HandlerFunc(apiPages.Account)))
 	http.Handle("GET /stats", api.MiddlewareForPages(http.HandlerFunc(apiPages.Stats)))
 	http.Handle("GET /stats/leaderboard", api.MiddlewareForPages(http.HandlerFunc(apiPages.StatsLeaderboard)))
 	http.Handle("GET /stats/users", api.MiddlewareForPages(http.HandlerFunc(apiPages.StatsUsers)))
 	http.Handle("GET /stats/user/{userId}", api.MiddlewareForPages(http.HandlerFunc(apiPages.StatsUser)))
 	http.Handle("GET /stats/cards", api.MiddlewareForPages(http.HandlerFunc(apiPages.StatsCards)))
 	http.Handle("GET /stats/card/{cardId}", api.MiddlewareForPages(http.HandlerFunc(apiPages.StatsCard)))
-	http.Handle("GET /users", api.MiddlewareForPages(http.HandlerFunc(apiPages.Users)))
 	http.Handle("GET /review", api.MiddlewareForPages(http.HandlerFunc(apiPages.Review)))
 	http.Handle("GET /lobbies", api.MiddlewareForPages(http.HandlerFunc(apiPages.Lobbies)))
 	http.Handle("GET /lobby/{lobbyId}", api.MiddlewareForPages(http.HandlerFunc(apiPages.Lobby)))
 	http.Handle("GET /lobby/{lobbyId}/access", api.MiddlewareForPages(http.HandlerFunc(apiPages.LobbyAccess)))
-	http.Handle("GET /decks", api.MiddlewareForPages(http.HandlerFunc(apiPages.Decks)))
 	http.Handle("GET /deck/{deckId}", api.MiddlewareForPages(http.HandlerFunc(apiPages.Deck)))
-	http.Handle("GET /deck/{deckId}/access", api.MiddlewareForPages(http.HandlerFunc(apiPages.DeckAccess)))
 
-	// user
-	http.Handle("POST /api/user/create", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.Create)))
-	http.Handle("POST /api/user/create/admin", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.CreateAdmin)))
-	http.Handle("POST /api/user/login", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.Login)))
-	http.Handle("POST /api/user/logout", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.Logout)))
-	http.Handle("PUT /api/user/{userId}/name", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.SetName)))
-	http.Handle("PUT /api/user/{userId}/password", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.SetPassword)))
-	http.Handle("PUT /api/user/{userId}/password/reset", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.ResetPassword)))
-	http.Handle("PUT /api/user/{userId}/color-theme", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.SetColorTheme)))
-	http.Handle("PUT /api/user/{userId}/approve", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.Approve)))
-	http.Handle("PUT /api/user/{userId}/is-admin", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.SetIsAdmin)))
-	http.Handle("DELETE /api/user/{userId}", api.MiddlewareForAPIs(http.HandlerFunc(apiUser.Delete)))
-
-	// deck
+	// deck (game-owned; card export/CSV is card-judge's own)
 	http.Handle("GET /api/deck/{deckId}/card-export", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.GetCardExport)))
-	http.Handle("POST /api/deck/create", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.Create)))
-	http.Handle("PUT /api/deck/{deckId}/name", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.SetName)))
-	http.Handle("PUT /api/deck/{deckId}/password", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.SetPassword)))
-	http.Handle("PUT /api/deck/{deckId}/is-public-read-only", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.SetIsPublicReadOnly)))
-	http.Handle("DELETE /api/deck/{deckId}", api.MiddlewareForAPIs(http.HandlerFunc(apiDeck.Delete)))
 
 	// card
 	http.Handle("POST /api/card/find", api.MiddlewareForAPIs(http.HandlerFunc(apiCard.Find)))
@@ -163,27 +163,5 @@ func main() {
 	// websocket
 	http.HandleFunc("GET /ws/lobby/{lobbyId}", websocket.ServeWs)
 
-	if os.Getenv("CARD_JUDGE_LOG_FILE") != "" {
-		logFile, err := os.OpenFile(os.Getenv("CARD_JUDGE_LOG_FILE"), os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
-		if err != nil {
-			log.Fatalln(err)
-		}
-		defer logFile.Close()
-		log.SetOutput(logFile)
-	}
-
-	port := ":2016"
-	if os.Getenv("CARD_JUDGE_PORT") != "" {
-		port = ":" + os.Getenv("CARD_JUDGE_PORT")
-	}
-
-	log.Println("server is running...")
-	if os.Getenv("CARD_JUDGE_CERT_FILE") != "" && os.Getenv("CARD_JUDGE_KEY_FILE") != "" {
-		err = http.ListenAndServeTLS(port, os.Getenv("CARD_JUDGE_CERT_FILE"), os.Getenv("CARD_JUDGE_KEY_FILE"), nil)
-	} else {
-		err = http.ListenAndServe(port, nil)
-	}
-	if err != nil {
-		log.Fatalln(err)
-	}
+	gsBootstrap.Serve("CARD_JUDGE")
 }
