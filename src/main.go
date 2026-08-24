@@ -18,7 +18,6 @@ import (
 	apiLobby "github.com/grantfbarnes/card-judge/api/lobby"
 	apiPages "github.com/grantfbarnes/card-judge/api/pages"
 	apiStats "github.com/grantfbarnes/card-judge/api/stats"
-	"github.com/grantfbarnes/card-judge/database"
 	"github.com/grantfbarnes/card-judge/game"
 	"github.com/grantfbarnes/card-judge/static"
 )
@@ -58,14 +57,6 @@ func main() {
 	gsBootstrap.ApplySchema(gsStatic.StaticFiles, gsStatic.SQLFiles)
 	gsBootstrap.ApplyFeatureSchema(features)
 	gsBootstrap.ApplySchema(static.StaticFiles, static.SQLFiles)
-
-	// TODO(remove-me): dev-convenience seed (default/password admin + a few
-	// test players) so a fresh local DB has an immediate login. Flagged for
-	// likely removal — see database/seed_dev_users.go.
-	if err := database.SeedDevUsersIfEmpty(); err != nil {
-		log.Fatalln(err)
-		return
-	}
 
 	// static files (game's own at /static/, shared framework assets at /gs/)
 	gsBootstrap.MountStaticAssets(static.StaticFiles)
