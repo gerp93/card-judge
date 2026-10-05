@@ -3,14 +3,9 @@ OR REPLACE TRIGGER TR_AUDIT_CARD_DELETE
 BEFORE DELETE ON CARD
 FOR EACH ROW
 BEGIN
-    DECLARE VAR_IS_WILD_CARD BOOLEAN DEFAULT (
-            SELECT
-                IS_LOBBY_WILD_DECK
-            FROM DECK
-            WHERE ID = OLD.DECK_ID
-        );
-
-    IF NOT VAR_IS_WILD_CARD THEN
+    -- Only real deck cards are audited; per-lobby wild cards (LOBBY_ID set) are
+    -- ephemeral gameplay artifacts and are not part of the deck audit trail.
+    IF OLD.LOBBY_ID IS NULL THEN
         INSERT INTO AUDIT_CARD(
             AUDIT_TYPE,
             CARD_ID,
