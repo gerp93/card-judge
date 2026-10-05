@@ -391,6 +391,19 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	canReadDecks, err := userCanReadDecks(userId, deckIdsPrompt, deckIdsResponse)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte("Failed to check deck access."))
+		return
+	}
+
+	if !canReadDecks {
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = w.Write([]byte("You do not have access to one of the selected decks."))
+		return
+	}
+
 	existingLobbyId, err := gsDatabase.GetLobbyId(name)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -2293,6 +2306,19 @@ func SetDecks(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	canReadDecks, err := userCanReadDecks(player.UserId, deckIdsPrompt, deckIdsResponse)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		_, _ = w.Write([]byte("Failed to check deck access."))
+		return
+	}
+
+	if !canReadDecks {
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = w.Write([]byte("You do not have access to one of the selected decks."))
+		return
+	}
+
 	err = database.SyncDecksInLobby(lobbyId, deckIdsPrompt, deckIdsResponse)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
@@ -2303,6 +2329,25 @@ func SetDecks(w http.ResponseWriter, r *http.Request) {
 	websocket.LobbyBroadcast(lobbyId, "refresh-lobby-game-info")
 	websocket.LobbyBroadcast(lobbyId, "<green>"+player.Name+"</>: Updated draw pile decks.")
 	w.WriteHeader(http.StatusOK)
+}
+
+// userCanReadDecks reports whether userId may read every deck in the given
+// lists. UserCanReadDeck (not UserHasDeckAccess) is deliberate: choosing decks
+// for a lobby is a read/use action, so a deck flagged public-readonly must pass
+// while edit actions keep using UserHasDeckAccess.
+func userCanReadDecks(userId uuid.UUID, deckIdLists ...[]uuid.UUID) (bool, error) {
+	for _, deckIds := range deckIdLists {
+		for _, deckId := range deckIds {
+			ok, err := gsDatabase.UserCanReadDeck(userId, deckId)
+			if err != nil {
+				return false, err
+			}
+			if !ok {
+				return false, nil
+			}
+		}
+	}
+	return true, nil
 }
 
 func getLobbyRequestPlayer(r *http.Request, lobbyId uuid.UUID) (gsDatabase.Player, error) {
