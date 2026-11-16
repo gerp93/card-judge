@@ -1,5 +1,3 @@
-let wsReconnectAttempts = 0;
-
 window.onload = () => {
     const lobbyMessageDialog = document.getElementById("lobby-message-dialog");
     if (lobbyMessageDialog) lobbyMessageDialog.showModal();
@@ -20,22 +18,9 @@ function websocketConnect() {
         document.location.href = "/lobbies";
     }
 
-    ws.onopen = () => {
-        if (wsReconnectAttempts > 0) {
-            displayLobbyAlert("Connection Restored", `Restored on attempt ${wsReconnectAttempts}`, 3);
-        }
-        wsReconnectAttempts = 0;
-    };
-
     ws.onclose = () => {
-        if (wsReconnectAttempts < 3) {
-            wsReconnectAttempts++;
-            displayLobbyAlert("Connection Lost", `Attempting to reconnect (${wsReconnectAttempts}/3)...`, 5);
-            setTimeout(() => { websocketConnect() }, 5000);
-        } else {
-            alert("Connection Lost");
-            document.location.href = "/lobbies";
-        }
+        displayLobbyAlert("Connection Lost", `Attempting to reconnect...`, 3);
+        setTimeout(() => { location.reload(true) }, 3000);
     };
 
     const lobbyChatForm = document.getElementById("lobby-chat-form");
