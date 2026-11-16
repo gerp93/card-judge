@@ -3,10 +3,10 @@ package apiAccess
 import (
 	"net/http"
 
+	"github.com/gerp93/gameshell-framework/api"
+	"github.com/gerp93/gameshell-framework/auth"
+	gsDatabase "github.com/gerp93/gameshell-framework/database"
 	"github.com/google/uuid"
-	"github.com/grantfbarnes/card-judge/api"
-	"github.com/grantfbarnes/card-judge/auth"
-	"github.com/grantfbarnes/card-judge/database"
 )
 
 func Lobby(w http.ResponseWriter, r *http.Request) {
@@ -18,7 +18,7 @@ func Lobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	lobbyPasswordHash, err := database.GetLobbyPasswordHash(lobbyId)
+	lobbyPasswordHash, err := gsDatabase.GetLobbyPasswordHash(lobbyId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(err.Error()))
@@ -54,7 +54,7 @@ func Lobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.AddUserLobbyAccess(userId, lobbyId)
+	err = gsDatabase.AddUserLobbyAccess(userId, lobbyId)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to add access."))
@@ -74,7 +74,7 @@ func Deck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	deckPasswordHash, err := database.GetDeckPasswordHash(deckId)
+	deckPasswordHash, err := gsDatabase.GetDeckPasswordHash(deckId)
 	if err != nil {
 		w.WriteHeader(http.StatusInternalServerError)
 		_, _ = w.Write([]byte(err.Error()))
@@ -110,7 +110,7 @@ func Deck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = database.AddUserDeckAccess(userId, deckId)
+	err = gsDatabase.AddUserDeckAccess(userId, deckId)
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to add access."))

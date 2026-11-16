@@ -1,0 +1,44 @@
+{{define "card-search-controls"}}
+<label for="categorySearch">Category:</label>
+<select
+    id="categorySearch"
+    name="category"
+    autocomplete="off"
+    onchange="submitTableFilterForm()"
+    required
+>
+    {{if eq .Category "PROMPT"}}
+    <option value="%">Any</option>
+    <option
+        value="PROMPT"
+        selected
+    >Prompt</option>
+    <option value="RESPONSE">Response</option>
+    {{else if eq .Category "RESPONSE"}}
+    <option value="%">Any</option>
+    <option value="PROMPT">Prompt</option>
+    <option
+        value="RESPONSE"
+        selected
+    >Response</option>
+    {{else}}
+    <option
+        value="%"
+        selected
+    >Any</option>
+    <option value="PROMPT">Prompt</option>
+    <option value="RESPONSE">Response</option>
+    {{end}}
+</select>
+<label for="textSearch">Search:</label>
+<input
+    type="search"
+    id="textSearch"
+    name="text"
+    maxlength="510"
+    placeholder="Search..."
+    value="{{.Text}}"
+    autocomplete="off"
+    onchange="submitTableFilterForm()"
+/>
+{{end}}

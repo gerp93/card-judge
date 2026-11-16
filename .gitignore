@@ -1,10 +1,6 @@
 # notes
 todo.txt
 
-# ignore everything inside in infrastructure/backups except gitkeep
-infrastructure/backups/*
-!infrastructure/backups/.gitkeep
-
 # compiled binaries
 src/main
 src/card-judge
