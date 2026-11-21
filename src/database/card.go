@@ -6,8 +6,7 @@ import (
 	"errors"
 	"log"
 	"time"
-
-	"github.com/google/uuid"
+	"uuid"
 )
 
 type Card struct {
@@ -447,11 +446,7 @@ func GetCard(id uuid.UUID) (Card, error) {
 }
 
 func CreateCard(deckId uuid.UUID, category string, text string, youtube string) (uuid.UUID, error) {
-	id, err := uuid.NewUUID()
-	if err != nil {
-		log.Println(err)
-		return id, errors.New("failed to generate new id")
-	}
+	id := uuid.New()
 
 	sqlString := `
 		INSERT INTO CARD(ID, DECK_ID, CATEGORY, TEXT, YOUTUBE)

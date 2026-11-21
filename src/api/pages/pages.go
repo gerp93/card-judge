@@ -5,8 +5,8 @@ import (
 	"html/template"
 	"net/http"
 	"strconv"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/grantfbarnes/card-judge/api"
 	"github.com/grantfbarnes/card-judge/database"
 	"github.com/grantfbarnes/card-judge/static"
@@ -581,7 +581,7 @@ func Lobby(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if lobby.Id == uuid.Nil {
+	if lobby.Id == uuid.Nil() {
 		http.Redirect(w, r, "/lobbies", http.StatusSeeOther)
 		return
 	}
@@ -655,7 +655,7 @@ func LobbyAccess(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if lobby.Id == uuid.Nil {
+	if lobby.Id == uuid.Nil() {
 		http.Redirect(w, r, "/lobbies", http.StatusSeeOther)
 		return
 	}
@@ -778,7 +778,7 @@ func Deck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if deck.Id == uuid.Nil {
+	if deck.Id == uuid.Nil() {
 		http.Redirect(w, r, "/decks", http.StatusSeeOther)
 		return
 	}
@@ -882,7 +882,7 @@ func DeckAccess(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if deck.Id == uuid.Nil {
+	if deck.Id == uuid.Nil() {
 		http.Redirect(w, r, "/decks", http.StatusSeeOther)
 		return
 	}

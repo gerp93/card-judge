@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/grantfbarnes/card-judge/api"
 	"github.com/grantfbarnes/card-judge/database"
 	"github.com/grantfbarnes/card-judge/static"
@@ -88,7 +88,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userId := api.GetUserId(r)
-	if userId == uuid.Nil {
+	if userId == uuid.Nil() {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to get user id."))
 		return
@@ -127,7 +127,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if existingCardId != uuid.Nil {
+	if existingCardId != uuid.Nil() {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Card text already exists."))
 		return
@@ -189,7 +189,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userId := api.GetUserId(r)
-	if userId == uuid.Nil {
+	if userId == uuid.Nil() {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to get user id."))
 		return
@@ -228,7 +228,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if existingCardId != uuid.Nil && existingCardId != cardId {
+	if existingCardId != uuid.Nil() && existingCardId != cardId {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Card text already exists."))
 		return
@@ -280,7 +280,7 @@ func SetImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userId := api.GetUserId(r)
-	if userId == uuid.Nil {
+	if userId == uuid.Nil() {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to get user id."))
 		return
@@ -339,7 +339,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userId := api.GetUserId(r)
-	if userId == uuid.Nil {
+	if userId == uuid.Nil() {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to get user id."))
 		return

@@ -5,8 +5,7 @@ import (
 	"fmt"
 	"log"
 	"reflect"
-
-	"github.com/google/uuid"
+	"uuid"
 )
 
 type StatUser struct {

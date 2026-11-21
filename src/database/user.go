@@ -5,8 +5,8 @@ import (
 	"errors"
 	"log"
 	"time"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/grantfbarnes/card-judge/auth"
 )
 
@@ -262,7 +262,7 @@ func GetUserIdByName(name string) (uuid.UUID, error) {
 		}
 	}
 
-	if userId == uuid.Nil {
+	if userId == uuid.Nil() {
 		return userId, errors.New("user not found")
 	}
 

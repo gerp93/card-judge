@@ -11,8 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
-
-	"github.com/google/uuid"
+	"uuid"
 )
 
 const cookieNameUserToken string = "CARD-JUDGE-USER-TOKEN"
@@ -29,12 +28,12 @@ func getRandomBytes() []byte {
 func GetUserId(r *http.Request) (uuid.UUID, error) {
 	token, err := getCookieValue(r, cookieNameUserToken)
 	if err != nil {
-		return uuid.Nil, errors.New("cookie not found")
+		return uuid.Nil(), errors.New("cookie not found")
 	}
 
 	userId, err := getUserIdFromToken(token)
 	if err != nil {
-		return uuid.Nil, errors.New("user not logged in")
+		return uuid.Nil(), errors.New("user not logged in")
 	}
 
 	return userId, nil
@@ -118,39 +117,39 @@ func getTokenFromUserId(userId uuid.UUID) (string, time.Time) {
 func getUserIdFromToken(token string) (uuid.UUID, error) {
 	split := strings.Split(token, "|")
 	if len(split) != 2 {
-		return uuid.Nil, errors.New("invalid token")
+		return uuid.Nil(), errors.New("invalid token")
 	}
 
 	valueBytesHashedEncoded := split[1]
 	valueBytesHashed, err := base64.URLEncoding.DecodeString(valueBytesHashedEncoded)
 	if err != nil {
-		return uuid.Nil, errors.New("failed to decode token")
+		return uuid.Nil(), errors.New("failed to decode token")
 	}
 
 	valueBytesEncoded := split[0]
 	valueBytes, err := base64.URLEncoding.DecodeString(valueBytesEncoded)
 	if err != nil {
-		return uuid.Nil, errors.New("failed to decode token")
+		return uuid.Nil(), errors.New("failed to decode token")
 	}
 
 	if !hmac.Equal(getHashedBytes(valueBytes), valueBytesHashed) {
-		return uuid.Nil, errors.New("hash invalid")
+		return uuid.Nil(), errors.New("hash invalid")
 	}
 
 	value := string(valueBytes)
 	split = strings.Split(value, " ")
 	if len(split) != 2 {
-		return uuid.Nil, errors.New("invalid token")
+		return uuid.Nil(), errors.New("invalid token")
 	}
 
 	expiry, err := strconv.ParseInt(split[1], 10, 64)
 	if err != nil || time.Now().Unix() > expiry {
-		return uuid.Nil, errors.New("token expired")
+		return uuid.Nil(), errors.New("token expired")
 	}
 
 	userId, err := uuid.Parse(split[0])
 	if err != nil {
-		return uuid.Nil, err
+		return uuid.Nil(), err
 	}
 
 	return userId, nil

@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/grantfbarnes/card-judge/api"
 	"github.com/grantfbarnes/card-judge/database"
 	"github.com/grantfbarnes/card-judge/static"
@@ -384,7 +384,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userId := api.GetUserId(r)
-	if userId == uuid.Nil {
+	if userId == uuid.Nil() {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to get user id."))
 		return
@@ -396,7 +396,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
-	if existingLobbyId != uuid.Nil {
+	if existingLobbyId != uuid.Nil() {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Lobby name already exists."))
 		return
@@ -1093,7 +1093,7 @@ func PlayWildCard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if existingCardId != uuid.Nil {
+	if existingCardId != uuid.Nil() {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Wild card text has already been played."))
 		return
@@ -1669,7 +1669,7 @@ func SetName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if existingLobbyId != uuid.Nil && existingLobbyId != lobbyId {
+	if existingLobbyId != uuid.Nil() && existingLobbyId != lobbyId {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Lobby name already exists."))
 		return
@@ -2266,7 +2266,7 @@ func getLobbyRequestPlayer(r *http.Request, lobbyId uuid.UUID) (database.Player,
 	var player database.Player
 
 	userId := api.GetUserId(r)
-	if userId == uuid.Nil {
+	if userId == uuid.Nil() {
 		return player, errors.New("failed to get user id")
 	}
 
@@ -2275,7 +2275,7 @@ func getLobbyRequestPlayer(r *http.Request, lobbyId uuid.UUID) (database.Player,
 		return player, err
 	}
 
-	if player.Id == uuid.Nil {
+	if player.Id == uuid.Nil() {
 		return player, errors.New("user not found in lobby")
 	}
 

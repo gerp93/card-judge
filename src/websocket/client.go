@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 	"time"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 	"github.com/grantfbarnes/card-judge/auth"
 	"github.com/grantfbarnes/card-judge/database"

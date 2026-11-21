@@ -3,8 +3,7 @@ package database
 import (
 	"errors"
 	"log"
-
-	"github.com/google/uuid"
+	"uuid"
 )
 
 func UserHasLobbyAccess(userId uuid.UUID, lobbyId uuid.UUID) (bool, error) {

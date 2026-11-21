@@ -1,7 +1,8 @@
 package websocket
 
 import (
-	"github.com/google/uuid"
+	"uuid"
+
 	"github.com/grantfbarnes/card-judge/database"
 )
 

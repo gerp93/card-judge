@@ -2,8 +2,8 @@ package apiUser
 
 import (
 	"net/http"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/grantfbarnes/card-judge/api"
 	"github.com/grantfbarnes/card-judge/auth"
 	"github.com/grantfbarnes/card-judge/database"

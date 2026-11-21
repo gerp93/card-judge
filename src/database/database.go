@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"uuid"
 
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/grantfbarnes/card-judge/static"
@@ -58,6 +59,17 @@ func RunFile(filePath string) error {
 }
 
 func query(sqlString string, params ...any) (*sql.Rows, error) {
+	for i, p := range params {
+		switch v := p.(type) {
+		case uuid.UUID:
+			params[i] = v.String()
+		case *uuid.UUID:
+			if v != nil {
+				params[i] = v.String()
+			}
+		}
+	}
+
 	statement, err := database.Prepare(sqlString)
 	if err != nil {
 		log.Println(err)
@@ -75,6 +87,17 @@ func query(sqlString string, params ...any) (*sql.Rows, error) {
 }
 
 func execute(sqlString string, params ...any) error {
+	for i, p := range params {
+		switch v := p.(type) {
+		case uuid.UUID:
+			params[i] = v.String()
+		case *uuid.UUID:
+			if v != nil {
+				params[i] = v.String()
+			}
+		}
+	}
+
 	statement, err := database.Prepare(sqlString)
 	if err != nil {
 		log.Println(err)

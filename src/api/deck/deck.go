@@ -3,8 +3,8 @@ package apiDeck
 import (
 	"encoding/csv"
 	"net/http"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/grantfbarnes/card-judge/api"
 	"github.com/grantfbarnes/card-judge/auth"
 	"github.com/grantfbarnes/card-judge/database"
@@ -20,7 +20,7 @@ func GetCardExport(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userId := api.GetUserId(r)
-	if userId == uuid.Nil {
+	if userId == uuid.Nil() {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to get user id."))
 		return
@@ -98,7 +98,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userId := api.GetUserId(r)
-	if userId == uuid.Nil {
+	if userId == uuid.Nil() {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to get user id."))
 		return
@@ -110,7 +110,7 @@ func Create(w http.ResponseWriter, r *http.Request) {
 		_, _ = w.Write([]byte(err.Error()))
 		return
 	}
-	if existingDeckId != uuid.Nil {
+	if existingDeckId != uuid.Nil() {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Deck name already exists."))
 		return
@@ -144,7 +144,7 @@ func SetName(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userId := api.GetUserId(r)
-	if userId == uuid.Nil {
+	if userId == uuid.Nil() {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to get user id."))
 		return
@@ -190,7 +190,7 @@ func SetName(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if existingDeckId != uuid.Nil && existingDeckId != deckId {
+	if existingDeckId != uuid.Nil() && existingDeckId != deckId {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Deck name already exists."))
 		return
@@ -217,7 +217,7 @@ func SetPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userId := api.GetUserId(r)
-	if userId == uuid.Nil {
+	if userId == uuid.Nil() {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to get user id."))
 		return
@@ -309,7 +309,7 @@ func SetIsPublicReadOnly(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userId := api.GetUserId(r)
-	if userId == uuid.Nil {
+	if userId == uuid.Nil() {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to get user id."))
 		return
@@ -363,7 +363,7 @@ func Delete(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userId := api.GetUserId(r)
-	if userId == uuid.Nil {
+	if userId == uuid.Nil() {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to get user id."))
 		return

@@ -4,8 +4,8 @@ import (
 	"context"
 	"net/http"
 	"strings"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/grantfbarnes/card-judge/auth"
 	"github.com/grantfbarnes/card-judge/database"
 )
@@ -32,7 +32,7 @@ func MiddlewareForPages(next http.Handler) http.Handler {
 		userId, err := auth.GetUserId(r)
 		if err == nil {
 			user, err := database.GetUser(userId)
-			if user.Id == uuid.Nil {
+			if user.Id == uuid.Nil() {
 				auth.RemoveUserId(w)
 			} else if err == nil {
 				basePageData.User = user
@@ -97,7 +97,7 @@ func GetUserId(r *http.Request) uuid.UUID {
 
 func UserIsAdmin(r *http.Request) bool {
 	userId := GetUserId(r)
-	if userId == uuid.Nil {
+	if userId == uuid.Nil() {
 		return false
 	}
 

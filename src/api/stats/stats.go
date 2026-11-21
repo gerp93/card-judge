@@ -3,8 +3,8 @@ package apiStats
 import (
 	"html/template"
 	"net/http"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/grantfbarnes/card-judge/api"
 	"github.com/grantfbarnes/card-judge/database"
 	"github.com/grantfbarnes/card-judge/static"
@@ -12,7 +12,7 @@ import (
 
 func GetLeaderboard(w http.ResponseWriter, r *http.Request) {
 	userId := api.GetUserId(r)
-	if userId == uuid.Nil {
+	if userId == uuid.Nil() {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to get user id."))
 		return

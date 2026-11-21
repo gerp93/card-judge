@@ -2,8 +2,8 @@ package apiAccess
 
 import (
 	"net/http"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/grantfbarnes/card-judge/api"
 	"github.com/grantfbarnes/card-judge/auth"
 	"github.com/grantfbarnes/card-judge/database"
@@ -48,7 +48,7 @@ func Lobby(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userId := api.GetUserId(r)
-	if userId == uuid.Nil {
+	if userId == uuid.Nil() {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to get user id."))
 		return
@@ -104,7 +104,7 @@ func Deck(w http.ResponseWriter, r *http.Request) {
 	}
 
 	userId := api.GetUserId(r)
-	if userId == uuid.Nil {
+	if userId == uuid.Nil() {
 		w.WriteHeader(http.StatusBadRequest)
 		_, _ = w.Write([]byte("Failed to get user id."))
 		return

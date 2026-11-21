@@ -4,8 +4,8 @@ import (
 	"errors"
 	"log"
 	"time"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/grantfbarnes/card-judge/auth"
 )
 
@@ -179,11 +179,7 @@ func GetDeckPasswordHash(id uuid.UUID) (string, error) {
 }
 
 func CreateDeck(name string, password string, isPublicReadOnly bool) (uuid.UUID, error) {
-	id, err := uuid.NewUUID()
-	if err != nil {
-		log.Println(err)
-		return id, errors.New("failed to generate new id")
-	}
+	id := uuid.New()
 
 	passwordHash, err := auth.GetPasswordHash(password)
 	if err != nil {

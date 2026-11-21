@@ -9,8 +9,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"uuid"
 
-	"github.com/google/uuid"
 	"github.com/grantfbarnes/card-judge/auth"
 )
 
@@ -342,11 +342,7 @@ func GetLobbyPasswordHash(id uuid.UUID) (sql.NullString, error) {
 }
 
 func CreateLobby(name string, message string, password string, drawPriority string, handSize int, roundTimer int, freeCredits int, freeSpecialCards bool, winStreakThreshold int, loseStreakThreshold int) (uuid.UUID, error) {
-	id, err := uuid.NewUUID()
-	if err != nil {
-		log.Println(err)
-		return id, errors.New("failed to generate new id")
-	}
+	id := uuid.New()
 
 	passwordHash, err := auth.GetPasswordHash(password)
 	if err != nil {
@@ -488,12 +484,8 @@ func AddUserToLobby(lobbyId uuid.UUID, userId uuid.UUID) (uuid.UUID, error) {
 		return player.Id, errors.New("failed to get player")
 	}
 
-	if player.Id == uuid.Nil {
-		player.Id, err = uuid.NewUUID()
-		if err != nil {
-			log.Println(err)
-			return player.Id, errors.New("failed to generate new player id")
-		}
+	if player.Id == uuid.Nil() {
+		player.Id = uuid.New()
 	}
 
 	sqlString := "CALL SP_SET_PLAYER_ACTIVE (?, ?, ?)"

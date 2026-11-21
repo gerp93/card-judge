@@ -4,8 +4,7 @@ import (
 	"errors"
 	"log"
 	"time"
-
-	"github.com/google/uuid"
+	"uuid"
 )
 
 type Player struct {
