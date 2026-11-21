@@ -23,6 +23,12 @@ const (
 	// Send pings to peer with this period. Must be less than pongWait.
 	pingPeriod = (pongWait * 9) / 10
 
+	// Send application-level keepalives to peer with this period. These are
+	// visible to browser JavaScript (unlike protocol-level ping frames, which
+	// the browser answers automatically without firing any event), so the
+	// client can detect a silent/half-open connection and recover.
+	appPingPeriod = 25 * time.Second
+
 	// Maximum message size allowed from peer.
 	maxMessageSize = 512
 )
@@ -86,8 +92,10 @@ func (c *Client) readPump() {
 // executing all writes from this goroutine.
 func (c *Client) writePump() {
 	ticker := time.NewTicker(pingPeriod)
+	appPingTicker := time.NewTicker(appPingPeriod)
 	defer func() {
 		ticker.Stop()
+		appPingTicker.Stop()
 		c.conn.Close()
 	}()
 	for {
@@ -112,6 +120,14 @@ func (c *Client) writePump() {
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
+			}
+		case <-appPingTicker.C:
+			// Application-level keepalive the browser can observe via its
+			// onmessage handler. The client treats silence beyond a couple of
+			// these periods as a dropped connection and reconnects.
+			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := c.conn.WriteMessage(websocket.TextMessage, []byte("ping")); err != nil {
 				return
 			}
 		}

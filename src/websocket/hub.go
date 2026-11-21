@@ -17,6 +17,9 @@ type Hub struct {
 	// Inbound messages from the clients.
 	broadcast chan []byte
 
+	// Messages targeted at a single user (by user id).
+	direct chan directMessage
+
 	// Register requests from the clients.
 	register chan *Client
 
@@ -24,10 +27,19 @@ type Hub struct {
 	unregister chan *Client
 }
 
+// directMessage is a payload destined for every client belonging to a single
+// user, delivered through the hub goroutine so the clients map is never
+// touched concurrently.
+type directMessage struct {
+	userId  uuid.UUID
+	payload []byte
+}
+
 func newHub(lobbyId uuid.UUID) *Hub {
 	return &Hub{
 		lobbyId:    lobbyId,
 		broadcast:  make(chan []byte),
+		direct:     make(chan directMessage),
 		register:   make(chan *Client),
 		unregister: make(chan *Client),
 		clients:    make(map[*Client]bool),
@@ -48,6 +60,8 @@ func (h *Hub) run() {
 			}
 		case message := <-h.broadcast:
 			h.broadcastMessage(message)
+		case dm := <-h.direct:
+			h.directMessage(dm)
 		}
 	}
 }
@@ -79,9 +93,23 @@ func (h *Hub) broadcastMessage(message []byte) {
 	}
 }
 
+func (h *Hub) directMessage(dm directMessage) {
+	for client := range h.clients {
+		if client.user.Id != dm.userId {
+			continue
+		}
+		select {
+		case client.send <- dm.payload:
+		default:
+			close(client.send)
+			delete(h.clients, client)
+		}
+	}
+}
+
 func LobbyBroadcast(lobbyId uuid.UUID, message string) {
 	if hub, ok := lobbyHubs[lobbyId]; ok {
-		hub.broadcastMessage([]byte(message))
+		hub.broadcast <- []byte(message)
 	}
 }
 
@@ -92,10 +120,9 @@ func PlayerBroadcast(playerId uuid.UUID, message string) {
 	}
 
 	if hub, ok := lobbyHubs[player.LobbyId]; ok {
-		for client := range hub.clients {
-			if client.user.Id == player.UserId {
-				client.send <- []byte(message)
-			}
+		hub.direct <- directMessage{
+			userId:  player.UserId,
+			payload: []byte(message),
 		}
 	}
 }

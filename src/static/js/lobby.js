@@ -18,10 +18,31 @@ function websocketConnect() {
         document.location.href = "/lobbies";
     }
 
-    ws.onclose = () => {
+    // The server sends an application-level "ping" every 25s. If we go longer
+    // than this without hearing anything from the server, the connection is
+    // dead or half-open (the server may have already dropped us without the
+    // browser ever firing onclose), so we force a reconnect ourselves.
+    const watchdogTimeout = 60000;
+    let watchdogTimer = null;
+    let connectionLostHandled = false;
+
+    function resetWatchdog() {
+        if (watchdogTimer) clearTimeout(watchdogTimer);
+        watchdogTimer = setTimeout(handleConnectionLost, watchdogTimeout);
+    }
+
+    function handleConnectionLost() {
+        if (connectionLostHandled) return;
+        connectionLostHandled = true;
+        if (watchdogTimer) clearTimeout(watchdogTimer);
+        try { ws.close(); } catch (e) { /* ignore */ }
         displayLobbyAlert("Connection Lost", `Attempting to reconnect...`, 3);
         setTimeout(() => { location.reload(true) }, 3000);
-    };
+    }
+
+    ws.onopen = () => resetWatchdog();
+    ws.onclose = () => handleConnectionLost();
+    ws.onerror = () => handleConnectionLost();
 
     const lobbyChatForm = document.getElementById("lobby-chat-form");
     const lobbyChatMessages = document.getElementById("lobby-chat-messages");
@@ -37,7 +58,14 @@ function websocketConnect() {
     ws.onmessage = (event) => {
         let messageText = event.data;
 
+        // Any message proves the server is still alive; keep the watchdog happy.
+        resetWatchdog();
+
         switch (messageText) {
+            case "ping":
+                // Application-level keepalive; nothing to render.
+                return;
+
             case "refresh":
                 confirmationDialogDelete();
                 htmx.ajax("GET", "/api" + document.location.pathname + "/html/game-interface", {
