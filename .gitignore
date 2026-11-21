@@ -8,9 +8,4 @@ infrastructure/backups/*
 # compiled binaries
 src/main
 src/card-judge
-tests/theme-validator/theme-validator
 *.exe
-
-# test output
-tests/theme-validator/screenshots/
-tests/theme-validator/theme-reports/
