@@ -59,11 +59,26 @@ func (h *Hub) registerClient(client *Client) {
 }
 
 func (h *Hub) unregisterClient(client *Client) {
-	if _, ok := h.clients[client]; ok {
-		delete(h.clients, client)
-		close(client.send)
-		_ = database.SetPlayerInactive(h.lobbyId, client.user.Id)
+	if _, ok := h.clients[client]; !ok {
+		return
 	}
+	delete(h.clients, client)
+	close(client.send)
+
+	// A single user can briefly hold more than one connection at once: when a
+	// client drops and reconnects, the new socket registers while the old,
+	// half-open one lingers until its read deadline (pongWait) expires. Player
+	// presence is keyed by user, not by connection, so only treat the user as
+	// having left once their LAST connection is gone. Otherwise the stale
+	// socket closing would mark a still-connected player inactive and broadcast
+	// a phantom "Player Left" to their live session.
+	for c := range h.clients {
+		if c.user.Id == client.user.Id {
+			return
+		}
+	}
+
+	_ = database.SetPlayerInactive(h.lobbyId, client.user.Id)
 	h.broadcastMessage([]byte("<red>Player Left</>: <green>" + client.user.Name + "</>"))
 	h.broadcastMessage([]byte("refresh"))
 }
