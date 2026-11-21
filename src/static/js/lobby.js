@@ -18,6 +18,11 @@ function websocketConnect() {
         document.location.href = "/lobbies";
     }
 
+    // needed for chromium based browsers that keep websockets open on page navigation
+    window.addEventListener("pagehide", () => {
+        ws.close(1000, "Page navigated away");
+    });
+
     ws.onclose = () => {
         displayLobbyAlert("Connection Lost", `Attempting to reconnect...`, 3);
         setTimeout(() => { location.reload(true) }, 3000);
