@@ -27,8 +27,7 @@ BEGIN
 
         IF VAR_NEXT_POSITION > VAR_PLAYER_COUNT THEN
             SET VAR_NEXT_POSITION = 1;
-        END
-        IF;
+        END IF;
 
         SELECT
             ID

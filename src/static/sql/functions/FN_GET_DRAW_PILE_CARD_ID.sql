@@ -41,8 +41,7 @@ BEGIN
                 RAND()
             LIMIT 1
         );
-    END
-    IF;
+    END IF;
 
     RETURN (
         SELECT

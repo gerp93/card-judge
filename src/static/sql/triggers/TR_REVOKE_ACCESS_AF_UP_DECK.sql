@@ -7,6 +7,5 @@ BEGIN
         DELETE
         FROM USER_ACCESS_DECK
         WHERE DECK_ID = NEW.ID;
-    END
-    IF;
+    END IF;
 END;

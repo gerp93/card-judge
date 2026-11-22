@@ -25,8 +25,7 @@ BEGIN
 
     IF VAR_BLANK_COUNT < 1 THEN
         SET VAR_BLANK_COUNT = 1;
-    END
-    IF;
+    END IF;
 
     UPDATE JUDGE
     SET CARD_ID = VAR_NEW_CARD_ID,

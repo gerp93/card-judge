@@ -8,8 +8,7 @@ BEGIN
     -- USER IS ADMIN
     IF EXISTS(SELECT ID FROM USER WHERE ID = VAR_USER_ID AND IS_ADMIN = 1) THEN
         RETURN 1;
-    END
-    IF;
+    END IF;
 
     -- USER HAS ACCESS
     IF EXISTS(
@@ -20,8 +19,6 @@ BEGIN
             AND DECK_ID = VAR_DECK_ID
     ) THEN
         RETURN 1;
-    END
-    IF;
-
+    END IF;
     RETURN VAR_DECK_ID IS NULL;
 END;

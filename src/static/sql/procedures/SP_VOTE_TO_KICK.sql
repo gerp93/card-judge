@@ -33,9 +33,8 @@ BEGIN
 
         SELECT
             1;
-        ELSE
+    ELSE
         SELECT
             0;
-    END
-    IF;
+    END IF;
 END;

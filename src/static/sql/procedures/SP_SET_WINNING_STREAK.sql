@@ -53,9 +53,9 @@ BEGIN
         INTO
             VAR_PLAYER_ID;
 
-        IF VAR_LOOP_DONE THEN LEAVE READ_LOOP;
-        END
-        IF;
+        IF VAR_LOOP_DONE THEN
+            LEAVE READ_LOOP;
+        END IF;
 
         -- REMOVE CREDITS AFTER BREAKING THRESHOLD
         CALL SP_SPEND_CREDITS(

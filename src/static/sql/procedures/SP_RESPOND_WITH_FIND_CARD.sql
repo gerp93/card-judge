@@ -28,6 +28,5 @@ BEGIN
             );
 
         CALL SP_RESPOND_WITH_CARD(VAR_PLAYER_ID, VAR_CARD_ID, 'FIND');
-    END
-    IF;
+    END IF;
 END;

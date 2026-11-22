@@ -9,9 +9,8 @@ BEGIN
         UPDATE PLAYER
         SET IS_ACTIVE = 1
         WHERE ID = VAR_PLAYER_ID;
-        ELSE
+    ELSE
         INSERT INTO PLAYER(ID, LOBBY_ID, USER_ID)
         VALUES (VAR_PLAYER_ID, VAR_LOBBY_ID, VAR_USER_ID);
-    END
-    IF;
+    END IF;
 END;

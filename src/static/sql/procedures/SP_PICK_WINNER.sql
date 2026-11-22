@@ -23,8 +23,7 @@ BEGIN
                 (VAR_PLAYER_BET_ON_WIN * 2) * -1,
                 'BET-WIN'
             );
-    END
-    IF;
+    END IF;
 
     INSERT INTO WIN(PLAYER_ID)
     VALUES (VAR_PLAYER_ID);

@@ -23,10 +23,9 @@ BEGIN
         INTO
             VAR_RESPONSE_ID;
 
-        IF VAR_LOOP_DONE THEN LEAVE READ_LOOP;
-        END
-        IF;
-
+        IF VAR_LOOP_DONE THEN
+            LEAVE READ_LOOP;
+        END IF;
         CALL SP_WITHDRAW_RESPONSE(VAR_RESPONSE_ID);
         END LOOP;
     CLOSE VAR_RESPONSE_CURSOR;

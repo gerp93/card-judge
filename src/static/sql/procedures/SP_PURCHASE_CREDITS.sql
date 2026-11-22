@@ -24,9 +24,9 @@ BEGIN
         INTO
             VAR_OTHER_PLAYER_ID;
 
-        IF VAR_LOOP_DONE THEN LEAVE READ_LOOP;
-        END
-        IF;
+        IF VAR_LOOP_DONE THEN
+            LEAVE READ_LOOP;
+        END IF;
 
         CALL SP_SPEND_CREDITS(
                 VAR_OTHER_PLAYER_ID,

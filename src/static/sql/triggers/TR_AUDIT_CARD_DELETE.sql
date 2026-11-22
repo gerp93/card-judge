@@ -29,6 +29,5 @@ BEGIN
             OLD.YOUTUBE,
             OLD.IMAGE
         );
-    END
-    IF;
+    END IF;
 END;

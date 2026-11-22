@@ -8,7 +8,7 @@ BEGIN
         FROM DECK AS D
         WHERE D.IS_LOBBY_WILD_DECK = FALSE
         ORDER BY D.NAME;
-        ELSE
+    ELSE
         SELECT DISTINCT
             D.ID,
             D.NAME
@@ -17,6 +17,5 @@ BEGIN
         WHERE D.IS_LOBBY_WILD_DECK = FALSE
             AND (UAD.USER_ID = VAR_USER_ID OR D.IS_PUBLIC_READONLY)
         ORDER BY D.NAME;
-    END
-    IF;
+    END IF;
 END;

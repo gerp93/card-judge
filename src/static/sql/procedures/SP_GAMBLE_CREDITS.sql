@@ -12,8 +12,7 @@ BEGIN
                 (VAR_AMOUNT * 2) * -1,
                 'GAMBLE-WIN'
             );
-    END
-    IF;
+    END IF;
 
     SELECT
         VAR_GAMBLE_WON AS GAMBLE_WON;

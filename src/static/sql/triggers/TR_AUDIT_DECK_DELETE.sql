@@ -47,6 +47,5 @@ BEGIN
             OLD.IS_PUBLIC_READONLY,
             OLD.IS_LOBBY_WILD_DECK
         );
-    END
-    IF;
+    END IF;
 END;
