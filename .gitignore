@@ -9,3 +9,11 @@ infrastructure/backups/*
 src/main
 src/card-judge
 *.exe
+
+# secrets (KVG_Standards secrets.md)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.json
